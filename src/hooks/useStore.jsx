@@ -16,6 +16,7 @@ function initStore() {
     storage.set(KEYS.wordcount, seed.wordcount)
     storage.set(KEYS.finance,   seed.finance)
     storage.set(KEYS.settings,  seed.settings)
+    storage.set(KEYS.contacts,  seed.contacts)
     return seed
   }
   return {

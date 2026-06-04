@@ -96,5 +96,5 @@ export function getSeedData() {
     monthlyGoals: { signal9: 2000, app: 500 },
   }
 
-  return { projects, events, tasks, notes, wordcount, finance, settings }
+  return { projects, events, tasks, contacts: [], notes, wordcount, finance, settings }
 }
