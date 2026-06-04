@@ -5,27 +5,36 @@ export default {
   theme: {
     extend: {
       colors: {
-        signal9: { DEFAULT: '#D85A30', light: '#FAECE7' },
-        app:     { DEFAULT: '#378ADD', light: '#E6F1FB' },
-        writing: { DEFAULT: '#1D9E75', light: '#E1F5EE' },
-        personal:{ DEFAULT: '#7F77DD', light: '#EEEDFE' },
+        // Business categories — richer, moodier
+        signal9: { DEFAULT: '#C4522A', light: '#2A1A12' },
+        app:     { DEFAULT: '#3B82F6', light: '#0F1929' },   // electric blue — cyberpunk city
+        writing: { DEFAULT: '#7C3AED', light: '#1A1128' },   // deep violet — grimdark
+        personal:{ DEFAULT: '#7F77DD', light: '#15132A' },
+        // Warm charcoal surfaces — pulled from the cliff/triptych images
         bg: {
-          base:     '#141413',
-          surface:  '#1E1E1C',
-          elevated: '#282826',
+          base:     '#0D0C0B',   // near-black with warm undertone
+          surface:  '#161412',   // warm charcoal
+          elevated: '#1F1C19',   // lifted warm dark
+          glass:    'rgba(22,20,18,0.85)',
         },
         text: {
-          primary:   '#F0EEE8',
-          secondary: '#A8A49C',
-          tertiary:  '#6B6762',
+          primary:   '#EDE8E0',  // warm off-white — aged paper
+          secondary: '#9A9088',  // muted warm grey
+          tertiary:  '#5C5650',  // deep muted
         },
+        // Accent pulls from the triptych
+        crimson: '#8B1A1A',
+        amber:   '#D4780A',
       },
       fontFamily: {
         display: ['"Playfair Display"', 'serif'],
         sans:    ['"DM Sans"', 'sans-serif'],
         mono:    ['"DM Mono"', 'monospace'],
       },
-      borderRadius: { card: '12px' },
+      borderRadius: { card: '10px' },
+      backgroundImage: {
+        'grain': "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E\")",
+      },
     },
   },
   plugins: [],
