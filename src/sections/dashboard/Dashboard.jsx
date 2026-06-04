@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { format, isToday, isPast, parseISO, startOfDay, addDays, isWithinInterval } from 'date-fns'
-import { Bell, Plus, Calendar, CheckSquare, Briefcase } from 'lucide-react'
+import { format, isToday, isPast, parseISO, startOfDay, addDays, isWithinInterval, startOfMonth, endOfMonth, startOfYear } from 'date-fns'
+import { Bell, Plus, Calendar, CheckSquare, Briefcase, TrendingUp } from 'lucide-react'
 import { useStore } from '../../hooks/useStore'
 import { BUSINESSES } from '../../lib/constants'
 import CategoryBadge from '../../components/CategoryBadge'
+import Modal from '../../components/Modal'
 import heroBg from '../../assets/hero.png'
 
 const CAT_COLORS = {
@@ -237,6 +238,156 @@ function SectionLabel({ children }) {
   )
 }
 
+const aud = (n) => n.toLocaleString('en-AU', { style: 'currency', currency: 'AUD', maximumFractionDigits: 0 })
+
+const BIZ_COLORS = { signal9: '#C4522A', app: '#3B82F6' }
+const BIZ_LABELS = { signal9: 'Signal9 Studio', app: 'App Development' }
+
+function QuickIncomeForm({ onSave, onClose }) {
+  const [form, setForm] = useState({ businessId: 'signal9', date: format(new Date(), 'yyyy-MM-dd'), amount: '', source: '', note: '' })
+  const f = k => e => setForm(s => ({ ...s, [k]: e.target.value }))
+  return (
+    <form onSubmit={e => { e.preventDefault(); onSave({ ...form, amount: Number(form.amount) }) }} className="space-y-4">
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <label className="text-text-secondary text-xs mb-1 block">Business</label>
+          <select className="input" value={form.businessId} onChange={f('businessId')}>
+            <option value="signal9">Signal9 Studio</option>
+            <option value="app">App Development</option>
+          </select>
+        </div>
+        <div>
+          <label className="text-text-secondary text-xs mb-1 block">Date</label>
+          <input type="date" className="input" value={form.date} onChange={f('date')} />
+        </div>
+      </div>
+      <div>
+        <label className="text-text-secondary text-xs mb-1 block">Amount (AUD) *</label>
+        <input required type="number" step="0.01" min="0.01" className="input" value={form.amount} onChange={f('amount')} placeholder="350.00" />
+      </div>
+      <div>
+        <label className="text-text-secondary text-xs mb-1 block">Source *</label>
+        <input required className="input" value={form.source} onChange={f('source')} placeholder="e.g. Harvest Market — Print #3" />
+      </div>
+      <div>
+        <label className="text-text-secondary text-xs mb-1 block">Note</label>
+        <input className="input" value={form.note} onChange={f('note')} placeholder="Optional" />
+      </div>
+      <div className="flex gap-3 justify-end pt-2">
+        <button type="button" onClick={onClose} className="btn-ghost">Cancel</button>
+        <button type="submit" className="btn-primary">Save Entry</button>
+      </div>
+    </form>
+  )
+}
+
+function BusinessLedger({ onNavigate }) {
+  const { finance, addFinanceEntry } = useStore()
+  const [showAdd, setShowAdd] = useState(false)
+  const { entries = [], goals = {} } = finance
+
+  const now = new Date()
+  const mStart = startOfMonth(now)
+  const mEnd = endOfMonth(now)
+  const yStart = startOfYear(now)
+
+  return (
+    <section>
+      <div className="flex items-center justify-between mb-3">
+        <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', color: '#5C5650', letterSpacing: '0.18em', textTransform: 'uppercase' }}>
+          Business Income
+        </p>
+        <div className="flex gap-2">
+          <button onClick={() => setShowAdd(true)} className="btn-ghost text-xs py-1"><Plus size={12}/> Income</button>
+          <button onClick={onNavigate} style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', color: '#5C5650', letterSpacing: '0.1em' }}>
+            FINANCE →
+          </button>
+        </div>
+      </div>
+
+      <div className="space-y-3">
+        {['signal9', 'app'].map(bizId => {
+          const color = BIZ_COLORS[bizId]
+          const label = BIZ_LABELS[bizId]
+          const bizEntries = entries.filter(e => e.businessId === bizId)
+          const monthTotal = bizEntries.filter(e => { const d = parseISO(e.date); return d >= mStart && d <= mEnd }).reduce((a, e) => a + e.amount, 0)
+          const ytdTotal = bizEntries.filter(e => parseISO(e.date) >= yStart).reduce((a, e) => a + e.amount, 0)
+          const monthGoal = goals[bizId]?.monthly || 0
+          const progress = monthGoal > 0 ? Math.min(monthTotal / monthGoal, 1) : 0
+          const recent = [...bizEntries].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 3)
+
+          return (
+            <div key={bizId} className="card" style={{ borderColor: color + '22' }}>
+              {/* Header row */}
+              <div className="flex items-start justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <div className="w-1 h-6 rounded-full" style={{ backgroundColor: color }} />
+                  <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', color: '#9A9088', letterSpacing: '0.08em' }}>{label}</p>
+                </div>
+                <div className="text-right">
+                  <p style={{ fontFamily: '"Playfair Display", serif', fontWeight: 600, fontSize: '1.3rem', color: '#EDE8E0', lineHeight: 1 }}>{aud(monthTotal)}</p>
+                  <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.55rem', color: '#5C5650', marginTop: 2 }}>this month</p>
+                </div>
+              </div>
+
+              {/* Progress bar */}
+              {monthGoal > 0 && (
+                <div className="mb-3">
+                  <div className="h-1 rounded-full" style={{ background: 'rgba(255,255,255,0.06)' }}>
+                    <div className="h-1 rounded-full transition-all duration-500"
+                      style={{ width: `${progress * 100}%`, backgroundColor: progress >= 1 ? '#2D9E5A' : color }} />
+                  </div>
+                  <div className="flex justify-between mt-1">
+                    <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.5rem', color: '#5C5650' }}>
+                      {Math.round(progress * 100)}% of {aud(monthGoal)} goal
+                    </p>
+                    <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.5rem', color: '#5C5650' }}>
+                      YTD {aud(ytdTotal)}
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {monthGoal === 0 && (
+                <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.5rem', color: '#5C5650', marginBottom: 8 }}>
+                  YTD {aud(ytdTotal)} · set a goal in Finance
+                </p>
+              )}
+
+              {/* Recent entries */}
+              {recent.length > 0 && (
+                <div className="space-y-1.5 pt-2" style={{ borderTop: '0.5px solid rgba(255,255,255,0.06)' }}>
+                  {recent.map(e => (
+                    <div key={e.id} className="flex items-center gap-2">
+                      <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.55rem', color: '#5C5650', width: 44, shrink: 0 }}>
+                        {format(parseISO(e.date), 'dd MMM')}
+                      </p>
+                      <p className="flex-1 min-w-0 truncate" style={{ fontSize: '0.75rem', color: '#9A9088' }}>{e.source}</p>
+                      <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.7rem', color: '#EDE8E0', fontWeight: 600, flexShrink: 0 }}>{aud(e.amount)}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {recent.length === 0 && (
+                <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', color: '#3D3A36' }}>No entries yet this year.</p>
+              )}
+            </div>
+          )
+        })}
+      </div>
+
+      {showAdd && (
+        <Modal title="Add Income" onClose={() => setShowAdd(false)}>
+          <QuickIncomeForm
+            onSave={(data) => { addFinanceEntry(data); setShowAdd(false) }}
+            onClose={() => setShowAdd(false)} />
+        </Modal>
+      )}
+    </section>
+  )
+}
+
 export default function Dashboard() {
   const navigate = useNavigate()
   const { tasks, events, projects, notes, addTask } = useStore()
@@ -355,6 +506,9 @@ export default function Dashboard() {
             })}
           </div>
         </section>
+
+        {/* Business Ledger */}
+        <BusinessLedger onNavigate={() => navigate('/finance')} />
 
         {/* Upcoming */}
         <section>
