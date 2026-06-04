@@ -29,6 +29,14 @@ export default defineConfig({
         globIgnores: ['**/art-*.png'],
         runtimeCaching: [
           {
+            urlPattern: /^https:\/\/api\.frankfurter\.app\/.*/i,
+            handler: 'NetworkOnly',
+          },
+          {
+            urlPattern: /^https:\/\/api\.open-meteo\.com\/.*/i,
+            handler: 'NetworkOnly',
+          },
+          {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
             handler: 'CacheFirst',
             options: { cacheName: 'google-fonts-cache', expiration: { maxEntries: 10, maxAgeSeconds: 31536000 } },

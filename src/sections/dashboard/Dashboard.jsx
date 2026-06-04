@@ -170,6 +170,9 @@ function LiveClock() {
           {!weather && (
             <span style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', color: '#3D3A36' }}>loading weather…</span>
           )}
+          {!rates && !ratesError && (
+            <span style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', color: '#3D3A36' }}>loading rates…</span>
+          )}
         </div>
       </div>
     </div>
