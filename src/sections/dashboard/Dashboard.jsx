@@ -87,7 +87,7 @@ function LiveClock() {
         backgroundImage: `url(${heroBg})`,
         backgroundSize: 'cover',
         backgroundPosition: 'center 30%',
-        opacity: 0.22,
+        opacity: 0.45,
       }} />
 
       {/* Gradient overlay to keep text readable */}
