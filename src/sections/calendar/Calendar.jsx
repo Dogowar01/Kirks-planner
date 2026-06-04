@@ -8,6 +8,15 @@ import CategoryBadge from '../../components/CategoryBadge'
 import Modal from '../../components/Modal'
 import ConfirmDialog from '../../components/ConfirmDialog'
 
+const QUICK_FILTERS = [
+  { label: 'Market',     q: 'market' },
+  { label: 'Art',        q: 'art exhibition' },
+  { label: 'Craft fair', q: 'craft fair' },
+  { label: 'Community',  q: 'community' },
+  { label: 'Festival',   q: 'festival' },
+  { label: 'Food',       q: 'food market' },
+]
+
 function EventSearchModal({ onClose, onAdd, apiKey }) {
   const [query, setQuery] = useState('')
   const [location, setLocation] = useState('')
@@ -16,47 +25,53 @@ function EventSearchModal({ onClose, onAdd, apiKey }) {
   const [error, setError] = useState('')
   const [added, setAdded] = useState(new Set())
 
-  async function handleSearch(e) {
-    e.preventDefault()
+  async function doSearch(q, loc) {
     if (!apiKey) return
     setLoading(true)
     setError('')
     setResults([])
     try {
+      // Eventbrite v3 — search free/community events by location + keyword
       const params = new URLSearchParams({
-        apikey: apiKey,
-        keyword: query || 'events',
-        city: location,
-        size: 10,
-        sort: 'date,asc',
-        countryCode: 'AU',
+        'location.address': loc || location,
+        'location.within': '30km',
+        q: q || query || 'market',
+        expand: 'venue',
+        sort_by: 'date',
+        'start_date.range_start': new Date().toISOString(),
       })
-      const res = await fetch(`https://app.ticketmaster.com/discovery/v2/events.json?${params}`)
+      const res = await fetch(
+        `https://www.eventbriteapi.com/v3/events/search/?${params}`,
+        { headers: { Authorization: `Bearer ${apiKey}` } }
+      )
+      if (!res.ok) throw new Error(res.status)
       const data = await res.json()
-      const events = data._embedded?.events || []
+      const events = data.events || []
       setResults(events)
-      if (events.length === 0) setError('No events found. Try a different location or keyword.')
-    } catch {
-      setError('Search failed. Check your API key or try again.')
+      if (events.length === 0) setError('No events found — try a different keyword or suburb.')
+    } catch (e) {
+      setError(e.message === '401' ? 'Invalid API key — check Settings.' : 'Search failed. Try again.')
     } finally {
       setLoading(false)
     }
   }
 
   function handleAdd(ev) {
-    const date = ev.dates?.start?.localDate || format(new Date(), 'yyyy-MM-dd')
-    const time = ev.dates?.start?.localTime?.slice(0, 5) || ''
-    const venue = ev._embedded?.venues?.[0]
-    const venueName = venue ? `${venue.name}${venue.city?.name ? ', ' + venue.city.name : ''}` : ''
+    const start = ev.start?.local || ''
+    const date = start ? start.slice(0, 10) : format(new Date(), 'yyyy-MM-dd')
+    const time = start ? start.slice(11, 16) : ''
+    const end = ev.end?.local || ''
+    const endTime = end ? end.slice(11, 16) : ''
+    const venueName = ev.venue ? [ev.venue.name, ev.venue.address?.city].filter(Boolean).join(', ') : ''
     onAdd({
-      title: ev.name,
+      title: ev.name?.text || 'Event',
       date,
       time,
-      endTime: '',
+      endTime,
       category: 'personal',
-      note: [ev.info, venueName, ev.url].filter(Boolean).join('\n'),
-      reminder: false,
-      reminderMinutes: 30,
+      note: [ev.description?.text?.slice(0, 300), venueName, ev.url].filter(Boolean).join('\n\n'),
+      reminder: true,
+      reminderMinutes: 1440,
       recurring: 'none',
     })
     setAdded(s => new Set([...s, ev.id]))
@@ -65,71 +80,92 @@ function EventSearchModal({ onClose, onAdd, apiKey }) {
   return (
     <Modal title="Find Local Events" onClose={onClose} size="lg">
       {!apiKey ? (
-        <div className="space-y-4 text-center py-4">
+        <div className="space-y-4 py-2">
           <p style={{ color: '#9A9088', fontSize: '0.875rem' }}>
-            This feature uses the free Ticketmaster Discovery API.
+            Uses the free <strong style={{ color: '#EDE8E0' }}>Eventbrite API</strong> — where markets, art shows, craft fairs and community events actually live.
           </p>
-          <ol className="text-left space-y-2 text-sm" style={{ color: '#9A9088' }}>
-            <li>1. Go to <a href="https://developer.ticketmaster.com" target="_blank" rel="noopener noreferrer" className="underline" style={{ color: '#3B82F6' }}>developer.ticketmaster.com</a></li>
-            <li>2. Create a free account</li>
-            <li>3. Copy your API key from the dashboard</li>
-            <li>4. Paste it in <strong style={{ color: '#EDE8E0' }}>Settings → Ticketmaster API Key</strong></li>
+          <ol className="space-y-2.5 text-sm" style={{ color: '#9A9088' }}>
+            <li><span style={{ color: '#5C5650', fontFamily: '"DM Mono", monospace', fontSize: '0.65rem' }}>01</span>&ensp;Go to <a href="https://www.eventbrite.com/platform/api" target="_blank" rel="noopener noreferrer" className="underline" style={{ color: '#3B82F6' }}>eventbrite.com/platform/api</a></li>
+            <li><span style={{ color: '#5C5650', fontFamily: '"DM Mono", monospace', fontSize: '0.65rem' }}>02</span>&ensp;Sign in / create a free account</li>
+            <li><span style={{ color: '#5C5650', fontFamily: '"DM Mono", monospace', fontSize: '0.65rem' }}>03</span>&ensp;Go to Account Settings → Developer → API Keys → Create key</li>
+            <li><span style={{ color: '#5C5650', fontFamily: '"DM Mono", monospace', fontSize: '0.65rem' }}>04</span>&ensp;Copy the <strong style={{ color: '#EDE8E0' }}>Private Token</strong> and paste it in <strong style={{ color: '#EDE8E0' }}>Settings → Integrations</strong></li>
           </ol>
-          <p style={{ color: '#5C5650', fontSize: '0.75rem' }}>Free tier: 5,000 searches/day. No credit card required.</p>
+          <p style={{ color: '#5C5650', fontFamily: '"DM Mono", monospace', fontSize: '0.6rem' }}>Free · no credit card · finds markets, fairs, art shows, community events</p>
         </div>
       ) : (
-        <div className="space-y-4">
-          <form onSubmit={handleSearch} className="flex gap-2">
+        <div className="space-y-3">
+          {/* Quick filters */}
+          <div className="flex gap-1.5 flex-wrap">
+            {QUICK_FILTERS.map(f => (
+              <button key={f.q}
+                onClick={() => { setQuery(f.q); doSearch(f.q, location) }}
+                className="px-3 py-1 rounded-full text-xs font-medium transition-colors"
+                style={{ background: query === f.q ? 'rgba(59,130,246,0.2)' : '#1F1C19', color: query === f.q ? '#3B82F6' : '#9A9088', fontFamily: '"DM Mono", monospace' }}>
+                {f.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Search bar */}
+          <form onSubmit={e => { e.preventDefault(); doSearch(query, location) }} className="flex gap-2">
             <div className="relative flex-1">
               <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: '#5C5650' }} />
-              <input className="input pl-8" placeholder="Concert, market, festival…" value={query} onChange={e => setQuery(e.target.value)} />
+              <input className="input pl-8" placeholder="Market, art fair, festival…" value={query}
+                onChange={e => setQuery(e.target.value)} />
             </div>
-            <div className="relative w-40">
+            <div className="relative w-36">
               <MapPin size={13} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: '#5C5650' }} />
-              <input className="input pl-8" placeholder="City" value={location} onChange={e => setLocation(e.target.value)} />
+              <input className="input pl-8" placeholder="Suburb / city" value={location}
+                onChange={e => setLocation(e.target.value)} />
             </div>
-            <button type="submit" className="btn-primary px-4 shrink-0" disabled={loading}>
-              {loading ? <Loader size={14} className="animate-spin" /> : 'Search'}
+            <button type="submit" className="btn-primary shrink-0 px-3" disabled={loading}>
+              {loading ? <Loader size={14} className="animate-spin" /> : <Search size={14} />}
             </button>
           </form>
 
-          {error && <p style={{ color: '#9A9088', fontSize: '0.875rem' }}>{error}</p>}
+          {error && <p style={{ color: '#9A9088', fontSize: '0.8rem' }}>{error}</p>}
 
-          <div className="space-y-2 max-h-96 overflow-y-auto">
+          <div className="space-y-2 max-h-[420px] overflow-y-auto pr-1">
             {results.map(ev => {
-              const date = ev.dates?.start?.localDate
-              const time = ev.dates?.start?.localTime?.slice(0, 5)
-              const venue = ev._embedded?.venues?.[0]
+              const start = ev.start?.local || ''
+              const date = start ? start.slice(0, 10) : null
+              const time = start ? start.slice(11, 16) : null
               const isAdded = added.has(ev.id)
+              const isFree = ev.is_free
               return (
                 <div key={ev.id} className="card flex items-start gap-3">
-                  {ev.images?.[0] && (
-                    <img src={ev.images.find(i => i.ratio === '4_3' && i.width < 300)?.url || ev.images[0].url}
-                      alt="" className="w-14 h-14 object-cover rounded-lg shrink-0" style={{ opacity: 0.85 }} />
+                  {ev.logo?.url && (
+                    <img src={ev.logo.url} alt=""
+                      className="w-14 h-14 object-cover rounded-lg shrink-0" style={{ opacity: 0.85 }} />
                   )}
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate" style={{ color: '#EDE8E0' }}>{ev.name}</p>
-                    <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.65rem', color: '#5C5650' }}>
+                    <p className="text-sm font-medium" style={{ color: '#EDE8E0', lineHeight: 1.3 }}>
+                      {ev.name?.text}
+                    </p>
+                    <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', color: '#5C5650', marginTop: 3 }}>
                       {date ? format(parseISO(date), 'd MMM yyyy') : ''}
                       {time ? ` · ${time}` : ''}
+                      {isFree && <span style={{ color: '#2D9E5A', marginLeft: 8 }}>FREE</span>}
                     </p>
-                    {venue && (
-                      <p className="text-xs truncate mt-0.5" style={{ color: '#5C5650' }}>
-                        <MapPin size={10} className="inline mr-1" />{venue.name}{venue.city?.name ? `, ${venue.city.name}` : ''}
+                    {ev.venue?.name && (
+                      <p className="text-xs truncate mt-1" style={{ color: '#5C5650' }}>
+                        <MapPin size={9} className="inline mr-1" />
+                        {ev.venue.name}{ev.venue.address?.city ? `, ${ev.venue.address.city}` : ''}
                       </p>
                     )}
                   </div>
-                  <div className="flex items-center gap-2 shrink-0">
+                  <div className="flex items-center gap-1.5 shrink-0 mt-0.5">
                     {ev.url && (
-                      <a href={ev.url} target="_blank" rel="noopener noreferrer" style={{ color: '#5C5650' }} className="hover:text-text-secondary">
-                        <ExternalLink size={13} />
+                      <a href={ev.url} target="_blank" rel="noopener noreferrer"
+                        style={{ color: '#5C5650' }} className="p-1 hover:text-text-secondary">
+                        <ExternalLink size={12} />
                       </a>
                     )}
                     <button
                       onClick={() => !isAdded && handleAdd(ev)}
                       className="rounded-lg p-1.5 transition-all"
                       style={{
-                        background: isAdded ? 'rgba(45,158,90,0.15)' : 'rgba(59,130,246,0.15)',
+                        background: isAdded ? 'rgba(45,158,90,0.15)' : 'rgba(59,130,246,0.2)',
                         color: isAdded ? '#2D9E5A' : '#3B82F6',
                         cursor: isAdded ? 'default' : 'pointer',
                       }}>
