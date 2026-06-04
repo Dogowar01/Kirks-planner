@@ -626,6 +626,7 @@ function Pomodoro() {
   }, [running, isBreak])
 
   const reset = () => { setRunning(false); setSecs(isBreak ? BREAK : WORK) }
+  const adjust = (delta) => { setSecs(s => Math.max(60, s + delta * 60)) }
   const total = isBreak ? BREAK : WORK
   const pct = ((total - secs) / total) * 100
   const mm = String(Math.floor(secs / 60)).padStart(2, '0')
@@ -657,6 +658,11 @@ function Pomodoro() {
             <span style={{ fontFamily: '"Playfair Display", serif', fontStyle: 'italic', fontSize: '2rem', fontWeight: 600, color: '#EDE8E0' }}>{mm}:{ss}</span>
           </div>
         </div>
+      </div>
+
+      <div className="flex gap-2 justify-center">
+        <button onClick={() => adjust(-5)} className="btn-ghost px-3" title="−5 min">−5</button>
+        <button onClick={() => adjust(5)} className="btn-ghost px-3" title="+5 min">+5</button>
       </div>
 
       <div className="flex gap-2">
