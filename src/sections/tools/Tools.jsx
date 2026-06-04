@@ -757,13 +757,349 @@ function QRGenerator() {
   )
 }
 
+// ─── Colour Palette Picker ───────────────────────────────────────────────────
+function hexToHsl(hex) {
+  let r = parseInt(hex.slice(1,3),16)/255, g = parseInt(hex.slice(3,5),16)/255, b = parseInt(hex.slice(5,7),16)/255
+  const max = Math.max(r,g,b), min = Math.min(r,g,b), l = (max+min)/2
+  if (max === min) return [0, 0, Math.round(l*100)]
+  const d = max-min, s = l>0.5 ? d/(2-max-min) : d/(max+min)
+  let h = max===r ? (g-b)/d+(g<b?6:0) : max===g ? (b-r)/d+2 : (r-g)/d+4
+  return [Math.round(h*60), Math.round(s*100), Math.round(l*100)]
+}
+function hslToHex(h,s,l) {
+  s/=100; l/=100
+  const a=s*Math.min(l,1-l), f=n=>{const k=(n+h/30)%12; return l-a*Math.max(Math.min(k-3,9-k,1),-1)}
+  return '#'+[f(0),f(8),f(4)].map(x=>Math.round(x*255).toString(16).padStart(2,'0')).join('')
+}
+function ColourPicker() {
+  const [hex, setHex] = useState('#2A7A6F')
+  const [input, setInput] = useState('#2A7A6F')
+
+  const apply = (v) => { if (/^#[0-9a-fA-F]{6}$/.test(v)) setHex(v) }
+  const [h,s,l] = hexToHsl(hex)
+  const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16)
+
+  const swatches = [
+    { label: 'Base',          color: hex },
+    { label: 'Complementary', color: hslToHex((h+180)%360,s,l) },
+    { label: 'Analogous −',   color: hslToHex((h-30+360)%360,s,l) },
+    { label: 'Analogous +',   color: hslToHex((h+30)%360,s,l) },
+    { label: 'Triadic A',     color: hslToHex((h+120)%360,s,l) },
+    { label: 'Triadic B',     color: hslToHex((h+240)%360,s,l) },
+    { label: 'Lighter',       color: hslToHex(h,s,Math.min(l+20,95)) },
+    { label: 'Darker',        color: hslToHex(h,s,Math.max(l-20,5)) },
+    { label: 'Desaturated',   color: hslToHex(h,Math.max(s-40,0),l) },
+  ]
+
+  const [copied, setCopied] = useState('')
+  const copy = (text) => { navigator.clipboard?.writeText(text); setCopied(text); setTimeout(()=>setCopied(''),1500) }
+
+  return (
+    <div className="card space-y-4">
+      <p className="section-label">Colour Palette</p>
+      <div className="flex gap-3 items-center">
+        <input type="color" value={hex} onChange={e=>{setHex(e.target.value);setInput(e.target.value)}}
+          style={{width:48,height:48,borderRadius:8,border:'1px solid var(--section-card-border)',cursor:'pointer',padding:2,background:'none'}} />
+        <div className="flex-1">
+          <input className="input" value={input} onChange={e=>{setInput(e.target.value);apply(e.target.value)}} placeholder="#rrggbb" />
+          <p style={{fontFamily:'"DM Mono",monospace',fontSize:'0.58rem',color:'var(--section-muted)',marginTop:4}}>
+            RGB {r} {g} {b} &nbsp;·&nbsp; HSL {h}° {s}% {l}%
+          </p>
+        </div>
+      </div>
+      <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:8}}>
+        {swatches.map(sw=>(
+          <button key={sw.label} onClick={()=>copy(sw.color)}
+            style={{borderRadius:8,overflow:'hidden',border:'1px solid rgba(255,255,255,0.08)',cursor:'pointer',background:'none'}}>
+            <div style={{height:40,background:sw.color,position:'relative'}}>
+              {copied===sw.color && <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',background:'rgba(0,0,0,0.4)',fontSize:'0.7rem',color:'#fff'}}>Copied!</div>}
+            </div>
+            <div style={{padding:'4px 6px',background:'#161412'}}>
+              <p style={{fontFamily:'"DM Mono",monospace',fontSize:'0.5rem',color:'#5C5650',letterSpacing:'0.06em'}}>{sw.label}</p>
+              <p style={{fontFamily:'"DM Mono",monospace',fontSize:'0.65rem',color:'#9A9088'}}>{sw.color}</p>
+            </div>
+          </button>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// ─── Regex Tester ─────────────────────────────────────────────────────────────
+function RegexTester() {
+  const [pattern, setPattern] = useState('')
+  const [flags, setFlags] = useState('g')
+  const [text, setText] = useState('')
+
+  const { parts, count, error } = (() => {
+    if (!pattern || !text) return { parts: [{ t: text, m: false }], count: 0, error: null }
+    try {
+      const re = new RegExp(pattern, flags.includes('g') ? flags : flags+'g')
+      const parts = [], matches = [...text.matchAll(re)]
+      if (!matches.length) return { parts: [{ t: text, m: false }], count: 0, error: null }
+      let i = 0
+      matches.forEach(m => {
+        if (m.index > i) parts.push({ t: text.slice(i, m.index), m: false })
+        parts.push({ t: m[0], m: true })
+        i = m.index + m[0].length
+      })
+      if (i < text.length) parts.push({ t: text.slice(i), m: false })
+      return { parts, count: matches.length, error: null }
+    } catch(e) { return { parts: [{ t: text, m: false }], count: 0, error: e.message } }
+  })()
+
+  return (
+    <div className="card space-y-3">
+      <p className="section-label">Regex Tester</p>
+      <div className="flex gap-2">
+        <div className="flex-1">
+          <label className="section-label mb-1 block">Pattern</label>
+          <input className="input" value={pattern} onChange={e=>setPattern(e.target.value)} placeholder="e.g. \d+" style={{fontFamily:'"DM Mono",monospace'}} />
+        </div>
+        <div style={{width:72}}>
+          <label className="section-label mb-1 block">Flags</label>
+          <input className="input" value={flags} onChange={e=>setFlags(e.target.value)} placeholder="gi" style={{fontFamily:'"DM Mono",monospace'}} />
+        </div>
+      </div>
+      {error && <p style={{fontFamily:'"DM Mono",monospace',fontSize:'0.7rem',color:'#f87171'}}>{error}</p>}
+      <div>
+        <label className="section-label mb-1 block">Test String</label>
+        <textarea className="input h-24 resize-none" value={text} onChange={e=>setText(e.target.value)} placeholder="Paste text to test…" style={{fontFamily:'"DM Mono",monospace',fontSize:'0.8rem'}} />
+      </div>
+      {text && (
+        <div>
+          <div className="flex items-center justify-between mb-2">
+            <label className="section-label">Matches</label>
+            <span style={{fontFamily:'"DM Mono",monospace',fontSize:'0.65rem',color:'var(--section-accent)'}}>{count} match{count!==1?'es':''}</span>
+          </div>
+          <div style={{background:'rgba(0,0,0,0.3)',borderRadius:8,padding:'10px 12px',fontFamily:'"DM Mono",monospace',fontSize:'0.8rem',lineHeight:1.6,wordBreak:'break-all'}}>
+            {parts.map((p,i)=>p.m
+              ? <mark key={i} style={{background:'color-mix(in srgb,var(--section-accent) 35%,transparent)',color:'#EDE8E0',borderRadius:3,padding:'0 2px'}}>{p.t}</mark>
+              : <span key={i} style={{color:'#5C5650'}}>{p.t}</span>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ─── Tip & Bill Splitter ──────────────────────────────────────────────────────
+function BillSplitter() {
+  const [bill, setBill] = useState('')
+  const [tip, setTip] = useState(10)
+  const [people, setPeople] = useState(2)
+  const b = parseFloat(bill)||0
+  const tipAmt = Math.round(b*tip/100*100)/100
+  const total = b + tipAmt
+  const perPerson = Math.round(total/Math.max(people,1)*100)/100
+  return (
+    <div className="card space-y-4">
+      <p className="section-label">Tip & Bill Splitter</p>
+      <div>
+        <label className="section-label mb-1 block">Bill Amount ($)</label>
+        <input className="input" type="number" min="0" step="0.01" placeholder="0.00" value={bill} onChange={e=>setBill(e.target.value)} />
+      </div>
+      <div>
+        <div className="flex justify-between mb-2">
+          <label className="section-label">Tip</label>
+          <span style={{fontFamily:'"DM Mono",monospace',fontSize:'0.7rem',color:'var(--section-accent)'}}>{tip}%</span>
+        </div>
+        <div className="flex gap-2 flex-wrap">
+          {[0,5,10,15,18,20].map(t=>(
+            <button key={t} onClick={()=>setTip(t)} className={`chip ${tip===t?'active':''}`}>{t}%</button>
+          ))}
+        </div>
+      </div>
+      <div>
+        <div className="flex justify-between mb-2">
+          <label className="section-label">People</label>
+          <div className="flex items-center gap-3">
+            <button onClick={()=>setPeople(p=>Math.max(1,p-1))} className="btn-ghost px-2 py-0.5">−</button>
+            <span style={{fontFamily:'"DM Mono",monospace',fontSize:'0.9rem',color:'#EDE8E0',minWidth:16,textAlign:'center'}}>{people}</span>
+            <button onClick={()=>setPeople(p=>p+1)} className="btn-ghost px-2 py-0.5">+</button>
+          </div>
+        </div>
+      </div>
+      {b > 0 && (
+        <div style={{background:'rgba(0,0,0,0.25)',borderRadius:10,padding:'14px 16px',display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:8,textAlign:'center'}}>
+          {[['Tip',`$${tipAmt.toFixed(2)}`],['Total',`$${total.toFixed(2)}`],['Each',`$${perPerson.toFixed(2)}`]].map(([l,v])=>(
+            <div key={l}>
+              <p className="section-label mb-1">{l}</p>
+              <p style={{fontFamily:'"Playfair Display",serif',fontStyle:'italic',fontSize:'1.3rem',fontWeight:600,color:'var(--section-accent)'}}>{v}</p>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ─── Countdown Timer ──────────────────────────────────────────────────────────
+function CountdownTimer() {
+  const [events, setEvents] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('s9_countdowns')||'[]') } catch { return [] }
+  })
+  const [label, setLabel] = useState('')
+  const [date, setDate] = useState('')
+  const [now, setNow] = useState(Date.now())
+
+  useEffect(() => { const id = setInterval(()=>setNow(Date.now()),1000); return ()=>clearInterval(id) }, [])
+  const save = (e) => { const next=[...e]; localStorage.setItem('s9_countdowns',JSON.stringify(next)); setEvents(next) }
+
+  const add = () => {
+    if (!label||!date) return
+    save([...events,{id:Date.now(),label,date}])
+    setLabel(''); setDate('')
+  }
+  const remove = (id) => save(events.filter(e=>e.id!==id))
+
+  const diff = (dateStr) => {
+    const ms = new Date(dateStr).getTime() - now
+    if (ms<=0) return null
+    const d=Math.floor(ms/86400000), h=Math.floor((ms%86400000)/3600000), m=Math.floor((ms%3600000)/60000), s=Math.floor((ms%60000)/1000)
+    return {d,h,m,s}
+  }
+
+  return (
+    <div className="card space-y-4">
+      <p className="section-label">Countdown Timers</p>
+      <div className="space-y-2">
+        <input className="input" placeholder="Event name…" value={label} onChange={e=>setLabel(e.target.value)} />
+        <div className="flex gap-2">
+          <input className="input flex-1" type="date" value={date} onChange={e=>setDate(e.target.value)} />
+          <button onClick={add} className="btn-primary px-4">Add</button>
+        </div>
+      </div>
+      {events.length===0 && <p style={{fontFamily:'"DM Mono",monospace',fontSize:'0.65rem',color:'var(--section-muted)',textAlign:'center',padding:'12px 0'}}>No countdowns yet</p>}
+      <div className="space-y-3">
+        {events.map(ev=>{
+          const t=diff(ev.date)
+          return (
+            <div key={ev.id} style={{background:'rgba(0,0,0,0.25)',borderRadius:10,padding:'12px 14px'}}>
+              <div className="flex justify-between items-start mb-2">
+                <p style={{fontSize:'0.85rem',color:'#EDE8E0',fontWeight:500}}>{ev.label}</p>
+                <button onClick={()=>remove(ev.id)} style={{color:'#5C5650',background:'none',border:'none',cursor:'pointer',fontSize:'0.8rem'}}>✕</button>
+              </div>
+              {t ? (
+                <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:6,textAlign:'center'}}>
+                  {[['Days',t.d],['Hours',t.h],['Mins',t.m],['Secs',t.s]].map(([l,v])=>(
+                    <div key={l} style={{background:'rgba(0,0,0,0.3)',borderRadius:6,padding:'6px 0'}}>
+                      <p style={{fontFamily:'"Share Tech Mono","DM Mono",monospace',fontSize:'1.3rem',color:'var(--section-accent)',lineHeight:1}}>{String(v).padStart(2,'0')}</p>
+                      <p style={{fontFamily:'"DM Mono",monospace',fontSize:'0.5rem',color:'var(--section-muted)',letterSpacing:'0.1em',textTransform:'uppercase',marginTop:2}}>{l}</p>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p style={{fontFamily:'"DM Mono",monospace',fontSize:'0.7rem',color:'#4ade80'}}>🎉 This day has arrived!</p>
+              )}
+              <p style={{fontFamily:'"DM Mono",monospace',fontSize:'0.55rem',color:'var(--section-muted)',marginTop:6}}>{new Date(ev.date).toLocaleDateString('en-AU',{day:'numeric',month:'long',year:'numeric'})}</p>
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+// ─── Pen Dose Calculator ──────────────────────────────────────────────────────
+const PEN_PRESETS = [
+  { id: 'custom',     label: 'Compounded (custom)', conc: '', clickVol: 0.05 },
+  { id: 'mounjaro25', label: 'Mounjaro 2.5 mg',     conc: 4,    clickVol: 0.05 },
+  { id: 'mounjaro5',  label: 'Mounjaro 5 mg',        conc: 8,    clickVol: 0.05 },
+  { id: 'mounjaro75', label: 'Mounjaro 7.5 mg',      conc: 12,   clickVol: 0.05 },
+  { id: 'mounjaro10', label: 'Mounjaro 10 mg',       conc: 16,   clickVol: 0.05 },
+  { id: 'ozempic025', label: 'Ozempic 0.25 mg',      conc: 1.34, clickVol: 0.05 },
+  { id: 'ozempic05',  label: 'Ozempic 0.5 mg',       conc: 1.34, clickVol: 0.05 },
+  { id: 'ozempic1',   label: 'Ozempic 1 mg',         conc: 1.34, clickVol: 0.05 },
+  { id: 'ozempic2',   label: 'Ozempic 2 mg',         conc: 2.68, clickVol: 0.05 },
+]
+
+function PenCalculator() {
+  const [preset, setPreset] = useState('custom')
+  const [conc, setConc] = useState('')       // mg/mL
+  const [dose, setDose] = useState('')       // mg desired
+  const [clickVol, setClickVol] = useState('0.05') // mL per click
+
+  const p = PEN_PRESETS.find(x=>x.id===preset)
+  const effConc = preset==='custom' ? parseFloat(conc) : p.conc
+  const effClick = preset==='custom' ? parseFloat(clickVol) : p.clickVol
+
+  const doseNum = parseFloat(dose)
+  const clicks = (effConc && effClick && doseNum)
+    ? Math.round(doseNum / effConc / effClick)
+    : null
+  const volMl = clicks ? Math.round(clicks * effClick * 1000)/1000 : null
+
+  return (
+    <div className="card space-y-4">
+      <div>
+        <p className="section-label mb-1">Pen / Dose Calculator</p>
+        <p style={{fontFamily:'"DM Mono",monospace',fontSize:'0.58rem',color:'#f87171',lineHeight:1.5}}>
+          ⚠ For reference only — always confirm doses with your prescriber or pharmacist.
+        </p>
+      </div>
+
+      <div>
+        <label className="section-label mb-1 block">Pen Type</label>
+        <select className="input" value={preset} onChange={e=>setPreset(e.target.value)}>
+          {PEN_PRESETS.map(p=><option key={p.id} value={p.id}>{p.label}</option>)}
+        </select>
+      </div>
+
+      {preset==='custom' && (
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="section-label mb-1 block">Concentration (mg/mL)</label>
+            <input className="input" type="number" min="0" step="0.1" placeholder="e.g. 5" value={conc} onChange={e=>setConc(e.target.value)} />
+          </div>
+          <div>
+            <label className="section-label mb-1 block">mL per click</label>
+            <input className="input" type="number" min="0" step="0.01" placeholder="0.05" value={clickVol} onChange={e=>setClickVol(e.target.value)} />
+          </div>
+        </div>
+      )}
+
+      {preset!=='custom' && (
+        <div style={{background:'rgba(0,0,0,0.2)',borderRadius:8,padding:'8px 12px',display:'flex',gap:16}}>
+          <div><p className="section-label">Concentration</p><p style={{fontFamily:'"DM Mono",monospace',fontSize:'0.8rem',color:'var(--section-accent)'}}>{p.conc} mg/mL</p></div>
+          <div><p className="section-label">Per click</p><p style={{fontFamily:'"DM Mono",monospace',fontSize:'0.8rem',color:'var(--section-accent)'}}>{p.clickVol} mL</p></div>
+        </div>
+      )}
+
+      <div>
+        <label className="section-label mb-1 block">Desired Dose (mg)</label>
+        <input className="input" type="number" min="0" step="0.25" placeholder="e.g. 2.5" value={dose} onChange={e=>setDose(e.target.value)} />
+      </div>
+
+      {clicks !== null && (
+        <div style={{background:'rgba(0,0,0,0.3)',borderRadius:10,padding:'16px',display:'grid',gridTemplateColumns:'1fr 1fr',gap:12,textAlign:'center'}}>
+          <div>
+            <p className="section-label mb-1">Clicks</p>
+            <p style={{fontFamily:'"Playfair Display",serif',fontStyle:'italic',fontSize:'2.5rem',fontWeight:600,color:'var(--section-accent)',lineHeight:1}}>{clicks}</p>
+          </div>
+          <div>
+            <p className="section-label mb-1">Volume</p>
+            <p style={{fontFamily:'"Playfair Display",serif',fontStyle:'italic',fontSize:'2.5rem',fontWeight:600,color:'var(--section-accent)',lineHeight:1}}>{volMl}<span style={{fontSize:'1rem'}}> mL</span></p>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
 // ─── Page ─────────────────────────────────────────────────────────────────────
 const TOOLS = [
-  { id: 'clocks',     label: 'World Clocks',      icon: '🕰',  desc: 'Orlando · Tokyo · New York' },
-  { id: 'calc',       label: 'GRAV-7 Calculator', icon: '🖩',  desc: 'Calculator + GST' },
-  { id: 'pomodoro',   label: 'Pomodoro',           icon: '🍅',  desc: 'Focus & break timer' },
-  { id: 'units',      label: 'Unit Converter',     icon: '📐',  desc: 'Length · Weight · Temp' },
-  { id: 'qr',         label: 'QR Generator',       icon: '📱',  desc: 'URL to QR code' },
+  { id: 'clocks',     label: 'World Clocks',        icon: '🕰',  desc: 'Orlando · Tokyo · New York' },
+  { id: 'calc',       label: 'GRAV-7 Calculator',   icon: '🖩',  desc: 'Calculator + GST' },
+  { id: 'pomodoro',   label: 'Pomodoro',             icon: '🍅',  desc: 'Focus & break timer' },
+  { id: 'units',      label: 'Unit Converter',       icon: '📐',  desc: 'Length · Weight · Temp' },
+  { id: 'qr',         label: 'QR Generator',         icon: '📱',  desc: 'URL to QR code' },
+  { id: 'colour',     label: 'Colour Palette',       icon: '🎨',  desc: 'Swatches from any hex colour' },
+  { id: 'regex',      label: 'Regex Tester',         icon: '🔍',  desc: 'Live pattern matching' },
+  { id: 'bill',       label: 'Tip & Bill Splitter',  icon: '🧾',  desc: 'Split bills with tip' },
+  { id: 'countdown',  label: 'Countdown Timers',     icon: '⏳',  desc: 'Days to any event' },
+  { id: 'pen',        label: 'Pen Dose Calculator',  icon: '💉',  desc: 'Mounjaro · Ozempic · Compounded' },
 ]
 
 export default function Tools() {
@@ -803,11 +1139,16 @@ export default function Tools() {
               <button onClick={() => setActive(null)} className="btn-ghost px-3 py-1.5 text-sm">‹ Back</button>
               <h1 className="section-title" style={{ fontSize: '1.3rem' }}>{tool?.label}</h1>
             </div>
-            {active === 'clocks'   && <WorldClocks />}
-            {active === 'calc'     && <Calculator />}
-            {active === 'pomodoro' && <Pomodoro />}
-            {active === 'units'    && <UnitConverter />}
-            {active === 'qr'       && <QRGenerator />}
+            {active === 'clocks'    && <WorldClocks />}
+            {active === 'calc'      && <Calculator />}
+            {active === 'pomodoro'  && <Pomodoro />}
+            {active === 'units'     && <UnitConverter />}
+            {active === 'qr'        && <QRGenerator />}
+            {active === 'colour'    && <ColourPicker />}
+            {active === 'regex'     && <RegexTester />}
+            {active === 'bill'      && <BillSplitter />}
+            {active === 'countdown' && <CountdownTimer />}
+            {active === 'pen'       && <PenCalculator />}
           </>
         )}
 
