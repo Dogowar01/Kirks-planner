@@ -4,6 +4,7 @@ import { Plus } from 'lucide-react'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts'
 import { useStore } from '../../hooks/useStore'
 import SectionShell from '../../components/SectionShell'
+import bgImg from '../../assets/art-vintage-woman.jpg'
 import Modal from '../../components/Modal'
 import EmptyState from '../../components/EmptyState'
 import { PenLine } from 'lucide-react'
@@ -88,7 +89,7 @@ export default function WordCount() {
     .slice(0, 20)
 
   return (
-    <SectionShell accent="#7C3AED">
+    <SectionShell accent="#7C3AED" bgImage={bgImg}>
     <div className="p-4 md:p-6 max-w-2xl">
       <div className="flex items-center justify-between mb-6">
         <h1 className="section-title" style={{ color: '#7C3AED' }}>Word Count</h1>

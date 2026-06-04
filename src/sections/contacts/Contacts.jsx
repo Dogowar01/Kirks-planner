@@ -4,6 +4,7 @@ import { useStore } from '../../hooks/useStore'
 import { CATEGORIES } from '../../lib/constants'
 import CategoryBadge from '../../components/CategoryBadge'
 import SectionShell from '../../components/SectionShell'
+import bgImg from '../../assets/art-portrait.jpg'
 import Modal from '../../components/Modal'
 import ConfirmDialog from '../../components/ConfirmDialog'
 import EmptyState from '../../components/EmptyState'
@@ -126,7 +127,7 @@ export default function Contacts() {
   }).sort((a,b) => a.name.localeCompare(b.name))
 
   return (
-    <SectionShell accent="#9A9088">
+    <SectionShell accent="#9A9088" bgImage={bgImg}>
     <div className="p-4 md:p-6 max-w-2xl">
       <div className="flex items-center justify-between mb-6">
         <h1 className="section-title" style={{ color: '#EDE8E0' }}>Contacts</h1>

@@ -6,7 +6,7 @@ import { useStore } from '../../hooks/useStore'
 import { BUSINESSES } from '../../lib/constants'
 import CategoryBadge from '../../components/CategoryBadge'
 import Modal from '../../components/Modal'
-import heroBg from '../../assets/hero.png'
+import heroBg from '../../assets/art-newyork.jpg'
 
 const CAT_COLORS = {
   signal9:  '#C4522A',

@@ -2,6 +2,7 @@ import { useState, useRef } from 'react'
 import { useStore } from '../../hooks/useStore'
 import ConfirmDialog from '../../components/ConfirmDialog'
 import SectionShell from '../../components/SectionShell'
+import bgImg from '../../assets/art-ethereal.jpg'
 
 export default function Settings() {
   const { settings, updateSettings, exportData, importData, clearAllData } = useStore()
@@ -23,7 +24,7 @@ export default function Settings() {
   }
 
   return (
-    <SectionShell accent="#5C5650">
+    <SectionShell accent="#5C5650" bgImage={bgImg}>
     <div className="p-4 md:p-6 max-w-xl">
       <h1 className="section-title mb-6" style={{ color: '#9A9088' }}>Settings</h1>
 

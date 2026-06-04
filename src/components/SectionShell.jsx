@@ -1,26 +1,53 @@
-export default function SectionShell({ accent, children, className = '' }) {
+export default function SectionShell({ accent, bgImage, children, className = '' }) {
   return (
     <div
       className={className}
       style={{
         minHeight: '100%',
-        background: [
-          /* Strong radial bloom from top — clearly tinted per section */
-          `radial-gradient(ellipse 100% 55% at 50% -5%, ${accent}45 0%, ${accent}10 45%, transparent 70%)`,
-          /* Subtle side bleeds so colour fills the viewport width */
-          `radial-gradient(ellipse 60% 30% at 0% 15%, ${accent}18 0%, transparent 55%)`,
-          `radial-gradient(ellipse 60% 30% at 100% 15%, ${accent}12 0%, transparent 55%)`,
-          '#0D0C0B',
-        ].join(', '),
+        position: 'relative',
+        backgroundColor: '#0D0C0B',
         '--section-accent': accent,
       }}
     >
-      {/* Top accent bar — 2px, solid, clearly visible */}
+      {/* Artwork background image */}
+      {bgImage && (
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          zIndex: 0,
+          backgroundImage: `url(${bgImage})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center top',
+          opacity: 0.08,
+          pointerEvents: 'none',
+        }} />
+      )}
+
+      {/* Colour gradient overlay */}
       <div style={{
+        position: 'fixed',
+        inset: 0,
+        zIndex: 1,
+        background: [
+          `radial-gradient(ellipse 110% 55% at 50% -5%, ${accent}55 0%, ${accent}18 40%, transparent 70%)`,
+          `radial-gradient(ellipse 50% 25% at 0% 20%, ${accent}15 0%, transparent 55%)`,
+          `radial-gradient(ellipse 50% 25% at 100% 20%, ${accent}10 0%, transparent 55%)`,
+        ].join(', '),
+        pointerEvents: 'none',
+      }} />
+
+      {/* Top accent bar */}
+      <div style={{
+        position: 'relative',
+        zIndex: 2,
         height: 2,
         background: `linear-gradient(90deg, transparent 0%, ${accent}90 20%, ${accent} 50%, ${accent}90 80%, transparent 100%)`,
       }} />
-      {children}
+
+      {/* Content */}
+      <div style={{ position: 'relative', zIndex: 2 }}>
+        {children}
+      </div>
     </div>
   )
 }

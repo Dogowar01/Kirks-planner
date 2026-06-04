@@ -4,6 +4,7 @@ import { Plus, Pin, Trash2, Search } from 'lucide-react'
 import { useStore } from '../../hooks/useStore'
 import { CATEGORIES } from '../../lib/constants'
 import SectionShell from '../../components/SectionShell'
+import bgImg from '../../assets/art-vintage-woman.jpg'
 import CategoryBadge from '../../components/CategoryBadge'
 import Modal from '../../components/Modal'
 import ConfirmDialog from '../../components/ConfirmDialog'
@@ -80,7 +81,7 @@ export default function Notes() {
   })
 
   return (
-    <SectionShell accent="#C9B49A">
+    <SectionShell accent="#C9B49A" bgImage={bgImg}>
     <div className="p-4 md:p-6 max-w-2xl">
       <div className="flex items-center justify-between mb-6">
         <h1 className="section-title" style={{ fontStyle: 'italic', color: '#C9B49A' }}>Notes</h1>

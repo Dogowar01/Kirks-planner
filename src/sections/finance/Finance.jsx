@@ -5,6 +5,7 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 
 import { useStore } from '../../hooks/useStore'
 import Modal from '../../components/Modal'
 import SectionShell from '../../components/SectionShell'
+import bgImg from '../../assets/art-newyork.jpg'
 import ConfirmDialog from '../../components/ConfirmDialog'
 
 const aud = (n) => Math.abs(n).toLocaleString('en-AU', { style: 'currency', currency: 'AUD', maximumFractionDigits: 0 })
@@ -186,7 +187,7 @@ export default function Finance() {
   const color = BIZ_COLORS[tab]
 
   return (
-    <SectionShell accent="#D4A017">
+    <SectionShell accent="#D4A017" bgImage={bgImg}>
     <div className="p-4 md:p-6 max-w-2xl">
       <div className="flex items-center justify-between mb-6">
         <h1 className="section-title" style={{ color: '#D4A017' }}>Finance</h1>
