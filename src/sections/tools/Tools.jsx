@@ -1009,6 +1009,8 @@ const PEN_PRESETS = [
   { id: 'mounjaro5',  label: 'Mounjaro 5 mg',        conc: 8,    clickVol: 0.05 },
   { id: 'mounjaro75', label: 'Mounjaro 7.5 mg',      conc: 12,   clickVol: 0.05 },
   { id: 'mounjaro10', label: 'Mounjaro 10 mg',       conc: 16,   clickVol: 0.05 },
+  { id: 'mounjaro125',label: 'Mounjaro 12.5 mg',     conc: 20,   clickVol: 0.05 },
+  { id: 'mounjaro15', label: 'Mounjaro 15 mg',       conc: 24,   clickVol: 0.05 },
   { id: 'ozempic025', label: 'Ozempic 0.25 mg',      conc: 1.34, clickVol: 0.05 },
   { id: 'ozempic05',  label: 'Ozempic 0.5 mg',       conc: 1.34, clickVol: 0.05 },
   { id: 'ozempic1',   label: 'Ozempic 1 mg',         conc: 1.34, clickVol: 0.05 },
