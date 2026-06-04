@@ -92,7 +92,7 @@ export default function WordCount() {
     <SectionShell accent="#7C3AED" bgImage={bgImg}>
     <div className="p-4 md:p-6 max-w-2xl">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="section-title" style={{ color: '#7C3AED' }}>Word Count</h1>
+        <h1 className="section-title">Word Count</h1>
         <button onClick={() => setShowAdd(true)} className="btn-primary"><Plus size={16}/> Log Session</button>
       </div>
 

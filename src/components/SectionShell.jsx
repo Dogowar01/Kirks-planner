@@ -1,4 +1,5 @@
 export default function SectionShell({ accent, bgImage, children, className = '' }) {
+  // Derive secondary palette from accent for consistent in-section theming
   return (
     <div
       className={className}
@@ -6,7 +7,15 @@ export default function SectionShell({ accent, bgImage, children, className = ''
         minHeight: '100%',
         position: 'relative',
         backgroundColor: '#0D0C0B',
+        // Expose the full palette as CSS vars so child components can use them
+        '--sa': accent,                                  // raw accent hex
         '--section-accent': accent,
+        '--section-card-border': `color-mix(in srgb, ${accent} 22%, rgba(255,255,255,0.05))`,
+        '--section-card-tint': `color-mix(in srgb, ${accent} 5%, #161412)`,
+        '--section-chip-bg': `color-mix(in srgb, ${accent} 18%, transparent)`,
+        '--section-input-focus': `color-mix(in srgb, ${accent} 55%, transparent)`,
+        '--section-label': `color-mix(in srgb, ${accent} 70%, #9A9088)`,
+        '--section-muted': `color-mix(in srgb, ${accent} 35%, #5C5650)`,
       }}
     >
       {/* Artwork background image */}

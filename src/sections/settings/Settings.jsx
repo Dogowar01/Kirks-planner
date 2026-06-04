@@ -26,11 +26,11 @@ export default function Settings() {
   return (
     <SectionShell accent="#5C5650" bgImage={bgImg}>
     <div className="p-4 md:p-6 max-w-xl">
-      <h1 className="section-title mb-6" style={{ color: '#9A9088' }}>Settings</h1>
+      <h1 className="section-title mb-6">Settings</h1>
 
       <div className="space-y-6">
         <section className="card space-y-4">
-          <h2 style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', color: '#5C5650', letterSpacing: '0.15em', textTransform: 'uppercase' }}>Display</h2>
+          <h2 className="section-label">Display</h2>
           <div>
             <label className="text-text-secondary text-xs mb-1 block">Display Name</label>
             <input className="input" value={s.displayName || 'Kirk'}
@@ -39,7 +39,7 @@ export default function Settings() {
         </section>
 
         <section className="card space-y-4">
-          <h2 style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', color: '#5C5650', letterSpacing: '0.15em', textTransform: 'uppercase' }}>Writing</h2>
+          <h2 className="section-label">Writing</h2>
           <div>
             <label className="text-text-secondary text-xs mb-1 block">Default Daily Word Goal</label>
             <input type="number" min="100" step="100" className="input"
@@ -49,7 +49,7 @@ export default function Settings() {
         </section>
 
         <section className="card space-y-4">
-          <h2 style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', color: '#5C5650', letterSpacing: '0.15em', textTransform: 'uppercase' }}>Data</h2>
+          <h2 className="section-label">Data</h2>
           <div className="flex flex-col gap-3">
             <button onClick={exportData} className="btn-ghost w-full justify-center">Export all data as JSON</button>
             <button onClick={() => fileRef.current.click()} className="btn-ghost w-full justify-center">Import from JSON backup</button>

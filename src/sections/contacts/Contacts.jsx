@@ -130,7 +130,7 @@ export default function Contacts() {
     <SectionShell accent="#9A9088" bgImage={bgImg}>
     <div className="p-4 md:p-6 max-w-2xl">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="section-title" style={{ color: '#EDE8E0' }}>Contacts</h1>
+        <h1 className="section-title">Contacts</h1>
         <button onClick={() => setShowModal(true)} className="btn-primary"><Plus size={16}/> Add</button>
       </div>
 

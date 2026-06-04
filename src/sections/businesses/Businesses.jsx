@@ -206,7 +206,7 @@ export default function Businesses() {
   return (
     <SectionShell accent="#C4522A" bgImage={bgImg}>
     <div className="p-4 md:p-6 max-w-2xl space-y-10">
-      <h1 className="section-title" style={{ color: '#C4522A' }}>Businesses</h1>
+      <h1 className="section-title">Businesses</h1>
       {Object.entries(BUSINESSES).map(([id, biz]) => (
         <BusinessSection key={id} bizId={id} biz={biz} />
       ))}

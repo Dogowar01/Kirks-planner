@@ -230,7 +230,7 @@ export default function Calendar() {
     <SectionShell accent="#3B82F6" bgImage={bgImg}>
     <div className="p-4 md:p-6 max-w-3xl">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="section-title" style={{ color: '#3B82F6' }}>Calendar</h1>
+        <h1 className="section-title">Calendar</h1>
         <div className="flex gap-2">
           <button onClick={() => setShowSearch(true)} className="btn-ghost text-xs">
             <Search size={14} /> Find Events

@@ -190,7 +190,7 @@ export default function Finance() {
     <SectionShell accent="#D4A017" bgImage={bgImg}>
     <div className="p-4 md:p-6 max-w-2xl">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="section-title" style={{ color: '#D4A017' }}>Finance</h1>
+        <h1 className="section-title">Finance</h1>
         <button onClick={() => setShowAdd(true)} className="btn-primary"><Plus size={16}/> Add Entry</button>
       </div>
 
@@ -252,12 +252,12 @@ export default function Finance() {
       <div className="flex gap-2 mb-3 flex-wrap">
         {['all', 'income', 'expense'].map(t => (
           <button key={t} onClick={() => setTypeFilter(t)}
-            className="px-3 py-1 rounded-full text-xs transition-colors"
-            style={{
-              fontFamily: '"DM Mono", monospace',
-              background: typeFilter === t ? (t === 'expense' ? 'rgba(220,38,38,0.2)' : t === 'income' ? 'rgba(45,158,90,0.2)' : 'rgba(255,255,255,0.1)') : '#1F1C19',
-              color: typeFilter === t ? (t === 'expense' ? '#DC2626' : t === 'income' ? '#2D9E5A' : '#EDE8E0') : '#9A9088',
-            }}>
+            className={`chip ${typeFilter === t ? (t === 'expense' ? '' : t === 'income' ? '' : 'active') : ''}`}
+            style={typeFilter === t && t !== 'all' ? {
+              background: t === 'expense' ? 'rgba(220,38,38,0.18)' : 'rgba(45,158,90,0.18)',
+              color: t === 'expense' ? '#DC2626' : '#2D9E5A',
+              borderColor: t === 'expense' ? 'rgba(220,38,38,0.35)' : 'rgba(45,158,90,0.35)',
+            } : {}}>
             {t === 'all' ? 'All' : t === 'income' ? '+ Income' : '− Expense'}
           </button>
         ))}

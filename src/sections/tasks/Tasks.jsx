@@ -160,7 +160,7 @@ export default function Tasks() {
     <SectionShell accent="#D4780A" bgImage={bgImg}>
     <div className="p-4 md:p-6 max-w-2xl">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="section-title" style={{ color: '#D4780A' }}>Tasks</h1>
+        <h1 className="section-title">Tasks</h1>
         <button onClick={() => setShowModal(true)} className="btn-primary">
           <Plus size={16} /> Add Task
         </button>
@@ -170,8 +170,7 @@ export default function Tasks() {
       <div className="flex gap-1.5 flex-wrap mb-4">
         {FILTERS.map(f => (
           <button key={f.id} onClick={() => setFilter(f.id)}
-            className="px-3 py-1 rounded-full text-xs font-medium transition-colors"
-            style={filter === f.id ? { background: '#D4780A', color: '#fff' } : { background: '#1F1C19', color: '#9A9088' }}>
+            className={`chip ${filter === f.id ? 'active' : ''}`}>
             {f.label}
           </button>
         ))}
