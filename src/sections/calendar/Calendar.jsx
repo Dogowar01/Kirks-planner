@@ -3,6 +3,7 @@ import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, eachDayOfInte
 import { ChevronLeft, ChevronRight, Plus, Bell, Trash2 } from 'lucide-react'
 import { useStore } from '../../hooks/useStore'
 import { CATEGORIES } from '../../lib/constants'
+import SectionShell from '../../components/SectionShell'
 import CategoryBadge from '../../components/CategoryBadge'
 import Modal from '../../components/Modal'
 import ConfirmDialog from '../../components/ConfirmDialog'
@@ -118,9 +119,10 @@ export default function Calendar() {
     .slice(0, 14)
 
   return (
+    <SectionShell accent="#3B82F6">
     <div className="p-4 md:p-6 max-w-3xl">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="section-title">Calendar</h1>
+        <h1 className="section-title" style={{ color: '#3B82F6' }}>Calendar</h1>
         <button onClick={() => setShowAdd(true)} className="btn-primary"><Plus size={16}/> Add Event</button>
       </div>
 
@@ -248,5 +250,6 @@ export default function Calendar() {
           onCancel={() => setDeleteId(null)} />
       )}
     </div>
+    </SectionShell>
   )
 }

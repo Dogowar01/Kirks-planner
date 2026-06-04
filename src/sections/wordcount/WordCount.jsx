@@ -3,6 +3,7 @@ import { format, parseISO, subDays, eachDayOfInterval } from 'date-fns'
 import { Plus } from 'lucide-react'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts'
 import { useStore } from '../../hooks/useStore'
+import SectionShell from '../../components/SectionShell'
 import Modal from '../../components/Modal'
 import EmptyState from '../../components/EmptyState'
 import { PenLine } from 'lucide-react'
@@ -87,9 +88,10 @@ export default function WordCount() {
     .slice(0, 20)
 
   return (
+    <SectionShell accent="#7C3AED">
     <div className="p-4 md:p-6 max-w-2xl">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="section-title">Word Count</h1>
+        <h1 className="section-title" style={{ color: '#7C3AED' }}>Word Count</h1>
         <button onClick={() => setShowAdd(true)} className="btn-primary"><Plus size={16}/> Log Session</button>
       </div>
 
@@ -190,5 +192,6 @@ export default function WordCount() {
         </Modal>
       )}
     </div>
+    </SectionShell>
   )
 }

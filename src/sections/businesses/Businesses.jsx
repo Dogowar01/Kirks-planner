@@ -3,6 +3,7 @@ import { Plus, Trash2, ChevronDown, ChevronUp, ExternalLink, Bell } from 'lucide
 import { useStore } from '../../hooks/useStore'
 import { BUSINESSES, STATUSES } from '../../lib/constants'
 import StatusBadge from '../../components/StatusBadge'
+import SectionShell from '../../components/SectionShell'
 import Modal from '../../components/Modal'
 import ConfirmDialog from '../../components/ConfirmDialog'
 
@@ -202,11 +203,13 @@ function BusinessSection({ bizId, biz }) {
 
 export default function Businesses() {
   return (
+    <SectionShell accent="#C4522A">
     <div className="p-4 md:p-6 max-w-2xl space-y-10">
-      <h1 className="section-title">Businesses</h1>
+      <h1 className="section-title" style={{ color: '#C4522A' }}>Businesses</h1>
       {Object.entries(BUSINESSES).map(([id, biz]) => (
         <BusinessSection key={id} bizId={id} biz={biz} />
       ))}
     </div>
+    </SectionShell>
   )
 }

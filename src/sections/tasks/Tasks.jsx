@@ -3,6 +3,7 @@ import { format, parseISO } from 'date-fns'
 import { Plus, Bell, Trash2, ChevronDown, ChevronUp } from 'lucide-react'
 import { useStore } from '../../hooks/useStore'
 import { CATEGORIES } from '../../lib/constants'
+import SectionShell from '../../components/SectionShell'
 import CategoryBadge from '../../components/CategoryBadge'
 import Modal from '../../components/Modal'
 import ConfirmDialog from '../../components/ConfirmDialog'
@@ -155,9 +156,10 @@ export default function Tasks() {
   const done = tasks.filter(t => t.done)
 
   return (
+    <SectionShell accent="#D4780A">
     <div className="p-4 md:p-6 max-w-2xl">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="section-title">Tasks</h1>
+        <h1 className="section-title" style={{ color: '#D4780A' }}>Tasks</h1>
         <button onClick={() => setShowModal(true)} className="btn-primary">
           <Plus size={16} /> Add Task
         </button>
@@ -167,7 +169,8 @@ export default function Tasks() {
       <div className="flex gap-1.5 flex-wrap mb-4">
         {FILTERS.map(f => (
           <button key={f.id} onClick={() => setFilter(f.id)}
-            className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${filter === f.id ? 'bg-signal9 text-white' : 'bg-bg-elevated text-text-secondary hover:text-text-primary'}`}>
+            className="px-3 py-1 rounded-full text-xs font-medium transition-colors"
+            style={filter === f.id ? { background: '#D4780A', color: '#fff' } : { background: '#1F1C19', color: '#9A9088' }}>
             {f.label}
           </button>
         ))}
@@ -217,5 +220,6 @@ export default function Tasks() {
           onCancel={() => setDeleteId(null)} />
       )}
     </div>
+    </SectionShell>
   )
 }

@@ -3,6 +3,7 @@ import { format, parseISO, startOfMonth, endOfMonth, startOfYear } from 'date-fn
 import { Plus, Trash2 } from 'lucide-react'
 import { useStore } from '../../hooks/useStore'
 import Modal from '../../components/Modal'
+import SectionShell from '../../components/SectionShell'
 import ConfirmDialog from '../../components/ConfirmDialog'
 
 const aud = (n) => n.toLocaleString('en-AU', { style: 'currency', currency: 'AUD' })
@@ -78,9 +79,10 @@ export default function Finance() {
   const progress = monthGoal > 0 ? Math.min(monthTotal / monthGoal, 1) : 0
 
   return (
+    <SectionShell accent="#D4A017">
     <div className="p-4 md:p-6 max-w-2xl">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="section-title">Finance</h1>
+        <h1 className="section-title" style={{ color: '#D4A017' }}>Finance</h1>
         <button onClick={() => setShowAdd(true)} className="btn-primary"><Plus size={16}/> Add Income</button>
       </div>
 
@@ -162,5 +164,6 @@ export default function Finance() {
           onCancel={() => setDeleteId(null)} />
       )}
     </div>
+    </SectionShell>
   )
 }
