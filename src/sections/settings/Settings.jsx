@@ -48,6 +48,19 @@ export default function Settings() {
         </section>
 
         <section className="card space-y-4">
+          <h2 style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', color: '#5C5650', letterSpacing: '0.15em', textTransform: 'uppercase' }}>Integrations</h2>
+          <div>
+            <label className="text-text-secondary text-xs mb-1 block">Ticketmaster API Key</label>
+            <input className="input font-mono text-xs" placeholder="Paste your free API key here"
+              value={s.ticketmasterKey || ''}
+              onChange={e => updateSettings({ ticketmasterKey: e.target.value })} />
+            <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', color: '#5C5650', marginTop: 6 }}>
+              Free at developer.ticketmaster.com · enables Find Events in Calendar
+            </p>
+          </div>
+        </section>
+
+        <section className="card space-y-4">
           <h2 style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', color: '#5C5650', letterSpacing: '0.15em', textTransform: 'uppercase' }}>Data</h2>
           <div className="flex flex-col gap-3">
             <button onClick={exportData} className="btn-ghost w-full justify-center">Export all data as JSON</button>

@@ -1,12 +1,150 @@
 import { useState } from 'react'
 import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, eachDayOfInterval, isSameMonth, isToday, parseISO, isSameDay, addMonths, subMonths, addDays } from 'date-fns'
-import { ChevronLeft, ChevronRight, Plus, Bell, Trash2 } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Plus, Bell, Trash2, Search, MapPin, Loader, ExternalLink } from 'lucide-react'
 import { useStore } from '../../hooks/useStore'
 import { CATEGORIES } from '../../lib/constants'
 import SectionShell from '../../components/SectionShell'
 import CategoryBadge from '../../components/CategoryBadge'
 import Modal from '../../components/Modal'
 import ConfirmDialog from '../../components/ConfirmDialog'
+
+function EventSearchModal({ onClose, onAdd, apiKey }) {
+  const [query, setQuery] = useState('')
+  const [location, setLocation] = useState('')
+  const [results, setResults] = useState([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+  const [added, setAdded] = useState(new Set())
+
+  async function handleSearch(e) {
+    e.preventDefault()
+    if (!apiKey) return
+    setLoading(true)
+    setError('')
+    setResults([])
+    try {
+      const params = new URLSearchParams({
+        apikey: apiKey,
+        keyword: query || 'events',
+        city: location,
+        size: 10,
+        sort: 'date,asc',
+        countryCode: 'AU',
+      })
+      const res = await fetch(`https://app.ticketmaster.com/discovery/v2/events.json?${params}`)
+      const data = await res.json()
+      const events = data._embedded?.events || []
+      setResults(events)
+      if (events.length === 0) setError('No events found. Try a different location or keyword.')
+    } catch {
+      setError('Search failed. Check your API key or try again.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  function handleAdd(ev) {
+    const date = ev.dates?.start?.localDate || format(new Date(), 'yyyy-MM-dd')
+    const time = ev.dates?.start?.localTime?.slice(0, 5) || ''
+    const venue = ev._embedded?.venues?.[0]
+    const venueName = venue ? `${venue.name}${venue.city?.name ? ', ' + venue.city.name : ''}` : ''
+    onAdd({
+      title: ev.name,
+      date,
+      time,
+      endTime: '',
+      category: 'personal',
+      note: [ev.info, venueName, ev.url].filter(Boolean).join('\n'),
+      reminder: false,
+      reminderMinutes: 30,
+      recurring: 'none',
+    })
+    setAdded(s => new Set([...s, ev.id]))
+  }
+
+  return (
+    <Modal title="Find Local Events" onClose={onClose} size="lg">
+      {!apiKey ? (
+        <div className="space-y-4 text-center py-4">
+          <p style={{ color: '#9A9088', fontSize: '0.875rem' }}>
+            This feature uses the free Ticketmaster Discovery API.
+          </p>
+          <ol className="text-left space-y-2 text-sm" style={{ color: '#9A9088' }}>
+            <li>1. Go to <a href="https://developer.ticketmaster.com" target="_blank" rel="noopener noreferrer" className="underline" style={{ color: '#3B82F6' }}>developer.ticketmaster.com</a></li>
+            <li>2. Create a free account</li>
+            <li>3. Copy your API key from the dashboard</li>
+            <li>4. Paste it in <strong style={{ color: '#EDE8E0' }}>Settings → Ticketmaster API Key</strong></li>
+          </ol>
+          <p style={{ color: '#5C5650', fontSize: '0.75rem' }}>Free tier: 5,000 searches/day. No credit card required.</p>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          <form onSubmit={handleSearch} className="flex gap-2">
+            <div className="relative flex-1">
+              <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: '#5C5650' }} />
+              <input className="input pl-8" placeholder="Concert, market, festival…" value={query} onChange={e => setQuery(e.target.value)} />
+            </div>
+            <div className="relative w-40">
+              <MapPin size={13} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: '#5C5650' }} />
+              <input className="input pl-8" placeholder="City" value={location} onChange={e => setLocation(e.target.value)} />
+            </div>
+            <button type="submit" className="btn-primary px-4 shrink-0" disabled={loading}>
+              {loading ? <Loader size={14} className="animate-spin" /> : 'Search'}
+            </button>
+          </form>
+
+          {error && <p style={{ color: '#9A9088', fontSize: '0.875rem' }}>{error}</p>}
+
+          <div className="space-y-2 max-h-96 overflow-y-auto">
+            {results.map(ev => {
+              const date = ev.dates?.start?.localDate
+              const time = ev.dates?.start?.localTime?.slice(0, 5)
+              const venue = ev._embedded?.venues?.[0]
+              const isAdded = added.has(ev.id)
+              return (
+                <div key={ev.id} className="card flex items-start gap-3">
+                  {ev.images?.[0] && (
+                    <img src={ev.images.find(i => i.ratio === '4_3' && i.width < 300)?.url || ev.images[0].url}
+                      alt="" className="w-14 h-14 object-cover rounded-lg shrink-0" style={{ opacity: 0.85 }} />
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate" style={{ color: '#EDE8E0' }}>{ev.name}</p>
+                    <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.65rem', color: '#5C5650' }}>
+                      {date ? format(parseISO(date), 'd MMM yyyy') : ''}
+                      {time ? ` · ${time}` : ''}
+                    </p>
+                    {venue && (
+                      <p className="text-xs truncate mt-0.5" style={{ color: '#5C5650' }}>
+                        <MapPin size={10} className="inline mr-1" />{venue.name}{venue.city?.name ? `, ${venue.city.name}` : ''}
+                      </p>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    {ev.url && (
+                      <a href={ev.url} target="_blank" rel="noopener noreferrer" style={{ color: '#5C5650' }} className="hover:text-text-secondary">
+                        <ExternalLink size={13} />
+                      </a>
+                    )}
+                    <button
+                      onClick={() => !isAdded && handleAdd(ev)}
+                      className="rounded-lg p-1.5 transition-all"
+                      style={{
+                        background: isAdded ? 'rgba(45,158,90,0.15)' : 'rgba(59,130,246,0.15)',
+                        color: isAdded ? '#2D9E5A' : '#3B82F6',
+                        cursor: isAdded ? 'default' : 'pointer',
+                      }}>
+                      {isAdded ? '✓' : <Plus size={14} />}
+                    </button>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
+    </Modal>
+  )
+}
 
 function EventForm({ initial = {}, onSave, onClose }) {
   const [form, setForm] = useState({
@@ -92,11 +230,12 @@ function expandRecurring(events, viewStart, viewEnd) {
 }
 
 export default function Calendar() {
-  const { events, addEvent, updateEvent, deleteEvent } = useStore()
+  const { events, addEvent, updateEvent, deleteEvent, settings } = useStore()
   const [month, setMonth] = useState(new Date())
   const [selected, setSelected] = useState(null)
   const [showAdd, setShowAdd] = useState(false)
   const [addDate, setAddDate] = useState(null)
+  const [showSearch, setShowSearch] = useState(false)
   const [editEvent, setEditEvent] = useState(null)
   const [deleteId, setDeleteId] = useState(null)
 
@@ -123,7 +262,14 @@ export default function Calendar() {
     <div className="p-4 md:p-6 max-w-3xl">
       <div className="flex items-center justify-between mb-6">
         <h1 className="section-title" style={{ color: '#3B82F6' }}>Calendar</h1>
-        <button onClick={() => setShowAdd(true)} className="btn-primary"><Plus size={16}/> Add Event</button>
+        <div className="flex gap-2">
+          <button onClick={() => setShowSearch(true)} className="btn-ghost text-xs">
+            <Search size={14} /> Find Events
+          </button>
+          <button onClick={() => setShowAdd(true)} className="btn-primary text-xs">
+            <Plus size={14} /> Add
+          </button>
+        </div>
       </div>
 
       {/* Month nav */}
@@ -248,6 +394,14 @@ export default function Calendar() {
         <ConfirmDialog title="Delete Event" message="Delete this event?"
           onConfirm={() => { deleteEvent(deleteId); setDeleteId(null) }}
           onCancel={() => setDeleteId(null)} />
+      )}
+
+      {showSearch && (
+        <EventSearchModal
+          apiKey={settings?.ticketmasterKey || ''}
+          onClose={() => setShowSearch(false)}
+          onAdd={(data) => { addEvent(data) }}
+        />
       )}
     </div>
     </SectionShell>
