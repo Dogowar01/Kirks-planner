@@ -1117,17 +1117,16 @@ export default function Tools() {
         {!active && (
           <>
             <h1 className="section-title mb-6">Tools</h1>
-            <div className="space-y-2">
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
               {TOOLS.map(t => (
                 <button key={t.id} onClick={() => setActive(t.id)}
-                  className="card w-full text-left flex items-center gap-4 hover:border-white/10 transition-all"
-                  style={{ padding: '14px 16px' }}>
-                  <span style={{ fontSize: '1.6rem', lineHeight: 1 }}>{t.icon}</span>
-                  <div className="flex-1">
-                    <p style={{ fontSize: '0.95rem', fontWeight: 500, color: '#EDE8E0' }}>{t.label}</p>
-                    <p style={{ fontFamily: '"DM Mono",monospace', fontSize: '0.6rem', color: 'var(--section-muted)', marginTop: 2, letterSpacing: '0.05em' }}>{t.desc}</p>
+                  className="card text-left flex flex-col gap-2 hover:border-white/10 transition-all"
+                  style={{ padding: '16px 14px' }}>
+                  <span style={{ fontSize: '1.8rem', lineHeight: 1 }}>{t.icon}</span>
+                  <div>
+                    <p style={{ fontSize: '0.85rem', fontWeight: 500, color: '#EDE8E0', lineHeight: 1.3 }}>{t.label}</p>
+                    <p style={{ fontFamily: '"DM Mono",monospace', fontSize: '0.55rem', color: 'var(--section-muted)', marginTop: 3, letterSpacing: '0.04em' }}>{t.desc}</p>
                   </div>
-                  <span style={{ color: 'var(--section-muted)', fontSize: '1rem' }}>›</span>
                 </button>
               ))}
             </div>
