@@ -9,6 +9,7 @@ import Notes from './sections/notes/Notes'
 import WordCount from './sections/wordcount/WordCount'
 import Finance from './sections/finance/Finance'
 import Settings from './sections/settings/Settings'
+import Tools from './sections/tools/Tools'
 
 export default function App() {
   return (
@@ -24,6 +25,7 @@ export default function App() {
           <Route path="notes"      element={<Notes />} />
           <Route path="wordcount"  element={<WordCount />} />
           <Route path="finance"    element={<Finance />} />
+          <Route path="tools"      element={<Tools />} />
           <Route path="settings"   element={<Settings />} />
         </Route>
       </Routes>
