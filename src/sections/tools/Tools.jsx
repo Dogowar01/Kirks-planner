@@ -18,15 +18,19 @@ function useWorldData() {
     const tick = () => {
       const now = {}
       CITIES.forEach(c => {
-        now[c.name] = new Intl.DateTimeFormat('en-AU', {
+        const d = new Date()
+        const time = new Intl.DateTimeFormat('en-GB', {
           timeZone: c.tz, hour: '2-digit', minute: '2-digit', hour12: false,
-          weekday: 'short',
-        }).format(new Date())
+        }).format(d)
+        const day = new Intl.DateTimeFormat('en-AU', {
+          timeZone: c.tz, weekday: 'short',
+        }).format(d)
+        now[c.name] = { time, day }
       })
       setTimes(now)
     }
     tick()
-    const id = setInterval(tick, 30000)
+    const id = setInterval(tick, 1000)
     return () => clearInterval(id)
   }, [])
 
@@ -120,11 +124,7 @@ function WorldClocks() {
       <p className="section-label mb-4">World Clocks</p>
       <div style={{ display: 'flex', justifyContent: 'space-around', flexWrap: 'wrap', gap: 16 }}>
         {CITIES.map(c => {
-          const raw = times[c.name] || ''
-          // Intl returns e.g. "Mon, 14:35" — split on ", "
-          const parts = raw.split(', ')
-          const day = parts[0] || ''
-          const time = parts[1] || ''
+          const { time = '', day = '' } = times[c.name] || {}
           return (
             <NixieClock key={c.name} city={c.name} time={time} day={day} temp={temps[c.name]} />
           )
