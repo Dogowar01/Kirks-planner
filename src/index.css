@@ -1,0 +1,61 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html { font-family: 'DM Sans', sans-serif; }
+  body {
+    background-color: #141413;
+    color: #F0EEE8;
+    margin: 0;
+    padding: 0;
+    min-height: 100dvh;
+    overflow-x: hidden;
+  }
+  #root { min-height: 100dvh; display: flex; flex-direction: column; }
+  * { box-sizing: border-box; }
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 2px; }
+}
+
+@layer components {
+  .card {
+    @apply bg-bg-surface border rounded-card p-4;
+    border-color: rgba(255,255,255,0.08);
+  }
+  .card-elevated {
+    @apply bg-bg-elevated border rounded-card p-4;
+    border-color: rgba(255,255,255,0.12);
+  }
+  .btn {
+    @apply inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-150 cursor-pointer;
+  }
+  .btn-ghost {
+    @apply btn text-text-secondary hover:text-text-primary hover:bg-bg-elevated;
+    border: 0.5px solid rgba(255,255,255,0.08);
+  }
+  .btn-primary {
+    @apply btn bg-signal9 text-white hover:bg-opacity-90;
+  }
+  .btn-danger {
+    @apply btn text-red-400 hover:bg-red-950 hover:text-red-300;
+    border: 0.5px solid rgba(255,255,255,0.08);
+  }
+  .input {
+    @apply w-full bg-bg-elevated text-text-primary placeholder-text-tertiary rounded-lg px-3 py-2 text-sm outline-none transition-all duration-150;
+    border: 0.5px solid rgba(255,255,255,0.12);
+  }
+  .input:focus { border-color: rgba(255,255,255,0.3); }
+  .badge {
+    @apply inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium;
+  }
+  .section-title {
+    @apply font-display text-2xl font-semibold text-text-primary;
+  }
+  .nav-item {
+    @apply flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-text-secondary transition-all duration-150 cursor-pointer;
+  }
+  .nav-item:hover { @apply text-text-primary bg-bg-elevated; }
+  .nav-item.active { @apply text-text-primary bg-bg-elevated; }
+}
