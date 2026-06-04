@@ -54,7 +54,7 @@ export default function SectionShell({ accent, bgImage, children, className = ''
       }} />
 
       {/* Content */}
-      <div style={{ position: 'relative', zIndex: 2 }}>
+      <div style={{ position: 'relative', zIndex: 2, paddingTop: 'max(env(safe-area-inset-top), 12px)' }}>
         {children}
       </div>
     </div>
