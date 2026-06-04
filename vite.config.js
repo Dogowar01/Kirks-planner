@@ -29,7 +29,7 @@ export default defineConfig({
         globIgnores: ['**/art-*.png'],
         runtimeCaching: [
           {
-            urlPattern: /^https:\/\/api\.frankfurter\.app\/.*/i,
+            urlPattern: /^https:\/\/api\.frankfurter\.dev\/.*/i,
             handler: 'NetworkOnly',
           },
           {

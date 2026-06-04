@@ -53,7 +53,7 @@ function useRates() {
   const [error, setError] = useState(false)
 
   useEffect(() => {
-    fetch('https://api.frankfurter.app/latest?from=AUD&to=USD,JPY', { cache: 'no-store' })
+    fetch('https://api.frankfurter.dev/v1/latest?from=AUD&to=USD,JPY', { cache: 'no-store' })
       .then(r => { if (!r.ok) throw new Error(); return r.json() })
       .then(json => {
         if (json.rates?.USD && json.rates?.JPY) setRates(json.rates)
