@@ -238,20 +238,54 @@ function SectionLabel({ children }) {
   )
 }
 
-const aud = (n) => n.toLocaleString('en-AU', { style: 'currency', currency: 'AUD', maximumFractionDigits: 0 })
+const aud = (n) => Math.abs(n).toLocaleString('en-AU', { style: 'currency', currency: 'AUD', maximumFractionDigits: 0 })
 
 const BIZ_COLORS = { signal9: '#C4522A', app: '#3B82F6' }
 const BIZ_LABELS = { signal9: 'Signal9 Studio', app: 'App Development' }
 
-function QuickIncomeForm({ onSave, onClose }) {
-  const [form, setForm] = useState({ businessId: 'signal9', date: format(new Date(), 'yyyy-MM-dd'), amount: '', source: '', note: '' })
+const BIZ_CATS = {
+  signal9: ['Print', 'Market', 'Commission', 'Workshop', 'Digital', 'Other'],
+  app:     ['Gumroad', 'App Store', 'Freelance', 'Consulting', 'Subscription', 'Other'],
+}
+const EXPENSE_CATS = {
+  signal9: ['Supplies', 'Printing', 'Market Fees', 'Software', 'Equipment', 'Marketing', 'Other'],
+  app:     ['Software', 'Hosting', 'Tools', 'Marketing', 'Equipment', 'Freelance', 'Other'],
+}
+
+function QuickEntryForm({ onSave, onClose }) {
+  const [form, setForm] = useState({ businessId: 'signal9', type: 'income', date: format(new Date(), 'yyyy-MM-dd'), amount: '', category: 'Print', source: '', note: '' })
   const f = k => e => setForm(s => ({ ...s, [k]: e.target.value }))
+
+  function handleBizChange(e) {
+    const biz = e.target.value
+    setForm(s => ({ ...s, businessId: biz, category: (s.type === 'income' ? BIZ_CATS[biz] : EXPENSE_CATS[biz])?.[0] || 'Other' }))
+  }
+  function handleTypeChange(t) {
+    setForm(s => ({ ...s, type: t, category: (t === 'income' ? BIZ_CATS[s.businessId] : EXPENSE_CATS[s.businessId])?.[0] || 'Other' }))
+  }
+
+  const cats = form.type === 'income' ? (BIZ_CATS[form.businessId] || []) : (EXPENSE_CATS[form.businessId] || [])
+
   return (
     <form onSubmit={e => { e.preventDefault(); onSave({ ...form, amount: Number(form.amount) }) }} className="space-y-4">
+      {/* Type toggle */}
+      <div className="flex gap-2">
+        {['income', 'expense'].map(t => (
+          <button key={t} type="button" onClick={() => handleTypeChange(t)}
+            className="flex-1 py-2 rounded-lg text-xs font-medium transition-colors"
+            style={{
+              fontFamily: '"DM Mono", monospace', letterSpacing: '0.08em', textTransform: 'uppercase',
+              background: form.type === t ? (t === 'income' ? 'rgba(45,158,90,0.2)' : 'rgba(220,38,38,0.15)') : '#1F1C19',
+              color: form.type === t ? (t === 'income' ? '#2D9E5A' : '#DC2626') : '#9A9088',
+            }}>
+            {t === 'income' ? '+ Income' : '− Expense'}
+          </button>
+        ))}
+      </div>
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className="text-text-secondary text-xs mb-1 block">Business</label>
-          <select className="input" value={form.businessId} onChange={f('businessId')}>
+          <select className="input" value={form.businessId} onChange={handleBizChange}>
             <option value="signal9">Signal9 Studio</option>
             <option value="app">App Development</option>
           </select>
@@ -261,17 +295,22 @@ function QuickIncomeForm({ onSave, onClose }) {
           <input type="date" className="input" value={form.date} onChange={f('date')} />
         </div>
       </div>
-      <div>
-        <label className="text-text-secondary text-xs mb-1 block">Amount (AUD) *</label>
-        <input required type="number" step="0.01" min="0.01" className="input" value={form.amount} onChange={f('amount')} placeholder="350.00" />
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <label className="text-text-secondary text-xs mb-1 block">Amount (AUD) *</label>
+          <input required type="number" step="0.01" min="0.01" className="input" value={form.amount} onChange={f('amount')} placeholder="350.00" />
+        </div>
+        <div>
+          <label className="text-text-secondary text-xs mb-1 block">Category</label>
+          <select className="input" value={form.category} onChange={f('category')}>
+            {cats.map(c => <option key={c} value={c}>{c}</option>)}
+          </select>
+        </div>
       </div>
       <div>
-        <label className="text-text-secondary text-xs mb-1 block">Source *</label>
-        <input required className="input" value={form.source} onChange={f('source')} placeholder="e.g. Harvest Market — Print #3" />
-      </div>
-      <div>
-        <label className="text-text-secondary text-xs mb-1 block">Note</label>
-        <input className="input" value={form.note} onChange={f('note')} placeholder="Optional" />
+        <label className="text-text-secondary text-xs mb-1 block">{form.type === 'income' ? 'Source' : 'Payee'} *</label>
+        <input required className="input" value={form.source} onChange={f('source')}
+          placeholder={form.type === 'income' ? 'e.g. Harvest Market' : 'e.g. Officeworks'} />
       </div>
       <div className="flex gap-3 justify-end pt-2">
         <button type="button" onClick={onClose} className="btn-ghost">Cancel</button>
@@ -288,17 +327,17 @@ function BusinessLedger({ onNavigate }) {
 
   const now = new Date()
   const mStart = startOfMonth(now)
-  const mEnd = endOfMonth(now)
+  const mEnd   = endOfMonth(now)
   const yStart = startOfYear(now)
 
   return (
     <section>
       <div className="flex items-center justify-between mb-3">
         <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', color: '#5C5650', letterSpacing: '0.18em', textTransform: 'uppercase' }}>
-          Business Income
+          Business Ledger
         </p>
         <div className="flex gap-2">
-          <button onClick={() => setShowAdd(true)} className="btn-ghost text-xs py-1"><Plus size={12}/> Income</button>
+          <button onClick={() => setShowAdd(true)} className="btn-ghost text-xs py-1"><Plus size={12}/> Entry</button>
           <button onClick={onNavigate} style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', color: '#5C5650', letterSpacing: '0.1em' }}>
             FINANCE →
           </button>
@@ -310,67 +349,89 @@ function BusinessLedger({ onNavigate }) {
           const color = BIZ_COLORS[bizId]
           const label = BIZ_LABELS[bizId]
           const bizEntries = entries.filter(e => e.businessId === bizId)
-          const monthTotal = bizEntries.filter(e => { const d = parseISO(e.date); return d >= mStart && d <= mEnd }).reduce((a, e) => a + e.amount, 0)
-          const ytdTotal = bizEntries.filter(e => parseISO(e.date) >= yStart).reduce((a, e) => a + e.amount, 0)
+
+          const monthEntries = bizEntries.filter(e => { const d = parseISO(e.date); return d >= mStart && d <= mEnd })
+          const monthIncome  = monthEntries.filter(e => (e.type || 'income') === 'income').reduce((a, e) => a + e.amount, 0)
+          const monthExpense = monthEntries.filter(e => e.type === 'expense').reduce((a, e) => a + e.amount, 0)
+          const monthNet     = monthIncome - monthExpense
+
+          const ytdIncome  = bizEntries.filter(e => parseISO(e.date) >= yStart && (e.type || 'income') === 'income').reduce((a, e) => a + e.amount, 0)
+          const ytdExpense = bizEntries.filter(e => parseISO(e.date) >= yStart && e.type === 'expense').reduce((a, e) => a + e.amount, 0)
+          const ytdNet     = ytdIncome - ytdExpense
+
           const monthGoal = goals[bizId]?.monthly || 0
-          const progress = monthGoal > 0 ? Math.min(monthTotal / monthGoal, 1) : 0
-          const recent = [...bizEntries].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 3)
+          const progress  = monthGoal > 0 ? Math.min(monthIncome / monthGoal, 1) : 0
+          const recent    = [...bizEntries].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 3)
 
           return (
             <div key={bizId} className="card" style={{ borderColor: color + '22' }}>
-              {/* Header row */}
-              <div className="flex items-start justify-between mb-3">
-                <div className="flex items-center gap-2">
-                  <div className="w-1 h-6 rounded-full" style={{ backgroundColor: color }} />
-                  <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', color: '#9A9088', letterSpacing: '0.08em' }}>{label}</p>
+              {/* Header */}
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-1 h-5 rounded-full shrink-0" style={{ backgroundColor: color }} />
+                <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', color: '#9A9088', letterSpacing: '0.08em', flex: 1 }}>{label}</p>
+              </div>
+
+              {/* P&L strip */}
+              <div className="grid grid-cols-3 gap-2 mb-3">
+                <div>
+                  <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.5rem', color: '#5C5650', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 3 }}>Income</p>
+                  <p style={{ fontFamily: '"Playfair Display", serif', fontWeight: 600, fontSize: '1rem', color: '#2D9E5A', lineHeight: 1 }}>{aud(monthIncome)}</p>
                 </div>
-                <div className="text-right">
-                  <p style={{ fontFamily: '"Playfair Display", serif', fontWeight: 600, fontSize: '1.3rem', color: '#EDE8E0', lineHeight: 1 }}>{aud(monthTotal)}</p>
-                  <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.55rem', color: '#5C5650', marginTop: 2 }}>this month</p>
+                <div>
+                  <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.5rem', color: '#5C5650', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 3 }}>Outgoings</p>
+                  <p style={{ fontFamily: '"Playfair Display", serif', fontWeight: 600, fontSize: '1rem', color: monthExpense > 0 ? '#DC2626' : '#5C5650', lineHeight: 1 }}>{aud(monthExpense)}</p>
+                </div>
+                <div>
+                  <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.5rem', color: '#5C5650', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 3 }}>Net</p>
+                  <p style={{ fontFamily: '"Playfair Display", serif', fontWeight: 600, fontSize: '1rem', color: monthNet >= 0 ? '#2D9E5A' : '#DC2626', lineHeight: 1 }}>
+                    {monthNet < 0 ? '−' : ''}{aud(monthNet)}
+                  </p>
                 </div>
               </div>
 
-              {/* Progress bar */}
+              {/* Goal progress bar */}
               {monthGoal > 0 && (
                 <div className="mb-3">
-                  <div className="h-1 rounded-full" style={{ background: 'rgba(255,255,255,0.06)' }}>
-                    <div className="h-1 rounded-full transition-all duration-500"
+                  <div className="h-0.5 rounded-full" style={{ background: 'rgba(255,255,255,0.06)' }}>
+                    <div className="h-0.5 rounded-full transition-all duration-500"
                       style={{ width: `${progress * 100}%`, backgroundColor: progress >= 1 ? '#2D9E5A' : color }} />
                   </div>
                   <div className="flex justify-between mt-1">
-                    <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.5rem', color: '#5C5650' }}>
+                    <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.48rem', color: '#5C5650' }}>
                       {Math.round(progress * 100)}% of {aud(monthGoal)} goal
                     </p>
-                    <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.5rem', color: '#5C5650' }}>
-                      YTD {aud(ytdTotal)}
+                    <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.48rem', color: '#5C5650' }}>
+                      YTD net: <span style={{ color: ytdNet >= 0 ? '#2D9E5A' : '#DC2626' }}>{ytdNet < 0 ? '−' : ''}{aud(ytdNet)}</span>
                     </p>
                   </div>
                 </div>
               )}
 
-              {monthGoal === 0 && (
-                <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.5rem', color: '#5C5650', marginBottom: 8 }}>
-                  YTD {aud(ytdTotal)} · set a goal in Finance
-                </p>
-              )}
-
-              {/* Recent entries */}
+              {/* Recent entries mini-ledger */}
               {recent.length > 0 && (
                 <div className="space-y-1.5 pt-2" style={{ borderTop: '0.5px solid rgba(255,255,255,0.06)' }}>
-                  {recent.map(e => (
-                    <div key={e.id} className="flex items-center gap-2">
-                      <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.55rem', color: '#5C5650', width: 44, shrink: 0 }}>
-                        {format(parseISO(e.date), 'dd MMM')}
-                      </p>
-                      <p className="flex-1 min-w-0 truncate" style={{ fontSize: '0.75rem', color: '#9A9088' }}>{e.source}</p>
-                      <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.7rem', color: '#EDE8E0', fontWeight: 600, flexShrink: 0 }}>{aud(e.amount)}</p>
-                    </div>
-                  ))}
+                  {recent.map(e => {
+                    const isExp = e.type === 'expense'
+                    return (
+                      <div key={e.id} className="flex items-center gap-2">
+                        <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.5rem', color: '#5C5650', width: 38, flexShrink: 0 }}>
+                          {format(parseISO(e.date), 'dd MMM')}
+                        </p>
+                        <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.48rem', color: isExp ? '#DC2626' : '#2D9E5A', width: 22, flexShrink: 0 }}>
+                          {isExp ? 'EXP' : 'INC'}
+                        </p>
+                        <p className="flex-1 min-w-0 truncate" style={{ fontSize: '0.7rem', color: '#9A9088' }}>{e.source}</p>
+                        <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.65rem', color: isExp ? '#DC2626' : '#EDE8E0', fontWeight: 600, flexShrink: 0 }}>
+                          {isExp ? '−' : '+'}{aud(e.amount)}
+                        </p>
+                      </div>
+                    )
+                  })}
                 </div>
               )}
 
               {recent.length === 0 && (
-                <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', color: '#3D3A36' }}>No entries yet this year.</p>
+                <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.55rem', color: '#3D3A36' }}>No entries yet.</p>
               )}
             </div>
           )
@@ -378,8 +439,8 @@ function BusinessLedger({ onNavigate }) {
       </div>
 
       {showAdd && (
-        <Modal title="Add Income" onClose={() => setShowAdd(false)}>
-          <QuickIncomeForm
+        <Modal title="Add Entry" onClose={() => setShowAdd(false)}>
+          <QuickEntryForm
             onSave={(data) => { addFinanceEntry(data); setShowAdd(false) }}
             onClose={() => setShowAdd(false)} />
         </Modal>
