@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, eachDayOfInterval, isSameMonth, isToday, parseISO, isSameDay, addMonths, subMonths, addDays } from 'date-fns'
-import { ChevronLeft, ChevronRight, Plus, Bell, Trash2, Search, MapPin, Loader, ExternalLink } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Plus, Bell, Trash2, Search, MapPin, ExternalLink } from 'lucide-react'
 import { useStore } from '../../hooks/useStore'
 import { CATEGORIES } from '../../lib/constants'
 import SectionShell from '../../components/SectionShell'
@@ -17,167 +17,99 @@ const QUICK_FILTERS = [
   { label: 'Food',       q: 'food market' },
 ]
 
-function EventSearchModal({ onClose, onAdd, apiKey }) {
-  const [query, setQuery] = useState('')
+function EventSearchModal({ onClose, onAdd }) {
   const [location, setLocation] = useState('')
-  const [results, setResults] = useState([])
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
-  const [added, setAdded] = useState(new Set())
+  const [activeFilter, setActiveFilter] = useState('')
+  const [quickAdd, setQuickAdd] = useState({ title: '', date: format(new Date(), 'yyyy-MM-dd'), time: '' })
 
-  async function doSearch(q, loc) {
-    if (!apiKey) return
-    setLoading(true)
-    setError('')
-    setResults([])
-    try {
-      // Eventbrite v3 — search free/community events by location + keyword
-      const params = new URLSearchParams({
-        'location.address': loc || location,
-        'location.within': '30km',
-        q: q || query || 'market',
-        expand: 'venue',
-        sort_by: 'date',
-        'start_date.range_start': new Date().toISOString(),
-      })
-      const res = await fetch(
-        `https://www.eventbriteapi.com/v3/events/search/?${params}`,
-        { headers: { Authorization: `Bearer ${apiKey}` } }
-      )
-      if (!res.ok) throw new Error(res.status)
-      const data = await res.json()
-      const events = data.events || []
-      setResults(events)
-      if (events.length === 0) setError('No events found — try a different keyword or suburb.')
-    } catch (e) {
-      setError(e.message === '401' ? 'Invalid API key — check Settings.' : 'Search failed. Try again.')
-    } finally {
-      setLoading(false)
-    }
+  function openGoogle(q) {
+    const keyword = q || activeFilter || 'local events'
+    const loc = location.trim() || 'near me'
+    const query = encodeURIComponent(`${keyword} ${loc}`)
+    window.open(`https://www.google.com/search?q=${query}&ibp=htl;events`, '_blank', 'noopener,noreferrer')
   }
 
-  function handleAdd(ev) {
-    const start = ev.start?.local || ''
-    const date = start ? start.slice(0, 10) : format(new Date(), 'yyyy-MM-dd')
-    const time = start ? start.slice(11, 16) : ''
-    const end = ev.end?.local || ''
-    const endTime = end ? end.slice(11, 16) : ''
-    const venueName = ev.venue ? [ev.venue.name, ev.venue.address?.city].filter(Boolean).join(', ') : ''
+  function handleQuickAdd(e) {
+    e.preventDefault()
+    if (!quickAdd.title) return
     onAdd({
-      title: ev.name?.text || 'Event',
-      date,
-      time,
-      endTime,
+      title: quickAdd.title,
+      date: quickAdd.date,
+      time: quickAdd.time,
+      endTime: '',
       category: 'personal',
-      note: [ev.description?.text?.slice(0, 300), venueName, ev.url].filter(Boolean).join('\n\n'),
+      note: '',
       reminder: true,
       reminderMinutes: 1440,
       recurring: 'none',
     })
-    setAdded(s => new Set([...s, ev.id]))
+    setQuickAdd({ title: '', date: format(new Date(), 'yyyy-MM-dd'), time: '' })
   }
 
   return (
-    <Modal title="Find Local Events" onClose={onClose} size="lg">
-      {!apiKey ? (
-        <div className="space-y-4 py-2">
-          <p style={{ color: '#9A9088', fontSize: '0.875rem' }}>
-            Uses the free <strong style={{ color: '#EDE8E0' }}>Eventbrite API</strong> — where markets, art shows, craft fairs and community events actually live.
-          </p>
-          <ol className="space-y-2.5 text-sm" style={{ color: '#9A9088' }}>
-            <li><span style={{ color: '#5C5650', fontFamily: '"DM Mono", monospace', fontSize: '0.65rem' }}>01</span>&ensp;Go to <a href="https://www.eventbrite.com/platform/api" target="_blank" rel="noopener noreferrer" className="underline" style={{ color: '#3B82F6' }}>eventbrite.com/platform/api</a></li>
-            <li><span style={{ color: '#5C5650', fontFamily: '"DM Mono", monospace', fontSize: '0.65rem' }}>02</span>&ensp;Sign in / create a free account</li>
-            <li><span style={{ color: '#5C5650', fontFamily: '"DM Mono", monospace', fontSize: '0.65rem' }}>03</span>&ensp;Go to Account Settings → Developer → API Keys → Create key</li>
-            <li><span style={{ color: '#5C5650', fontFamily: '"DM Mono", monospace', fontSize: '0.65rem' }}>04</span>&ensp;Copy the <strong style={{ color: '#EDE8E0' }}>Private Token</strong> and paste it in <strong style={{ color: '#EDE8E0' }}>Settings → Integrations</strong></li>
-          </ol>
-          <p style={{ color: '#5C5650', fontFamily: '"DM Mono", monospace', fontSize: '0.6rem' }}>Free · no credit card · finds markets, fairs, art shows, community events</p>
-        </div>
-      ) : (
-        <div className="space-y-3">
-          {/* Quick filters */}
-          <div className="flex gap-1.5 flex-wrap">
-            {QUICK_FILTERS.map(f => (
-              <button key={f.q}
-                onClick={() => { setQuery(f.q); doSearch(f.q, location) }}
-                className="px-3 py-1 rounded-full text-xs font-medium transition-colors"
-                style={{ background: query === f.q ? 'rgba(59,130,246,0.2)' : '#1F1C19', color: query === f.q ? '#3B82F6' : '#9A9088', fontFamily: '"DM Mono", monospace' }}>
-                {f.label}
-              </button>
-            ))}
-          </div>
+    <Modal title="Find Local Events" onClose={onClose}>
+      <div className="space-y-4">
+        <p style={{ color: '#9A9088', fontSize: '0.8rem', lineHeight: 1.5 }}>
+          Search Google Events — it aggregates Eventbrite, Facebook, Humanitix, council sites and more. No account needed.
+        </p>
 
-          {/* Search bar */}
-          <form onSubmit={e => { e.preventDefault(); doSearch(query, location) }} className="flex gap-2">
-            <div className="relative flex-1">
-              <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: '#5C5650' }} />
-              <input className="input pl-8" placeholder="Market, art fair, festival…" value={query}
-                onChange={e => setQuery(e.target.value)} />
-            </div>
-            <div className="relative w-36">
-              <MapPin size={13} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: '#5C5650' }} />
-              <input className="input pl-8" placeholder="Suburb / city" value={location}
-                onChange={e => setLocation(e.target.value)} />
-            </div>
-            <button type="submit" className="btn-primary shrink-0 px-3" disabled={loading}>
-              {loading ? <Loader size={14} className="animate-spin" /> : <Search size={14} />}
+        {/* Quick filter chips */}
+        <div className="flex gap-1.5 flex-wrap">
+          {QUICK_FILTERS.map(f => (
+            <button key={f.q}
+              onClick={() => setActiveFilter(activeFilter === f.q ? '' : f.q)}
+              className="px-3 py-1 rounded-full text-xs font-medium transition-colors"
+              style={{
+                background: activeFilter === f.q ? 'rgba(59,130,246,0.2)' : '#1F1C19',
+                color: activeFilter === f.q ? '#3B82F6' : '#9A9088',
+                fontFamily: '"DM Mono", monospace',
+              }}>
+              {f.label}
             </button>
-          </form>
-
-          {error && <p style={{ color: '#9A9088', fontSize: '0.8rem' }}>{error}</p>}
-
-          <div className="space-y-2 max-h-[420px] overflow-y-auto pr-1">
-            {results.map(ev => {
-              const start = ev.start?.local || ''
-              const date = start ? start.slice(0, 10) : null
-              const time = start ? start.slice(11, 16) : null
-              const isAdded = added.has(ev.id)
-              const isFree = ev.is_free
-              return (
-                <div key={ev.id} className="card flex items-start gap-3">
-                  {ev.logo?.url && (
-                    <img src={ev.logo.url} alt=""
-                      className="w-14 h-14 object-cover rounded-lg shrink-0" style={{ opacity: 0.85 }} />
-                  )}
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium" style={{ color: '#EDE8E0', lineHeight: 1.3 }}>
-                      {ev.name?.text}
-                    </p>
-                    <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', color: '#5C5650', marginTop: 3 }}>
-                      {date ? format(parseISO(date), 'd MMM yyyy') : ''}
-                      {time ? ` · ${time}` : ''}
-                      {isFree && <span style={{ color: '#2D9E5A', marginLeft: 8 }}>FREE</span>}
-                    </p>
-                    {ev.venue?.name && (
-                      <p className="text-xs truncate mt-1" style={{ color: '#5C5650' }}>
-                        <MapPin size={9} className="inline mr-1" />
-                        {ev.venue.name}{ev.venue.address?.city ? `, ${ev.venue.address.city}` : ''}
-                      </p>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-1.5 shrink-0 mt-0.5">
-                    {ev.url && (
-                      <a href={ev.url} target="_blank" rel="noopener noreferrer"
-                        style={{ color: '#5C5650' }} className="p-1 hover:text-text-secondary">
-                        <ExternalLink size={12} />
-                      </a>
-                    )}
-                    <button
-                      onClick={() => !isAdded && handleAdd(ev)}
-                      className="rounded-lg p-1.5 transition-all"
-                      style={{
-                        background: isAdded ? 'rgba(45,158,90,0.15)' : 'rgba(59,130,246,0.2)',
-                        color: isAdded ? '#2D9E5A' : '#3B82F6',
-                        cursor: isAdded ? 'default' : 'pointer',
-                      }}>
-                      {isAdded ? '✓' : <Plus size={14} />}
-                    </button>
-                  </div>
-                </div>
-              )
-            })}
-          </div>
+          ))}
         </div>
-      )}
+
+        {/* Location + search */}
+        <div className="flex gap-2">
+          <div className="relative flex-1">
+            <MapPin size={13} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: '#5C5650' }} />
+            <input className="input pl-8" placeholder="Suburb or city…" value={location}
+              onChange={e => setLocation(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && openGoogle()} />
+          </div>
+          <button onClick={() => openGoogle()} className="btn-primary shrink-0 flex items-center gap-1.5">
+            <ExternalLink size={14} /> Search
+          </button>
+        </div>
+
+        <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', color: '#5C5650' }}>
+          Opens Google Events in a new tab · find what you like · come back and add it below
+        </p>
+
+        {/* Divider */}
+        <div style={{ height: 1, background: 'rgba(255,255,255,0.08)' }} />
+
+        {/* Quick-add form */}
+        <div>
+          <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', color: '#5C5650', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 10 }}>
+            Add to calendar
+          </p>
+          <form onSubmit={handleQuickAdd} className="space-y-3">
+            <input required className="input" placeholder="Event name" value={quickAdd.title}
+              onChange={e => setQuickAdd(s => ({ ...s, title: e.target.value }))} />
+            <div className="grid grid-cols-2 gap-3">
+              <input type="date" className="input" value={quickAdd.date}
+                onChange={e => setQuickAdd(s => ({ ...s, date: e.target.value }))} />
+              <input type="time" className="input" value={quickAdd.time}
+                onChange={e => setQuickAdd(s => ({ ...s, time: e.target.value }))} />
+            </div>
+            <div className="flex gap-3 justify-end">
+              <button type="button" onClick={onClose} className="btn-ghost">Done</button>
+              <button type="submit" className="btn-primary"><Plus size={14} /> Add Event</button>
+            </div>
+          </form>
+        </div>
+      </div>
     </Modal>
   )
 }
@@ -266,7 +198,7 @@ function expandRecurring(events, viewStart, viewEnd) {
 }
 
 export default function Calendar() {
-  const { events, addEvent, updateEvent, deleteEvent, settings } = useStore()
+  const { events, addEvent, updateEvent, deleteEvent } = useStore()
   const [month, setMonth] = useState(new Date())
   const [selected, setSelected] = useState(null)
   const [showAdd, setShowAdd] = useState(false)
@@ -434,7 +366,6 @@ export default function Calendar() {
 
       {showSearch && (
         <EventSearchModal
-          apiKey={settings?.ticketmasterKey || ''}
           onClose={() => setShowSearch(false)}
           onAdd={(data) => { addEvent(data) }}
         />
