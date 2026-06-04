@@ -42,24 +42,91 @@ function useWorldData() {
   return { times, temps }
 }
 
+// Nixie tube digit — each character gets its own glowing tube
+function NixieTube({ char, colon }) {
+  if (colon) return (
+    <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: 5, padding: '0 1px', paddingBottom: 6 }}>
+      <div style={{ width: 4, height: 4, borderRadius: '50%', background: '#FF6B00', boxShadow: '0 0 6px #FF6B00, 0 0 12px #FF4400' }} />
+      <div style={{ width: 4, height: 4, borderRadius: '50%', background: '#FF6B00', boxShadow: '0 0 6px #FF6B00, 0 0 12px #FF4400' }} />
+    </div>
+  )
+  return (
+    <div style={{
+      position: 'relative',
+      width: 32, height: 46,
+      background: 'radial-gradient(ellipse at 50% 30%, #1a0f00 0%, #0d0800 100%)',
+      borderRadius: 5,
+      border: '1px solid #3a2800',
+      boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.8), 0 0 8px rgba(255,100,0,0.15)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      overflow: 'hidden',
+    }}>
+      {/* Glass sheen */}
+      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '45%', background: 'linear-gradient(180deg,rgba(255,255,255,0.04) 0%,transparent 100%)', borderRadius: '5px 5px 0 0', pointerEvents: 'none' }} />
+      {/* Glow halo behind digit */}
+      <div style={{ position: 'absolute', inset: 0, background: `radial-gradient(ellipse at 50% 60%, rgba(255,80,0,0.18) 0%, transparent 70%)`, pointerEvents: 'none' }} />
+      <span style={{
+        fontFamily: '"Share Tech Mono","DM Mono",monospace',
+        fontSize: '1.6rem',
+        fontWeight: 400,
+        color: '#FF8C35',
+        textShadow: '0 0 6px #FF6B00, 0 0 14px #FF4400, 0 0 28px #FF220066',
+        lineHeight: 1,
+        position: 'relative',
+        zIndex: 1,
+        letterSpacing: 0,
+      }}>{char}</span>
+    </div>
+  )
+}
+
+function NixieClock({ time, day, temp, city }) {
+  // time is "HH:MM" or ''
+  const chars = time ? time.split('') : ['–', '–', ':', '–', '–']
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
+      {/* City label */}
+      <p style={{ fontFamily: '"DM Mono",monospace', fontSize: '0.58rem', color: '#5C5650', letterSpacing: '0.2em', textTransform: 'uppercase' }}>{city}</p>
+
+      {/* Tube row */}
+      <div style={{
+        background: 'linear-gradient(180deg,#111008 0%,#0a0805 100%)',
+        borderRadius: 8,
+        padding: '8px 10px 10px',
+        border: '1px solid #2a1f00',
+        boxShadow: '0 4px 20px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,150,0,0.08)',
+        display: 'flex', alignItems: 'flex-end', gap: 3,
+      }}>
+        {chars.map((ch, i) => (
+          <NixieTube key={i} char={ch} colon={ch === ':'} />
+        ))}
+      </div>
+
+      {/* Day + temp */}
+      <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+        <span style={{ fontFamily: '"DM Mono",monospace', fontSize: '0.58rem', color: '#5C4A30', letterSpacing: '0.1em', textTransform: 'uppercase' }}>{day}</span>
+        {temp !== undefined && (
+          <span style={{ fontFamily: '"Share Tech Mono","DM Mono",monospace', fontSize: '0.7rem', color: '#CC5500', textShadow: '0 0 6px #FF440044' }}>{temp}°</span>
+        )}
+      </div>
+    </div>
+  )
+}
+
 function WorldClocks() {
   const { times, temps } = useWorldData()
   return (
-    <div className="card">
-      <p className="section-label mb-3">World Clocks</p>
-      <div className="grid grid-cols-3 gap-3">
+    <div className="card" style={{ background: '#0a0905', borderColor: '#1e1a0a' }}>
+      <p className="section-label mb-4">World Clocks</p>
+      <div style={{ display: 'flex', justifyContent: 'space-around', flexWrap: 'wrap', gap: 16 }}>
         {CITIES.map(c => {
-          const t = times[c.name] || ''
-          const [day, time] = t.split(', ')
+          const raw = times[c.name] || ''
+          // Intl returns e.g. "Mon, 14:35" — split on ", "
+          const parts = raw.split(', ')
+          const day = parts[0] || ''
+          const time = parts[1] || ''
           return (
-            <div key={c.name} className="text-center">
-              <p className="section-label mb-1">{c.name}</p>
-              <p style={{ fontFamily: '"Playfair Display", serif', fontStyle: 'italic', fontSize: '1.5rem', fontWeight: 600, color: 'var(--section-accent)', lineHeight: 1 }}>{time || '—'}</p>
-              <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', color: 'var(--section-muted)', marginTop: 2 }}>{day}</p>
-              <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.65rem', color: 'var(--section-label)', marginTop: 4 }}>
-                {temps[c.name] !== undefined ? `${temps[c.name]}°C` : '—'}
-              </p>
-            </div>
+            <NixieClock key={c.name} city={c.name} time={time} day={day} temp={temps[c.name]} />
           )
         })}
       </div>
