@@ -1,6 +1,7 @@
-import { NavLink } from 'react-router-dom'
+import { useState } from 'react'
+import { NavLink, useLocation } from 'react-router-dom'
 import { Outlet } from 'react-router-dom'
-import { LayoutDashboard, CalendarDays, CheckSquare, Briefcase, Users, BookOpen, PenLine, DollarSign, Settings } from 'lucide-react'
+import { LayoutDashboard, CalendarDays, CheckSquare, Briefcase, Users, BookOpen, PenLine, DollarSign, Settings, MoreHorizontal, X } from 'lucide-react'
 
 const NAV = [
   { to: '/dashboard',  label: 'Dashboard',  Icon: LayoutDashboard },
@@ -61,27 +62,72 @@ function SideNav() {
   )
 }
 
+const OVERFLOW = [
+  { to: '/wordcount', label: 'Word Count', Icon: PenLine },
+  { to: '/finance',   label: 'Finance',    Icon: DollarSign },
+  { to: '/settings',  label: 'Settings',   Icon: Settings },
+]
+
 function BottomNav() {
+  const [open, setOpen] = useState(false)
+  const location = useLocation()
   const primary = NAV.slice(0, 6)
+  const overflowActive = OVERFLOW.some(o => location.pathname.startsWith(o.to))
+
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 flex"
-      style={{
-        background: 'rgba(13,12,11,0.97)',
-        backdropFilter: 'blur(20px)',
-        borderTop: '0.5px solid rgba(255,255,255,0.08)',
-        paddingBottom: 'env(safe-area-inset-bottom)',
-      }}>
-      {primary.map(({ to, label, Icon }) => (
-        <NavLink key={to} to={to}
-          className={({ isActive }) =>
-            `flex-1 flex flex-col items-center py-2.5 gap-1 transition-colors duration-150 ${isActive ? '' : ''}`
-          }
-          style={({ isActive }) => ({ color: isActive ? '#C4522A' : '#5C5650' })}>
-          <Icon size={19} strokeWidth={1.5} />
-          <span style={{ fontSize: '9px', fontFamily: '"DM Mono", monospace', letterSpacing: '0.05em', textTransform: 'uppercase' }}>{label}</span>
-        </NavLink>
-      ))}
-    </nav>
+    <>
+      {/* Overflow drawer */}
+      {open && (
+        <div className="md:hidden fixed inset-0 z-50" onClick={() => setOpen(false)}>
+          <div className="absolute inset-0" style={{ background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)' }} />
+          <div
+            className="absolute left-0 right-0 bottom-0"
+            style={{
+              background: '#111009',
+              borderTop: '0.5px solid rgba(255,255,255,0.1)',
+              borderRadius: '16px 16px 0 0',
+              paddingBottom: 'calc(env(safe-area-inset-bottom) + 80px)',
+            }}
+            onClick={e => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'center', padding: '10px 0 4px' }}>
+              <div style={{ width: 36, height: 3, borderRadius: 2, background: 'rgba(255,255,255,0.15)' }} />
+            </div>
+            {OVERFLOW.map(({ to, label, Icon }) => (
+              <NavLink key={to} to={to} onClick={() => setOpen(false)}
+                className={({ isActive }) => `nav-item mx-3 my-1${isActive ? ' active' : ''}`}>
+                <Icon size={16} strokeWidth={1.5} />
+                <span>{label}</span>
+              </NavLink>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Bottom bar */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 flex"
+        style={{
+          background: 'rgba(13,12,11,0.97)',
+          backdropFilter: 'blur(20px)',
+          borderTop: '0.5px solid rgba(255,255,255,0.08)',
+          paddingBottom: 'env(safe-area-inset-bottom)',
+        }}>
+        {primary.map(({ to, label, Icon }) => (
+          <NavLink key={to} to={to}
+            className="flex-1 flex flex-col items-center py-2.5 gap-1 transition-colors duration-150"
+            style={({ isActive }) => ({ color: isActive ? '#C4522A' : '#5C5650' })}>
+            <Icon size={19} strokeWidth={1.5} />
+            <span style={{ fontSize: '9px', fontFamily: '"DM Mono", monospace', letterSpacing: '0.05em', textTransform: 'uppercase' }}>{label}</span>
+          </NavLink>
+        ))}
+        <button
+          onClick={() => setOpen(o => !o)}
+          className="flex-1 flex flex-col items-center py-2.5 gap-1 transition-colors duration-150"
+          style={{ color: overflowActive ? '#C4522A' : open ? '#EDE8E0' : '#5C5650', background: 'none', border: 'none', cursor: 'pointer' }}>
+          {open ? <X size={19} strokeWidth={1.5} /> : <MoreHorizontal size={19} strokeWidth={1.5} />}
+          <span style={{ fontSize: '9px', fontFamily: '"DM Mono", monospace', letterSpacing: '0.05em', textTransform: 'uppercase' }}>More</span>
+        </button>
+      </nav>
+    </>
   )
 }
 
