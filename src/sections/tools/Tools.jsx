@@ -758,23 +758,61 @@ function QRGenerator() {
 }
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
+const TOOLS = [
+  { id: 'clocks',     label: 'World Clocks',      icon: '🕰',  desc: 'Orlando · Tokyo · New York' },
+  { id: 'calc',       label: 'GRAV-7 Calculator', icon: '🖩',  desc: 'Calculator + GST' },
+  { id: 'pomodoro',   label: 'Pomodoro',           icon: '🍅',  desc: 'Focus & break timer' },
+  { id: 'units',      label: 'Unit Converter',     icon: '📐',  desc: 'Length · Weight · Temp' },
+  { id: 'qr',         label: 'QR Generator',       icon: '📱',  desc: 'URL to QR code' },
+]
+
 export default function Tools() {
+  const [active, setActive] = useState(null)
+
+  const tool = TOOLS.find(t => t.id === active)
+
   return (
     <SectionShell accent="#2A7A6F" bgImage={bgImg}>
       <div className="p-4 md:p-6 max-w-2xl">
-        <h1 className="section-title mb-6">Tools</h1>
-        <div className="space-y-4">
-          <WorldClocks />
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Calculator />
-            <div className="space-y-4">
-              <Pomodoro />
-              <QRGenerator />
+
+        {/* Hub */}
+        {!active && (
+          <>
+            <h1 className="section-title mb-6">Tools</h1>
+            <div className="space-y-2">
+              {TOOLS.map(t => (
+                <button key={t.id} onClick={() => setActive(t.id)}
+                  className="card w-full text-left flex items-center gap-4 hover:border-white/10 transition-all"
+                  style={{ padding: '14px 16px' }}>
+                  <span style={{ fontSize: '1.6rem', lineHeight: 1 }}>{t.icon}</span>
+                  <div className="flex-1">
+                    <p style={{ fontSize: '0.95rem', fontWeight: 500, color: '#EDE8E0' }}>{t.label}</p>
+                    <p style={{ fontFamily: '"DM Mono",monospace', fontSize: '0.6rem', color: 'var(--section-muted)', marginTop: 2, letterSpacing: '0.05em' }}>{t.desc}</p>
+                  </div>
+                  <span style={{ color: 'var(--section-muted)', fontSize: '1rem' }}>›</span>
+                </button>
+              ))}
             </div>
-          </div>
-          <UnitConverter />
-        </div>
+          </>
+        )}
+
+        {/* Active tool */}
+        {active && (
+          <>
+            <div className="flex items-center gap-3 mb-6">
+              <button onClick={() => setActive(null)} className="btn-ghost px-3 py-1.5 text-sm">‹ Back</button>
+              <h1 className="section-title" style={{ fontSize: '1.3rem' }}>{tool?.label}</h1>
+            </div>
+            {active === 'clocks'   && <WorldClocks />}
+            {active === 'calc'     && <Calculator />}
+            {active === 'pomodoro' && <Pomodoro />}
+            {active === 'units'    && <UnitConverter />}
+            {active === 'qr'       && <QRGenerator />}
+          </>
+        )}
+
       </div>
     </SectionShell>
   )
 }
+
