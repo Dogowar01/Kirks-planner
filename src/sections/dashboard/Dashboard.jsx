@@ -50,21 +50,25 @@ function useWeather() {
 
 function useRates() {
   const [rates, setRates] = useState(null)
+  const [error, setError] = useState(false)
 
   useEffect(() => {
     fetch('https://api.frankfurter.app/latest?from=AUD&to=USD,JPY')
-      .then(r => r.json())
-      .then(json => setRates(json.rates))
-      .catch(() => {})
+      .then(r => { if (!r.ok) throw new Error(); return r.json() })
+      .then(json => {
+        if (json.rates?.USD && json.rates?.JPY) setRates(json.rates)
+        else setError(true)
+      })
+      .catch(() => setError(true))
   }, [])
 
-  return rates
+  return { rates, error }
 }
 
 function LiveClock() {
   const [now, setNow] = useState(new Date())
   const weather = useWeather()
-  const rates = useRates()
+  const { rates, error: ratesError } = useRates()
 
   useEffect(() => {
     const id = setInterval(() => setNow(new Date()), 30000)
@@ -139,23 +143,23 @@ function LiveClock() {
           )}
 
           {/* Divider */}
-          {weather && rates && (
+          {weather && (rates || ratesError) && (
             <div style={{ width: 1, height: 24, background: 'rgba(255,255,255,0.1)', alignSelf: 'center' }} />
           )}
 
           {/* Exchange rates */}
-          {rates && (
+          {(rates || ratesError) && (
             <>
               <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
                 <span style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.55rem', color: '#5C5650', letterSpacing: '0.1em', textTransform: 'uppercase' }}>USD</span>
                 <span style={{ fontFamily: '"Playfair Display", serif', fontWeight: 600, fontSize: '1.1rem', color: '#9A9088' }}>
-                  {rates.USD?.toFixed(4)}
+                  {rates ? rates.USD?.toFixed(4) : '—'}
                 </span>
               </div>
               <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
                 <span style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.55rem', color: '#5C5650', letterSpacing: '0.1em', textTransform: 'uppercase' }}>JPY</span>
                 <span style={{ fontFamily: '"Playfair Display", serif', fontWeight: 600, fontSize: '1.1rem', color: '#9A9088' }}>
-                  {rates.JPY?.toFixed(2)}
+                  {rates ? rates.JPY?.toFixed(2) : '—'}
                 </span>
               </div>
               <span style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.5rem', color: '#3D3A36', alignSelf: 'center' }}>1 AUD</span>
