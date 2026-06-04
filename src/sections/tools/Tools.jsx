@@ -5,9 +5,9 @@ import bgImg from '../../assets/art-architectural.jpg'
 
 // ─── World Clocks ────────────────────────────────────────────────────────────
 const CITIES = [
-  { name: 'Orlando',  tz: 'America/New_York',  lat: 28.54,  lon: -81.38 },
-  { name: 'Tokyo',    tz: 'Asia/Tokyo',         lat: 35.68,  lon: 139.69 },
-  { name: 'New York', tz: 'America/New_York',   lat: 40.71,  lon: -74.01 },
+  { name: 'Orlando',     tz: 'America/New_York',    lat: 28.54,  lon: -81.38 },
+  { name: 'Tokyo',       tz: 'Asia/Tokyo',           lat: 35.68,  lon: 139.69 },
+  { name: 'Los Angeles', tz: 'America/Los_Angeles',  lat: 34.05,  lon: -118.24 },
 ]
 
 function useWorldData() {
