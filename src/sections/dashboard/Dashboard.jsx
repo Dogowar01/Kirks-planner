@@ -50,25 +50,31 @@ function useWeather() {
 
 function useRates() {
   const [rates, setRates] = useState(null)
+  const [prev, setPrev] = useState(null)
   const [error, setError] = useState(false)
 
   useEffect(() => {
-    fetch('https://api.frankfurter.dev/v1/latest?from=AUD&to=USD,JPY', { cache: 'no-store' })
-      .then(r => { if (!r.ok) throw new Error(); return r.json() })
-      .then(json => {
-        if (json.rates?.USD && json.rates?.JPY) setRates(json.rates)
+    const opts = { cache: 'no-store' }
+    const base = 'https://api.frankfurter.dev/v1'
+    const yesterday = new Date(Date.now() - 86400000 * 2).toISOString().slice(0, 10)
+    Promise.all([
+      fetch(`${base}/latest?from=AUD&to=USD,JPY`, opts).then(r => r.json()),
+      fetch(`${base}/${yesterday}?from=AUD&to=USD,JPY`, opts).then(r => r.json()),
+    ])
+      .then(([today, prior]) => {
+        if (today.rates?.USD) { setRates(today.rates); setPrev(prior.rates) }
         else setError(true)
       })
       .catch(() => setError(true))
   }, [])
 
-  return { rates, error }
+  return { rates, prev, error }
 }
 
 function LiveClock() {
   const [now, setNow] = useState(new Date())
   const weather = useWeather()
-  const { rates, error: ratesError } = useRates()
+  const { rates, prev, error: ratesError } = useRates()
 
   useEffect(() => {
     const id = setInterval(() => setNow(new Date()), 30000)
@@ -150,18 +156,24 @@ function LiveClock() {
           {/* Exchange rates */}
           {(rates || ratesError) && (
             <>
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
-                <span style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.55rem', color: '#5C5650', letterSpacing: '0.1em', textTransform: 'uppercase' }}>USD</span>
-                <span style={{ fontFamily: '"Playfair Display", serif', fontWeight: 600, fontSize: '1.1rem', color: '#9A9088' }}>
-                  {rates ? rates.USD?.toFixed(4) : '—'}
-                </span>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
-                <span style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.55rem', color: '#5C5650', letterSpacing: '0.1em', textTransform: 'uppercase' }}>JPY</span>
-                <span style={{ fontFamily: '"Playfair Display", serif', fontWeight: 600, fontSize: '1.1rem', color: '#9A9088' }}>
-                  {rates ? rates.JPY?.toFixed(2) : '—'}
-                </span>
-              </div>
+              {[['USD', 4], ['JPY', 2]].map(([ccy, dp]) => {
+                const val = rates?.[ccy]
+                const pval = prev?.[ccy]
+                const up = val && pval ? val > pval : null
+                return (
+                  <div key={ccy} style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
+                    <span style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.55rem', color: '#5C5650', letterSpacing: '0.1em', textTransform: 'uppercase' }}>{ccy}</span>
+                    <span style={{ fontFamily: '"Playfair Display", serif', fontWeight: 600, fontSize: '1.1rem', color: '#9A9088' }}>
+                      {val ? val.toFixed(dp) : '—'}
+                    </span>
+                    {up !== null && (
+                      <span style={{ fontSize: '0.65rem', lineHeight: 1, alignSelf: 'center', color: up ? '#4ade80' : '#f87171' }}>
+                        {up ? '▲' : '▼'}
+                      </span>
+                    )}
+                  </div>
+                )
+              })}
               <span style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.5rem', color: '#3D3A36', alignSelf: 'center' }}>1 AUD</span>
             </>
           )}
