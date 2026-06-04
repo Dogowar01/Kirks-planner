@@ -5,6 +5,7 @@ import { Bell, Plus, Calendar, CheckSquare, Briefcase } from 'lucide-react'
 import { useStore } from '../../hooks/useStore'
 import { BUSINESSES } from '../../lib/constants'
 import CategoryBadge from '../../components/CategoryBadge'
+import heroBg from '../../assets/hero.png'
 
 const CAT_COLORS = {
   signal9:  '#C4522A',
@@ -13,8 +14,57 @@ const CAT_COLORS = {
   personal: '#7F77DD',
 }
 
+const WMO_CODES = {
+  0: 'Clear sky', 1: 'Mainly clear', 2: 'Partly cloudy', 3: 'Overcast',
+  45: 'Foggy', 48: 'Icy fog',
+  51: 'Light drizzle', 53: 'Drizzle', 55: 'Heavy drizzle',
+  61: 'Light rain', 63: 'Rain', 65: 'Heavy rain',
+  71: 'Light snow', 73: 'Snow', 75: 'Heavy snow',
+  80: 'Showers', 81: 'Heavy showers', 82: 'Violent showers',
+  95: 'Thunderstorm', 96: 'Hail storm', 99: 'Heavy hail storm',
+}
+
+function useWeather() {
+  const [data, setData] = useState(null)
+
+  useEffect(() => {
+    if (!navigator.geolocation) return
+    navigator.geolocation.getCurrentPosition(async ({ coords }) => {
+      try {
+        const res = await fetch(
+          `https://api.open-meteo.com/v1/forecast?latitude=${coords.latitude}&longitude=${coords.longitude}&current=temperature_2m,weathercode,windspeed_10m&timezone=auto`
+        )
+        const json = await res.json()
+        setData({
+          temp: Math.round(json.current.temperature_2m),
+          code: json.current.weathercode,
+          wind: Math.round(json.current.windspeed_10m),
+        })
+      } catch {}
+    }, () => {})
+  }, [])
+
+  return data
+}
+
+function useRates() {
+  const [rates, setRates] = useState(null)
+
+  useEffect(() => {
+    fetch('https://api.frankfurter.app/latest?from=AUD&to=USD,JPY')
+      .then(r => r.json())
+      .then(json => setRates(json.rates))
+      .catch(() => {})
+  }, [])
+
+  return rates
+}
+
 function LiveClock() {
   const [now, setNow] = useState(new Date())
+  const weather = useWeather()
+  const rates = useRates()
+
   useEffect(() => {
     const id = setInterval(() => setNow(new Date()), 30000)
     return () => clearInterval(id)
@@ -24,37 +74,99 @@ function LiveClock() {
   const greeting = hour < 5 ? 'Still awake,' : hour < 12 ? 'Good morning,' : hour < 17 ? 'Good afternoon,' : 'Good evening,'
 
   return (
-    <div className="relative px-6 pt-10 pb-8 overflow-hidden"
+    <div className="relative overflow-hidden"
       style={{
-        background: 'linear-gradient(135deg, #111009 0%, #0D0C0B 50%, #100D14 100%)',
         borderBottom: '0.5px solid rgba(255,255,255,0.06)',
+        minHeight: 200,
       }}>
 
-      {/* Atmospheric orb — pulled from the triptych painting */}
+      {/* Background image */}
+      <div style={{
+        position: 'absolute', inset: 0,
+        backgroundImage: `url(${heroBg})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center 30%',
+        opacity: 0.22,
+      }} />
+
+      {/* Gradient overlay to keep text readable */}
+      <div style={{
+        position: 'absolute', inset: 0,
+        background: 'linear-gradient(135deg, rgba(13,12,11,0.85) 0%, rgba(13,12,11,0.55) 60%, rgba(16,13,20,0.75) 100%)',
+      }} />
+
+      {/* Warm orb */}
       <div style={{
         position: 'absolute', top: -60, right: -40,
-        width: 240, height: 240,
+        width: 260, height: 260,
         borderRadius: '50%',
-        background: 'radial-gradient(circle, rgba(196,82,42,0.12) 0%, transparent 70%)',
+        background: 'radial-gradient(circle, rgba(196,82,42,0.14) 0%, transparent 70%)',
         pointerEvents: 'none',
       }} />
       <div style={{
         position: 'absolute', bottom: -80, left: 60,
-        width: 180, height: 180,
+        width: 200, height: 200,
         borderRadius: '50%',
-        background: 'radial-gradient(circle, rgba(124,58,237,0.08) 0%, transparent 70%)',
+        background: 'radial-gradient(circle, rgba(124,58,237,0.09) 0%, transparent 70%)',
         pointerEvents: 'none',
       }} />
 
-      <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.65rem', color: '#5C5650', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: 8 }}>
-        {format(now, "EEEE · d MMMM yyyy")}
-      </p>
-      <h1 style={{ fontFamily: '"Playfair Display", serif', fontStyle: 'italic', fontWeight: 600, fontSize: 'clamp(1.6rem, 5vw, 2.4rem)', color: '#EDE8E0', lineHeight: 1.15, letterSpacing: '-0.02em' }}>
-        {greeting} Kirk.
-      </h1>
-      <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.75rem', color: '#5C5650', marginTop: 8 }}>
-        {format(now, "HH:mm")}
-      </p>
+      {/* Content */}
+      <div className="relative px-6 pt-10 pb-6">
+        <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.65rem', color: '#5C5650', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: 8 }}>
+          {format(now, "EEEE · d MMMM yyyy")}
+        </p>
+        <h1 style={{ fontFamily: '"Playfair Display", serif', fontStyle: 'italic', fontWeight: 600, fontSize: 'clamp(1.6rem, 5vw, 2.4rem)', color: '#EDE8E0', lineHeight: 1.15, letterSpacing: '-0.02em' }}>
+          {greeting} Kirk.
+        </h1>
+        <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.75rem', color: '#5C5650', marginTop: 6, marginBottom: 16 }}>
+          {format(now, "HH:mm")}
+        </p>
+
+        {/* Live data strip */}
+        <div className="flex gap-4 flex-wrap" style={{ marginTop: 4 }}>
+          {/* Weather */}
+          {weather && (
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+              <span style={{ fontFamily: '"Playfair Display", serif', fontWeight: 600, fontSize: '1.4rem', color: '#EDE8E0' }}>
+                {weather.temp}°
+              </span>
+              <span style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', color: '#5C5650', letterSpacing: '0.08em' }}>
+                {WMO_CODES[weather.code] || 'Unknown'} · {weather.wind} km/h
+              </span>
+            </div>
+          )}
+
+          {/* Divider */}
+          {weather && rates && (
+            <div style={{ width: 1, height: 24, background: 'rgba(255,255,255,0.1)', alignSelf: 'center' }} />
+          )}
+
+          {/* Exchange rates */}
+          {rates && (
+            <>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
+                <span style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.55rem', color: '#5C5650', letterSpacing: '0.1em', textTransform: 'uppercase' }}>USD</span>
+                <span style={{ fontFamily: '"Playfair Display", serif', fontWeight: 600, fontSize: '1.1rem', color: '#9A9088' }}>
+                  {rates.USD?.toFixed(4)}
+                </span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
+                <span style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.55rem', color: '#5C5650', letterSpacing: '0.1em', textTransform: 'uppercase' }}>JPY</span>
+                <span style={{ fontFamily: '"Playfair Display", serif', fontWeight: 600, fontSize: '1.1rem', color: '#9A9088' }}>
+                  {rates.JPY?.toFixed(2)}
+                </span>
+              </div>
+              <span style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.5rem', color: '#3D3A36', alignSelf: 'center' }}>1 AUD</span>
+            </>
+          )}
+
+          {/* Loading states */}
+          {!weather && (
+            <span style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', color: '#3D3A36' }}>loading weather…</span>
+          )}
+        </div>
+      </div>
     </div>
   )
 }
@@ -127,7 +239,7 @@ function SectionLabel({ children }) {
 
 export default function Dashboard() {
   const navigate = useNavigate()
-  const { tasks, events, projects, notes, settings, addTask } = useStore()
+  const { tasks, events, projects, notes, addTask } = useStore()
 
   const today = startOfDay(new Date())
   const in7 = addDays(today, 7)
