@@ -72,10 +72,40 @@ function useRates() {
   return { rates, prev, error }
 }
 
+const PLUM       = '#C084FC'
+const PLUM_GLOW  = 'rgba(192,132,252,0.6)'
+const PLUM_DIM   = 'rgba(192,132,252,0.45)'
+
+function usePinnedCountdown(settings) {
+  const [tick, setTick] = useState(Date.now())
+  useEffect(() => {
+    const id = setInterval(() => setTick(Date.now()), 1000)
+    return () => clearInterval(id)
+  }, [])
+
+  const pinnedId = settings?.pinnedCountdownId
+  if (!pinnedId) return null
+
+  let events = []
+  try { events = JSON.parse(localStorage.getItem('s9_countdowns') || '[]') } catch {}
+  const ev = events.find(e => e.id === pinnedId)
+  if (!ev) return null
+
+  const ms = new Date(ev.date).getTime() - tick
+  if (ms <= 0) return { label: ev.label, date: ev.date, arrived: true }
+  const d = Math.floor(ms / 86400000)
+  const h = Math.floor((ms % 86400000) / 3600000)
+  const m = Math.floor((ms % 3600000) / 60000)
+  const s = Math.floor((ms % 60000) / 1000)
+  return { label: ev.label, date: ev.date, d, h, m, s, arrived: false }
+}
+
 function LiveClock() {
   const [now, setNow] = useState(new Date())
   const weather = useWeather()
   const { rates, prev, error: ratesError } = useRates()
+  const { settings } = useStore()
+  const pinned = usePinnedCountdown(settings)
 
   useEffect(() => {
     const id = setInterval(() => setNow(new Date()), 30000)
@@ -187,6 +217,54 @@ function LiveClock() {
             <span style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', color: '#7A7470' }}>loading rates…</span>
           )}
         </div>
+
+        {/* Pinned countdown */}
+        {pinned && (
+          <div style={{
+            marginTop: 16,
+            padding: '12px 14px',
+            borderRadius: 10,
+            background: 'rgba(192,132,252,0.06)',
+            border: `0.5px solid ${PLUM}30`,
+            boxShadow: `0 0 20px ${PLUM}10`,
+          }}>
+            {/* Label row */}
+            <div className="flex items-center gap-2 mb-2">
+              <span style={{ width: 5, height: 5, borderRadius: '50%', background: PLUM, boxShadow: `0 0 6px ${PLUM_GLOW}`, flexShrink: 0, display: 'block' }} />
+              <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', color: PLUM_DIM, letterSpacing: '0.18em', textTransform: 'uppercase', opacity: 0.9 }}>
+                {pinned.label}
+              </p>
+            </div>
+
+            {pinned.arrived ? (
+              <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.75rem', color: PLUM }}>🎉 This day has arrived!</p>
+            ) : (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, auto)', gap: 8, justifyContent: 'start' }}>
+                {[['d', pinned.d, 'Days'], ['h', pinned.h, 'Hrs'], ['m', pinned.m, 'Min'], ['s', pinned.s, 'Sec']].map(([k, val, lbl]) => (
+                  <div key={k} style={{ textAlign: 'center', minWidth: 42 }}>
+                    <p style={{
+                      fontFamily: '"Share Tech Mono", "DM Mono", monospace',
+                      fontSize: '1.6rem',
+                      lineHeight: 1,
+                      color: PLUM,
+                      textShadow: `0 0 16px ${PLUM_GLOW}, 0 0 30px ${PLUM}50`,
+                      letterSpacing: '-0.02em',
+                    }}>
+                      {String(val).padStart(2, '0')}
+                    </p>
+                    <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.48rem', color: PLUM_DIM, letterSpacing: '0.14em', textTransform: 'uppercase', marginTop: 2 }}>
+                      {lbl}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.5rem', color: '#5C5650', marginTop: 8, letterSpacing: '0.06em' }}>
+              {new Date(pinned.date).toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' })}
+            </p>
+          </div>
+        )}
       </div>
     </div>
   )

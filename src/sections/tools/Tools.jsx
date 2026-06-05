@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { QRCodeSVG } from 'qrcode.react'
 import SectionShell from '../../components/SectionShell'
 import bgImg from '../../assets/art-architectural.jpg'
+import { useStore } from '../../hooks/useStore'
 
 // ─── World Clocks ────────────────────────────────────────────────────────────
 const CITIES = [
@@ -873,6 +874,9 @@ function BillSplitter() {
 
 // ─── Countdown Timer ──────────────────────────────────────────────────────────
 function CountdownTimer() {
+  const { settings, updateSettings } = useStore()
+  const pinnedId = settings?.pinnedCountdownId || null
+
   const [events, setEvents] = useState(() => {
     try { return JSON.parse(localStorage.getItem('s9_countdowns')||'[]') } catch { return [] }
   })
@@ -888,7 +892,13 @@ function CountdownTimer() {
     save([...events,{id:Date.now(),label,date}])
     setLabel(''); setDate('')
   }
-  const remove = (id) => save(events.filter(e=>e.id!==id))
+  const remove = (id) => {
+    if (pinnedId === id) updateSettings({ pinnedCountdownId: null })
+    save(events.filter(e=>e.id!==id))
+  }
+  const togglePin = (id) => {
+    updateSettings({ pinnedCountdownId: pinnedId === id ? null : id })
+  }
 
   const diff = (dateStr) => {
     const ms = new Date(dateStr).getTime() - now
@@ -896,6 +906,8 @@ function CountdownTimer() {
     const d=Math.floor(ms/86400000), h=Math.floor((ms%86400000)/3600000), m=Math.floor((ms%3600000)/60000), s=Math.floor((ms%60000)/1000)
     return {d,h,m,s}
   }
+
+  const PLUM = '#C084FC'
 
   return (
     <div className="card space-y-4">
@@ -911,11 +923,30 @@ function CountdownTimer() {
       <div className="space-y-3">
         {events.map(ev=>{
           const t=diff(ev.date)
+          const isPinned = pinnedId === ev.id
           return (
-            <div key={ev.id} style={{background:'rgba(0,0,0,0.25)',borderRadius:10,padding:'12px 14px'}}>
+            <div key={ev.id} style={{background:'rgba(0,0,0,0.25)',borderRadius:10,padding:'12px 14px',
+              border: isPinned ? `0.5px solid ${PLUM}50` : '0.5px solid transparent',
+              boxShadow: isPinned ? `0 0 12px ${PLUM}20` : 'none',
+            }}>
               <div className="flex justify-between items-start mb-2">
                 <p style={{fontSize:'0.85rem',color:'#EDE8E0',fontWeight:500}}>{ev.label}</p>
-                <button onClick={()=>remove(ev.id)} style={{color:'#A09890',background:'none',border:'none',cursor:'pointer',fontSize:'0.8rem'}}>✕</button>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => togglePin(ev.id)}
+                    title={isPinned ? 'Remove from dashboard' : 'Pin to dashboard'}
+                    style={{
+                      fontFamily:'"DM Mono",monospace', fontSize:'0.5rem', letterSpacing:'0.1em',
+                      color: isPinned ? PLUM : '#5C5650',
+                      background: isPinned ? `${PLUM}15` : 'transparent',
+                      border: `0.5px solid ${isPinned ? PLUM+'50' : 'rgba(255,255,255,0.08)'}`,
+                      borderRadius: 999, padding:'2px 7px', cursor:'pointer',
+                      textTransform:'uppercase', transition:'all 0.15s',
+                    }}>
+                    {isPinned ? '📌 Pinned' : '📌 Pin'}
+                  </button>
+                  <button onClick={()=>remove(ev.id)} style={{color:'#A09890',background:'none',border:'none',cursor:'pointer',fontSize:'0.8rem'}}>✕</button>
+                </div>
               </div>
               {t ? (
                 <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:6,textAlign:'center'}}>
