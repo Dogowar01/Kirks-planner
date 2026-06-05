@@ -14,13 +14,9 @@ import { Users } from 'lucide-react'
 
 async function runOCR(imageFile) {
   // Dynamically import Tesseract so it only loads when actually used
+  // v7 API: createWorker(langs) — paths are resolved automatically from CDN
   const { createWorker } = await import('tesseract.js')
-  const worker = await createWorker('eng', 1, {
-    workerPath: 'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/worker.min.js',
-    langPath: 'https://tessdata.projectnaptha.com/4.0.0',
-    corePath: 'https://cdn.jsdelivr.net/npm/tesseract.js-core@5/tesseract-core-simd.wasm.js',
-    logger: () => {},
-  })
+  const worker = await createWorker('eng')
   const { data: { text } } = await worker.recognize(imageFile)
   await worker.terminate()
   return text
@@ -82,22 +78,25 @@ function CardScanner({ onParsed, onClose }) {
   const [status, setStatus] = useState('idle') // idle | scanning | done | error
   const [preview, setPreview] = useState(null)
   const [scanText, setScanText] = useState('')
+  const [errMsg, setErrMsg] = useState('')
   const fileRef = useRef(null)
 
   async function handleFile(file) {
     if (!file) return
     setPreview(URL.createObjectURL(file))
     setStatus('scanning')
-    setScanText('Reading card…')
+    setScanText('Loading OCR engine…')
 
     try {
+      setScanText('Loading OCR engine…')
       const text = await runOCR(file)
       setScanText('Parsing details…')
       const parsed = parseCard(text)
       setStatus('done')
       onParsed(parsed)
     } catch (err) {
-      console.error(err)
+      console.error('OCR error:', err)
+      setErrMsg(err?.message || 'Unknown error')
       setStatus('error')
     }
   }
@@ -178,7 +177,12 @@ function CardScanner({ onParsed, onClose }) {
           <p style={{ color: '#f87171', fontSize: '0.8rem', textAlign: 'center' }}>
             Couldn't read the card — try a clearer photo with good lighting.
           </p>
-          <button onClick={() => { setStatus('idle'); setPreview(null) }} className="btn-ghost w-full">
+          {errMsg && (
+            <p style={{ color: '#7A7470', fontSize: '0.65rem', fontFamily: '"DM Mono", monospace', textAlign: 'center', wordBreak: 'break-all' }}>
+              {errMsg}
+            </p>
+          )}
+          <button onClick={() => { setStatus('idle'); setPreview(null); setErrMsg('') }} className="btn-ghost w-full">
             Try Again
           </button>
         </div>
