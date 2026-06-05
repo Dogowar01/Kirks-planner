@@ -9,10 +9,18 @@ import Notes from './sections/notes/Notes'
 import Finance from './sections/finance/Finance'
 import Settings from './sections/settings/Settings'
 import Tools from './sections/tools/Tools'
+import { useNotifications } from './hooks/useNotifications'
+
+// Mounted inside StoreProvider — starts the notification polling loop
+function NotificationEngine() {
+  useNotifications()
+  return null
+}
 
 export default function App() {
   return (
     <HashRouter>
+      <NotificationEngine />
       <Routes>
         <Route path="/" element={<Layout />}>
           <Route index element={<Navigate to="/dashboard" replace />} />

@@ -1,15 +1,32 @@
 import { useState, useRef } from 'react'
 import { useStore } from '../../hooks/useStore'
+import { useNotifications } from '../../hooks/useNotifications'
 import ConfirmDialog from '../../components/ConfirmDialog'
 import SectionShell from '../../components/SectionShell'
 import bgImg from '../../assets/art-ethereal.jpg'
 
 export default function Settings() {
   const { settings, updateSettings, exportData, importData, clearAllData } = useStore()
+  const { permission, enabled, requestPermission, disable } = useNotifications()
+  const [notifMsg, setNotifMsg] = useState('')
   const [showClear, setShowClear] = useState(false)
   const [importMsg, setImportMsg] = useState('')
   const fileRef = useRef()
   const s = settings || {}
+
+  async function handleNotifToggle() {
+    if (enabled) {
+      disable()
+      setNotifMsg('Notifications disabled.')
+    } else {
+      const result = await requestPermission()
+      if (result === 'granted') setNotifMsg('Notifications enabled!')
+      else if (result === 'denied') setNotifMsg('Permission denied — please allow notifications in your browser settings.')
+      else if (result === 'unsupported') setNotifMsg('Notifications not supported on this device.')
+      else setNotifMsg('Permission not granted.')
+    }
+    setTimeout(() => setNotifMsg(''), 4000)
+  }
 
   function handleImport(e) {
     const file = e.target.files[0]
@@ -46,6 +63,25 @@ export default function Settings() {
               value={s.dailyWordGoal || 1000}
               onChange={e => updateSettings({ dailyWordGoal: Number(e.target.value) })} />
           </div>
+        </section>
+
+        <section className="card space-y-4">
+          <h2 className="section-label">Notifications</h2>
+          <p style={{ fontSize: '0.8rem', color: '#B8B0A8' }}>
+            Get reminded for tasks and events that have a reminder set. Notifications are local — no account needed.
+          </p>
+          <button
+            onClick={handleNotifToggle}
+            className={enabled ? 'btn-danger w-full justify-center' : 'btn-primary w-full justify-center'}
+          >
+            {enabled ? '🔕 Disable Notifications' : '🔔 Enable Notifications'}
+          </button>
+          {permission === 'denied' && (
+            <p style={{ fontSize: '0.75rem', color: '#f87171' }}>
+              Notifications are blocked. Open your browser / OS settings and allow notifications for this site, then try again.
+            </p>
+          )}
+          {notifMsg && <p style={{ fontSize: '0.8rem', color: '#7C3AED', textAlign: 'center' }}>{notifMsg}</p>}
         </section>
 
         <section className="card space-y-4">

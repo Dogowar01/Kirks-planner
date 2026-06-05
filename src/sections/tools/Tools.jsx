@@ -134,286 +134,13 @@ function WorldClocks() {
   )
 }
 
-// ─── GRAV-7 Calculator ───────────────────────────────────────────────────────
-const CYAN = '#00D4FF'
-const CYAN_DIM = '#007A94'
-const BODY = '#1a1c1f'
-const BTN_BG = '#222528'
-const BTN_BORDER = '#2e3135'
+// ─── CALC 7.09 Calculator ────────────────────────────────────────────────────
+const CYAN = '#00BFFF'
+const CYAN_DIM = '#0077A8'
+const CYAN_GLOW = 'rgba(0,191,255,0.55)'
+const BTN_BG = '#1a1d22'
+const BTN_DARK = '#13151a'
 
-function Grav7() {
-  const [display, setDisplay] = useState('0')
-  const [expr, setExpr] = useState('')
-  const [subExpr, setSubExpr] = useState('')   // shown above main display
-  const [memory, setMemory] = useState(0)
-  const [m1, setM1] = useState(null)
-  const [m2, setM2] = useState(null)
-  const [m3, setM3] = useState(null)
-  const [shift, setShift] = useState(false)
-  const [gstBreak, setGstBreak] = useState(null)
-  const [hasResult, setHasResult] = useState(false)
-
-  const numVal = () => parseFloat(display) || 0
-
-  const evaluate = (e, d) => {
-    try {
-      // eslint-disable-next-line no-new-func
-      const r = Function('"use strict";return(' + e + d + ')')()
-      return isFinite(r) ? r : null
-    } catch { return null }
-  }
-
-  const press = (key) => {
-    switch (key) {
-      case 'AC':
-        setDisplay('0'); setExpr(''); setSubExpr(''); setGstBreak(null); setHasResult(false)
-        break
-      case 'DEL':
-        if (hasResult) { setDisplay('0'); setHasResult(false) }
-        else setDisplay(d => d.length > 1 ? d.slice(0, -1) : '0')
-        break
-      case '+': case '-': case '×': case '÷': {
-        const op = key.replace('×','*').replace('÷','/')
-        const cur = hasResult ? display : display
-        setSubExpr(cur + ' ' + key)
-        setExpr(cur + op)
-        setDisplay('0')
-        setHasResult(false)
-        setGstBreak(null)
-        break
-      }
-      case '%':
-        if (expr) {
-          const r = evaluate(expr, display + '/100*' + display.replace(/.*[+\-*/]/, ''))
-          // simpler: x% of preceding
-          const base = parseFloat(expr.replace(/[+\-*/][^+\-*/]*$/, '')) || 100
-          const pct = numVal() / 100 * base
-          setDisplay(String(Math.round(pct * 1e10) / 1e10))
-        } else {
-          setDisplay(d => String(parseFloat(d) / 100))
-        }
-        setHasResult(true)
-        break
-      case '=': {
-        if (!expr) break
-        const r = evaluate(expr, display)
-        if (r === null) { setDisplay('Error'); setExpr(''); setSubExpr(''); break }
-        const rounded = Math.round(r * 1e10) / 1e10
-        setSubExpr(subExpr + ' ' + display + ' =')
-        setDisplay(String(rounded))
-        setExpr('')
-        setHasResult(true)
-        setGstBreak(null)
-        break
-      }
-      case '.':
-        if (hasResult) { setDisplay('0.'); setHasResult(false) }
-        else setDisplay(d => d.includes('.') ? d : d + '.')
-        break
-      case '00':
-        if (hasResult) { setDisplay('0'); setHasResult(false) }
-        else setDisplay(d => d === '0' ? '0' : d + '00')
-        break
-      // Memory
-      case 'MC': setMemory(0); break
-      case 'MR': setDisplay(String(memory)); setHasResult(true); break
-      case 'M+': setMemory(m => m + numVal()); break
-      case 'M-': setMemory(m => m - numVal()); break
-      // M slots
-      case 'MEM': setM1(numVal()); break
-      case 'HIST': setM2(numVal()); break
-      case 'EQ': setM3(numVal()); break
-      // FUNC = GST toggle
-      case 'FUNC': {
-        const v = numVal()
-        if (!isNaN(v) && v !== 0) {
-          const gst = Math.round(v / 11 * 100) / 100
-          const ex = Math.round((v - gst) * 100) / 100
-          setGstBreak({ inc: v, gst, ex })
-        } else setGstBreak(null)
-        break
-      }
-      case 'SHIFT': setShift(s => !s); break
-      default: {
-        // number
-        if (hasResult) { setDisplay(key); setHasResult(false) }
-        else setDisplay(d => d === '0' ? key : d + key)
-        setGstBreak(null)
-      }
-    }
-  }
-
-  const fmt = (n) => {
-    if (n === null) return '—'
-    const str = String(n)
-    if (str === 'Error') return str
-    const [int, dec] = str.split('.')
-    const intFmt = parseInt(int).toLocaleString()
-    return dec !== undefined ? intFmt + '.' + dec : intFmt
-  }
-
-  // Button definitions: [label, subLabel?, type]
-  // types: num, op, mem, fn, eq, ac, del, shift
-  const btnStyle = (type, active = false) => {
-    const base = {
-      border: `1px solid ${BTN_BORDER}`,
-      borderRadius: 8,
-      cursor: 'pointer',
-      fontFamily: '"Share Tech Mono", "DM Mono", monospace',
-      letterSpacing: '0.05em',
-      transition: 'all 0.1s',
-      display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-      padding: '0 4px',
-      boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.06), 0 2px 4px rgba(0,0,0,0.5)',
-    }
-    if (type === 'shift') return { ...base, background: active ? CYAN : '#1a3a40', color: active ? '#000' : CYAN, border: `1px solid ${active ? CYAN : CYAN_DIM}`, clipPath: 'polygon(25% 0%,75% 0%,100% 50%,75% 100%,25% 100%,0% 50%)', borderRadius: 0 }
-    if (type === 'ac')    return { ...base, background: '#1a2a2e', color: CYAN, border: `1px solid ${CYAN_DIM}` }
-    if (type === 'del')   return { ...base, background: BTN_BG, color: CYAN }
-    if (type === 'eq')    return { ...base, background: '#0a2030', color: CYAN, border: `1px solid ${CYAN_DIM}` }
-    if (type === 'op')    return { ...base, background: '#1e2428', color: CYAN, border: `1px solid #2a3840` }
-    if (type === 'mem')   return { ...base, background: '#1c1e21', color: '#7a9aaa', fontSize: '0.75rem' }
-    if (type === 'fn')    return { ...base, background: '#1c1e22', color: '#6a8a9a', fontSize: '0.75rem' }
-    return { ...base, background: BTN_BG, color: '#ddeeff' }
-  }
-
-  const Btn = ({ label, sub, type = 'num', rowSpan, onClick }) => (
-    <button
-      onClick={() => onClick ? onClick() : press(label)}
-      style={{
-        ...btnStyle(type, type === 'shift' && shift),
-        gridRow: rowSpan ? `span ${rowSpan}` : undefined,
-        minHeight: rowSpan ? undefined : 46,
-        height: rowSpan ? '100%' : 46,
-      }}>
-      <span style={{ fontSize: type === 'mem' || type === 'fn' ? '0.7rem' : '1rem', lineHeight: 1 }}>{label}</span>
-      {sub && <span style={{ fontSize: '0.5rem', color: CYAN_DIM, marginTop: 2, letterSpacing: '0.1em' }}>{sub}</span>}
-    </button>
-  )
-
-  return (
-    <div style={{
-      background: `linear-gradient(145deg, #23262b, #16181c)`,
-      borderRadius: 20,
-      padding: 16,
-      border: '1px solid #2e3540',
-      boxShadow: `0 0 0 1px #1a1c20, 0 20px 60px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.05)`,
-      maxWidth: 360,
-      margin: '0 auto',
-    }}>
-
-      {/* Display */}
-      <div style={{
-        background: '#080c10',
-        borderRadius: 10,
-        padding: '10px 14px 12px',
-        marginBottom: 14,
-        border: '1px solid #111820',
-        boxShadow: `inset 0 2px 12px rgba(0,0,0,0.9), 0 0 20px rgba(0,212,255,0.04)`,
-        position: 'relative',
-      }}>
-        {/* Header row */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-          <span style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: '0.6rem', color: CYAN_DIM, letterSpacing: '0.15em' }}>GRAV-7</span>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            {memory !== 0 && <span style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: '0.55rem', color: CYAN }}>M</span>}
-            <span style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: '0.55rem', color: CYAN_DIM }}>DEG</span>
-            <div style={{ width: 18, height: 8, border: `1px solid ${CYAN_DIM}`, borderRadius: 2, padding: 1 }}>
-              <div style={{ width: '70%', height: '100%', background: CYAN, borderRadius: 1 }} />
-            </div>
-          </div>
-        </div>
-
-        {/* Sub expression */}
-        <div style={{ textAlign: 'right', minHeight: 16, marginBottom: 2 }}>
-          <span style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: '0.65rem', color: CYAN_DIM, opacity: 0.7 }}>{subExpr}</span>
-        </div>
-
-        {/* Main display */}
-        <div style={{ textAlign: 'right' }}>
-          <span style={{
-            fontFamily: '"Share Tech Mono", monospace',
-            fontSize: display.length > 10 ? '1.4rem' : display.length > 7 ? '1.8rem' : '2.2rem',
-            color: CYAN,
-            textShadow: `0 0 10px ${CYAN}99, 0 0 20px ${CYAN}44`,
-            letterSpacing: '0.05em',
-            lineHeight: 1,
-          }}>{fmt(display)}</span>
-        </div>
-
-        {/* GST breakdown */}
-        {gstBreak && (
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 8, paddingTop: 8, borderTop: `0.5px solid ${CYAN_DIM}33` }}>
-            {[['EX GST', gstBreak.ex], ['GST', gstBreak.gst], ['INC GST', gstBreak.inc]].map(([l, v]) => (
-              <div key={l} style={{ textAlign: 'center' }}>
-                <div style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: '0.45rem', color: CYAN_DIM, letterSpacing: '0.1em' }}>{l}</div>
-                <div style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: '0.75rem', color: CYAN }}>${v.toFixed(2)}</div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* M slot indicators */}
-        <div style={{ display: 'flex', gap: 8, marginTop: 6 }}>
-          {[['M1', m1], ['M2', m2], ['M3', m3]].map(([l, v]) => (
-            <button key={l} onClick={() => v !== null && (setDisplay(String(v)), setHasResult(true))}
-              style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: '0.5rem', color: v !== null ? CYAN : '#2a3a44', letterSpacing: '0.1em', background: 'none', border: 'none', cursor: v !== null ? 'pointer' : 'default', padding: 0 }}>
-              {l}{v !== null ? `=${v}` : ''}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Button grid */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-
-        {/* Row 0: MEM HIST EQ FUNC SHIFT */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5,1fr)', gap: 6 }}>
-          <Btn label="MEM" sub="M1" type="fn" />
-          <Btn label="HIST" sub="M2" type="fn" />
-          <Btn label="EQ" sub="M3" type="fn" />
-          <Btn label="FUNC" type="fn" onClick={() => press('FUNC')} />
-          <Btn label="SHIFT" type="shift" />
-        </div>
-
-        {/* Rows 1-4: main grid — left mem col + 4 num cols + op col + right col */}
-        {/* Using explicit grid for the tall = button */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr 1fr 1fr', gridTemplateRows: 'repeat(4, 46px)', gap: 6 }}>
-          {/* Col 1: MC MR M- M+ */}
-          <Btn label="MC" type="mem" />
-          <Btn label="MR" type="mem" />
-          <Btn label="M−" type="mem" onClick={() => press('M-')} />
-          <Btn label="M+" type="mem" />
-
-          {/* Row 1 nums: 7 8 9 */}
-          <Btn label="7" /><Btn label="8" /><Btn label="9" />
-          {/* Row 2 nums: 4 5 6 */}
-          <Btn label="4" /><Btn label="5" /><Btn label="6" />
-          {/* Row 3 nums: 1 2 3 */}
-          <Btn label="1" /><Btn label="2" /><Btn label="3" />
-          {/* Row 4 nums: 0 00 . */}
-          <Btn label="0" /><Btn label="00" /><Btn label="." />
-
-          {/* Col 5: % × + ÷ */}
-          <Btn label="%" type="op" />
-          <Btn label="×" type="op" />
-          <Btn label="+" type="op" />
-          <Btn label="÷" type="op" />
-
-          {/* Col 6: AC DEL = (tall) */}
-          <Btn label="AC" type="ac" />
-          <Btn label="DEL" type="del" />
-          {/* Tall = button — rendered separately via absolute/flex trick */}
-        </div>
-
-        {/* = button spans last 2 rows of col 6 — we recreate as a separate button below the grid using negative margin */}
-      </div>
-
-      {/* Render = as a standalone tall button overlaid — easier: just add it outside main rows */}
-    </div>
-  )
-}
-
-// Revised layout using CSS grid with explicit placement
 function Calculator() {
   const [display, setDisplay] = useState('0')
   const [expr, setExpr] = useState('')
@@ -429,170 +156,258 @@ function Calculator() {
   const numVal = () => { const n = parseFloat(display); return isNaN(n) ? 0 : n }
 
   const press = (key) => {
-    if (key === 'AC') { setDisplay('0'); setExpr(''); setSubExpr(''); setGstBreak(null); setHasResult(false); return }
-    if (key === 'DEL') { if (hasResult) { setDisplay('0'); setHasResult(false) } else setDisplay(d => d.length > 1 ? d.slice(0, -1) : '0'); return }
-    if (key === 'SHIFT') { setShift(s => !s); return }
+    if (key === 'AC')   { setDisplay('0'); setExpr(''); setSubExpr(''); setGstBreak(null); setHasResult(false); return }
+    if (key === 'DEL')  { if (hasResult) { setDisplay('0'); setHasResult(false) } else setDisplay(d => d.length > 1 ? d.slice(0,-1) : '0'); return }
+    if (key === 'SHIFT'){ setShift(s => !s); return }
     if (key === 'FUNC') {
       const v = numVal()
-      if (v !== 0) { const gst = Math.round(v / 11 * 100) / 100; setGstBreak({ inc: v, gst, ex: Math.round((v - gst) * 100) / 100 }) }
-      else setGstBreak(null)
-      return
+      if (v !== 0) { const gst = Math.round(v/11*100)/100; setGstBreak({ inc: v, gst, ex: Math.round((v-gst)*100)/100 }) }
+      else setGstBreak(null); return
     }
-    if (key === 'MC') { setMemory(0); return }
-    if (key === 'MR') { setDisplay(String(memory)); setHasResult(true); return }
-    if (key === 'M+') { setMemory(m => m + numVal()); return }
-    if (key === 'M-') { setMemory(m => m - numVal()); return }
-    if (key === 'MEM') { setM1(numVal()); return }
+    if (key === 'MC')   { setMemory(0); return }
+    if (key === 'MR')   { setDisplay(String(memory)); setHasResult(true); return }
+    if (key === 'M+')   { setMemory(m => m + numVal()); return }
+    if (key === 'M-')   { setMemory(m => m - numVal()); return }
+    if (key === 'MEM')  { setM1(numVal()); return }
     if (key === 'HIST') { setM2(numVal()); return }
-    if (key === 'EQ') { setM3(numVal()); return }
-    if (key === '%') {
-      const v = numVal()
-      const base = expr ? parseFloat(expr) || 100 : 100
-      setDisplay(String(Math.round(v / 100 * base * 1e10) / 1e10))
-      setHasResult(true); return
-    }
-    if (['+', '-', '×', '÷'].includes(key)) {
+    if (key === 'EQ')   { setM3(numVal()); return }
+    if (key === '%')    { const v=numVal(), base=expr?parseFloat(expr)||100:100; setDisplay(String(Math.round(v/100*base*1e10)/1e10)); setHasResult(true); return }
+    if (['+','-','×','÷'].includes(key)) {
       const op = key.replace('×','*').replace('÷','/')
-      setSubExpr(display + ' ' + key); setExpr(display + op); setDisplay('0'); setHasResult(false); setGstBreak(null); return
+      setSubExpr(display+' '+key); setExpr(display+op); setDisplay('0'); setHasResult(false); setGstBreak(null); return
     }
     if (key === '=') {
       if (!expr) return
       try {
         // eslint-disable-next-line no-new-func
-        const r = Function('"use strict";return(' + expr + display + ')')()
+        const r = Function('"use strict";return('+expr+display+')')()
         if (!isFinite(r)) { setDisplay('Error'); setExpr(''); setSubExpr(''); return }
-        const rounded = Math.round(r * 1e10) / 1e10
-        setSubExpr(subExpr + ' ' + display + ' =')
+        const rounded = Math.round(r*1e10)/1e10
+        setSubExpr(subExpr+' '+display+' =')
         setDisplay(String(rounded)); setExpr(''); setHasResult(true); setGstBreak(null)
       } catch { setDisplay('Error'); setExpr(''); setSubExpr('') }
       return
     }
-    if (key === '.') { if (hasResult) { setDisplay('0.'); setHasResult(false) } else setDisplay(d => d.includes('.') ? d : d + '.'); return }
-    if (key === '00') { if (hasResult) { setDisplay('0'); setHasResult(false) } else setDisplay(d => d === '0' ? '0' : d + '00'); return }
-    // digit
-    if (hasResult) { setDisplay(key); setHasResult(false) } else setDisplay(d => d === '0' ? key : d.length >= 12 ? d : d + key)
+    if (key === '.')  { if (hasResult) { setDisplay('0.'); setHasResult(false) } else setDisplay(d => d.includes('.')?d:d+'.'); return }
+    if (key === '00') { if (hasResult) { setDisplay('0'); setHasResult(false) } else setDisplay(d => d==='0'?'0':d+'00'); return }
+    if (key === '+/-') { setDisplay(d => d.startsWith('-') ? d.slice(1) : d==='0' ? '0' : '-'+d); return }
+    if (hasResult) { setDisplay(key); setHasResult(false) } else setDisplay(d => d==='0'?key:d.length>=12?d:d+key)
     setGstBreak(null)
   }
 
   const fmt = (n) => {
-    if (n === 'Error') return n
+    if (n==='Error') return n
     const [int, dec] = n.split('.')
-    try { return parseInt(int, 10).toLocaleString() + (dec !== undefined ? '.' + dec : '') }
-    catch { return n }
+    try { return parseInt(int,10).toLocaleString()+(dec!==undefined?'.'+dec:'') } catch { return n }
   }
 
-  const s = {
-    wrap: { background: 'linear-gradient(145deg,#23262b,#16181c)', borderRadius: 20, padding: 16, border: '1px solid #2e3540', boxShadow: '0 0 0 1px #1a1c20, 0 20px 60px rgba(0,0,0,0.8)', maxWidth: 360, margin: '0 auto' },
-    display: { background: '#080c10', borderRadius: 10, padding: '10px 14px 12px', marginBottom: 14, border: '1px solid #111820', boxShadow: 'inset 0 2px 12px rgba(0,0,0,0.9)' },
-    btn: (t) => ({
-      borderRadius: t === 'shift' ? 0 : 8,
-      cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-      border: `1px solid ${t === 'ac' || t === 'shift' ? CYAN_DIM : BTN_BORDER}`,
-      boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.06), 0 2px 4px rgba(0,0,0,0.5)',
-      fontFamily: '"Share Tech Mono","DM Mono",monospace',
-      background: t === 'shift' ? (shift ? CYAN : '#0d2228') : t === 'ac' ? '#0d2228' : t === 'del' ? BTN_BG : t === 'op' ? '#1a2228' : t === 'mem' || t === 'fn' ? '#1c1e22' : BTN_BG,
-      color: t === 'shift' ? (shift ? '#000' : CYAN) : t === 'ac' || t === 'del' ? CYAN : t === 'op' ? CYAN : t === 'mem' || t === 'fn' ? '#6a8a9a' : '#ddeeff',
-      clipPath: t === 'shift' ? 'polygon(20% 0%,80% 0%,100% 50%,80% 100%,20% 100%,0% 50%)' : undefined,
-      fontSize: t === 'mem' || t === 'fn' ? '0.7rem' : '1rem',
-      transition: 'filter 0.1s',
+  // ── Button style factory ──
+  const bStyle = (t) => ({
+    cursor: 'pointer',
+    border: 'none',
+    borderRadius: 10,
+    display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+    fontFamily: '"Share Tech Mono","DM Mono",monospace',
+    letterSpacing: '0.04em',
+    transition: 'filter 0.08s, transform 0.08s',
+    userSelect: 'none',
+    // 3-D push effect: bright top edge, dark shadow underneath
+    ...(t === 'blue' ? {
+      background: 'linear-gradient(180deg, #005f7a 0%, #003d52 100%)',
+      color: CYAN,
+      boxShadow: `0 1px 0 rgba(255,255,255,0.12) inset, 0 3px 0 #001a22, 0 4px 8px rgba(0,0,0,0.6)`,
+      border: `1px solid ${CYAN_DIM}`,
+      textShadow: `0 0 8px ${CYAN_GLOW}`,
+    } : t === 'fn' ? {
+      background: 'linear-gradient(180deg, #1e2228 0%, #15181c 100%)',
+      color: '#5a8a9a',
+      boxShadow: '0 1px 0 rgba(255,255,255,0.06) inset, 0 3px 0 #0a0c0f, 0 4px 8px rgba(0,0,0,0.5)',
+    } : t === 'shift' ? {
+      background: shift ? `linear-gradient(180deg,${CYAN},#007a9a)` : 'linear-gradient(180deg,#003545,#001e28)',
+      color: shift ? '#000' : CYAN,
+      boxShadow: shift
+        ? `0 1px 0 rgba(255,255,255,0.3) inset, 0 3px 0 #003344, 0 0 14px ${CYAN_GLOW}`
+        : `0 1px 0 rgba(255,255,255,0.08) inset, 0 3px 0 #000e14, 0 4px 8px rgba(0,0,0,0.6)`,
+      border: `1px solid ${shift ? CYAN : CYAN_DIM}`,
+      textShadow: shift ? 'none' : `0 0 6px ${CYAN_GLOW}`,
+    } : {
+      background: 'linear-gradient(180deg, #22262c 0%, #181b1f 100%)',
+      color: '#d8e8f0',
+      boxShadow: '0 1px 0 rgba(255,255,255,0.08) inset, 0 3px 0 #0a0c0f, 0 4px 8px rgba(0,0,0,0.5)',
     }),
-  }
+  })
 
-  const B = ({ k, sub, t = 'num', style: sx = {} }) => (
-    <button onClick={() => press(k)} style={{ ...s.btn(t), ...sx }}>
-      <span style={{ lineHeight: 1 }}>{k}</span>
-      {sub && <span style={{ fontSize: '0.48rem', color: CYAN_DIM, marginTop: 2, letterSpacing: '0.1em' }}>{sub}</span>}
+  const B = ({ k, sub, t='num', rs, cs, fs }) => (
+    <button
+      onPointerDown={e => { e.currentTarget.style.transform='translateY(2px)'; e.currentTarget.style.filter='brightness(0.85)' }}
+      onPointerUp={e => { e.currentTarget.style.transform=''; e.currentTarget.style.filter=''; press(k) }}
+      onPointerLeave={e => { e.currentTarget.style.transform=''; e.currentTarget.style.filter='' }}
+      style={{ ...bStyle(t), gridRow: rs, gridColumn: cs, fontSize: fs || (t==='fn'?'0.62rem':'0.95rem') }}>
+      <span style={{ lineHeight:1 }}>{k}</span>
+      {sub && <span style={{ fontSize:'0.45rem', marginTop:2, opacity:0.6, letterSpacing:'0.1em' }}>{sub}</span>}
     </button>
   )
 
+  // corner bracket decoration for display
+  const Corner = ({ pos }) => {
+    const sz = 10, thick = 1.5
+    const s = { position:'absolute', width:sz, height:sz }
+    const line = { position:'absolute', background:CYAN_DIM }
+    const top=pos.includes('t'), left=pos.includes('l')
+    return (
+      <div style={{ ...s, ...(top?{top:0}:{bottom:0}), ...(left?{left:0}:{right:0}) }}>
+        <div style={{ ...line, top:0, left:0, right:0, height:thick }} />
+        <div style={{ ...line, top:0, bottom:0, ...(left?{left:0}:{right:0}), width:thick }} />
+      </div>
+    )
+  }
+
   return (
-    <div style={s.wrap}>
-      {/* Display */}
-      <div style={s.display}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-          <span style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: '0.58rem', color: CYAN_DIM, letterSpacing: '0.15em' }}>GRAV-7</span>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            {memory !== 0 && <span style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: '0.55rem', color: CYAN }}>M</span>}
-            <span style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: '0.55rem', color: CYAN_DIM }}>DEG</span>
-            <div style={{ width: 20, height: 9, border: `1px solid ${CYAN_DIM}`, borderRadius: 2, padding: '1px 2px' }}>
-              <div style={{ width: '70%', height: '100%', background: CYAN, borderRadius: 1 }} />
-            </div>
+    <div style={{
+      background: 'linear-gradient(160deg,#111318 0%,#0c0e12 100%)',
+      borderRadius: 20,
+      padding: '14px 12px 18px',
+      border: '1px solid #2a2e36',
+      boxShadow: '0 0 0 1px #070809, 0 24px 60px rgba(0,0,0,0.9), inset 0 1px 0 rgba(255,255,255,0.04)',
+      maxWidth: 360,
+      margin: '0 auto',
+      userSelect: 'none',
+    }}>
+
+      {/* ── HUD top bar ── */}
+      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:8, padding:'0 2px' }}>
+        <span style={{ fontFamily:'"Share Tech Mono",monospace', fontSize:'0.65rem', color:CYAN, letterSpacing:'0.18em', textShadow:`0 0 8px ${CYAN_GLOW}` }}>CALC 7.09</span>
+        <div style={{ flex:1, height:1, background:`linear-gradient(90deg, ${CYAN_DIM}00, ${CYAN_DIM}80, ${CYAN_DIM}00)`, margin:'0 10px' }} />
+        <div style={{ display:'flex', alignItems:'center', gap:5 }}>
+          <span style={{ fontFamily:'"Share Tech Mono",monospace', fontSize:'0.55rem', color:CYAN_DIM }}>100%</span>
+          <div style={{ width:22, height:10, border:`1px solid ${CYAN_DIM}`, borderRadius:3, padding:'1px 2px', position:'relative' }}>
+            <div style={{ width:'90%', height:'100%', background:`linear-gradient(90deg,${CYAN},#0088aa)`, borderRadius:2 }} />
+            <div style={{ position:'absolute', right:-4, top:'50%', transform:'translateY(-50%)', width:3, height:5, background:CYAN_DIM, borderRadius:'0 1px 1px 0' }} />
           </div>
-        </div>
-        <div style={{ textAlign: 'right', minHeight: 14, marginBottom: 2 }}>
-          <span style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: '0.6rem', color: CYAN_DIM }}>{subExpr}</span>
-        </div>
-        <div style={{ textAlign: 'right' }}>
-          <span style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: display.length > 10 ? '1.4rem' : display.length > 7 ? '1.8rem' : '2.3rem', color: CYAN, textShadow: `0 0 10px ${CYAN}88,0 0 25px ${CYAN}33`, letterSpacing: '0.04em', lineHeight: 1 }}>
-            {fmt(display)}
-          </span>
-        </div>
-        {gstBreak && (
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 8, paddingTop: 8, borderTop: `0.5px solid #00D4FF22` }}>
-            {[['EX GST', gstBreak.ex], ['GST', gstBreak.gst], ['INC GST', gstBreak.inc]].map(([l, v]) => (
-              <div key={l} style={{ textAlign: 'center' }}>
-                <div style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: '0.45rem', color: CYAN_DIM, letterSpacing: '0.1em' }}>{l}</div>
-                <div style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: '0.8rem', color: CYAN }}>${v.toFixed(2)}</div>
-              </div>
-            ))}
-          </div>
-        )}
-        <div style={{ display: 'flex', gap: 10, marginTop: 6 }}>
-          {[['M1', m1, setM1], ['M2', m2, setM2], ['M3', m3, setM3]].map(([l, v, setter]) => (
-            <button key={l} onClick={() => v !== null && (setDisplay(String(v)), setHasResult(true))}
-              style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: '0.5rem', color: v !== null ? CYAN : '#1e3040', background: 'none', border: 'none', cursor: v !== null ? 'pointer' : 'default', padding: 0, letterSpacing: '0.08em' }}>
-              {l}{v !== null ? `·${v}` : ''}
-            </button>
-          ))}
         </div>
       </div>
 
-      {/* Grid — 6 cols × 5 rows */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gridTemplateRows: '36px repeat(4, 48px)', gap: 6 }}>
+      {/* ── Display panel ── */}
+      <div style={{
+        background:'#060810',
+        borderRadius:10,
+        padding:'10px 12px 12px',
+        marginBottom:12,
+        border:`1px solid #1a1e28`,
+        boxShadow:`inset 0 3px 16px rgba(0,0,0,0.95), 0 0 0 1px #050608`,
+        position:'relative',
+      }}>
+        <Corner pos="tl"/><Corner pos="tr"/><Corner pos="bl"/><Corner pos="br"/>
 
-        {/* Row 0: MEM HIST EQ FUNC SHIFT (spans cols 1-5, SHIFT col 6) */}
-        <B k="MEM" sub="M1" t="fn" style={{ gridColumn: 1 }} />
-        <B k="HIST" sub="M2" t="fn" style={{ gridColumn: 2 }} />
-        <B k="EQ" sub="M3" t="fn" style={{ gridColumn: 3 }} />
-        <B k="FUNC" t="fn" style={{ gridColumn: 4 }} />
-        <B k="SHIFT" t="shift" style={{ gridColumn: '5 / span 2', padding: '0 8px' }} />
+        {/* DEG + MODE row */}
+        <div style={{ display:'flex', justifyContent:'space-between', marginBottom:4 }}>
+          <div style={{ display:'flex', gap:10, alignItems:'center' }}>
+            <span style={{ fontFamily:'"Share Tech Mono",monospace', fontSize:'0.55rem', color:CYAN, letterSpacing:'0.12em' }}>DEG</span>
+            {memory!==0 && <span style={{ fontFamily:'"Share Tech Mono",monospace', fontSize:'0.5rem', color:CYAN, letterSpacing:'0.08em', textShadow:`0 0 6px ${CYAN_GLOW}` }}>M</span>}
+          </div>
+          <span style={{ fontFamily:'"Share Tech Mono",monospace', fontSize:'0.55rem', color:CYAN_DIM, letterSpacing:'0.1em' }}>
+            {gstBreak ? 'GST MODE' : 'GRAVITY MODE'}
+          </span>
+        </div>
 
-        {/* Col 1: MC MR M- M+ (rows 2-5) */}
-        <B k="MC" t="mem" style={{ gridColumn: 1, gridRow: 2 }} />
-        <B k="MR" t="mem" style={{ gridColumn: 1, gridRow: 3 }} />
-        <B k="M−" t="mem" style={{ gridColumn: 1, gridRow: 4 }} />
-        <B k="M+" t="mem" style={{ gridColumn: 1, gridRow: 5 }} />
+        {/* Sub-expression */}
+        <div style={{ textAlign:'right', minHeight:13, marginBottom:4 }}>
+          <span style={{ fontFamily:'"Share Tech Mono",monospace', fontSize:'0.58rem', color:CYAN_DIM, opacity:0.7 }}>{subExpr}</span>
+        </div>
 
-        {/* Row 2: 7 8 9 */}
-        <B k="7" style={{ gridColumn: 2, gridRow: 2 }} />
-        <B k="8" style={{ gridColumn: 3, gridRow: 2 }} />
-        <B k="9" style={{ gridColumn: 4, gridRow: 2 }} />
+        {/* Main number */}
+        <div style={{ textAlign:'right', minHeight:48 }}>
+          <span style={{
+            fontFamily:'"Share Tech Mono",monospace',
+            fontSize: display.length>12?'1.3rem':display.length>9?'1.7rem':display.length>6?'2rem':'2.6rem',
+            color: CYAN,
+            textShadow:`0 0 12px ${CYAN_GLOW}, 0 0 30px ${CYAN}44`,
+            letterSpacing:'0.06em',
+            lineHeight:1,
+          }}>{fmt(display)}</span>
+        </div>
 
-        {/* Row 3: 4 5 6 */}
-        <B k="4" style={{ gridColumn: 2, gridRow: 3 }} />
-        <B k="5" style={{ gridColumn: 3, gridRow: 3 }} />
-        <B k="6" style={{ gridColumn: 4, gridRow: 3 }} />
+        {/* HISTORY divider */}
+        <div style={{ display:'flex', alignItems:'center', gap:6, margin:'8px 0 4px' }}>
+          <div style={{ flex:1, height:1, background:`${CYAN_DIM}30` }} />
+          <span style={{ fontFamily:'"Share Tech Mono",monospace', fontSize:'0.45rem', color:`${CYAN_DIM}80`, letterSpacing:'0.2em' }}>HISTORY</span>
+          <div style={{ flex:1, height:1, background:`${CYAN_DIM}30` }} />
+        </div>
 
-        {/* Row 4: 1 2 3 */}
-        <B k="1" style={{ gridColumn: 2, gridRow: 4 }} />
-        <B k="2" style={{ gridColumn: 3, gridRow: 4 }} />
-        <B k="3" style={{ gridColumn: 4, gridRow: 4 }} />
+        {/* GST breakdown or M-slot recall */}
+        {gstBreak ? (
+          <div style={{ display:'flex', justifyContent:'space-around' }}>
+            {[['EX GST',gstBreak.ex],['GST',gstBreak.gst],['INC GST',gstBreak.inc]].map(([l,v])=>(
+              <div key={l} style={{ textAlign:'center' }}>
+                <div style={{ fontFamily:'"Share Tech Mono",monospace', fontSize:'0.42rem', color:CYAN_DIM, letterSpacing:'0.1em' }}>{l}</div>
+                <div style={{ fontFamily:'"Share Tech Mono",monospace', fontSize:'0.8rem', color:CYAN, textShadow:`0 0 8px ${CYAN_GLOW}` }}>${v.toFixed(2)}</div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div style={{ display:'flex', gap:12 }}>
+            {[['M1',m1],['M2',m2],['M3',m3]].map(([l,v])=>(
+              <button key={l} onClick={() => v!==null && (setDisplay(String(v)),setHasResult(true))}
+                style={{ fontFamily:'"Share Tech Mono",monospace', fontSize:'0.48rem', color:v!==null?CYAN:`${CYAN_DIM}40`, background:'none', border:'none', cursor:v!==null?'pointer':'default', padding:0, letterSpacing:'0.08em' }}>
+                {l}{v!==null?`·${v}`:''}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
 
-        {/* Row 5: 0 00 . */}
-        <B k="0" style={{ gridColumn: 2, gridRow: 5 }} />
-        <B k="00" style={{ gridColumn: 3, gridRow: 5 }} />
-        <B k="." style={{ gridColumn: 4, gridRow: 5 }} />
+      {/* ── Button grid — 5 cols × 6 rows ── */}
+      <div style={{ display:'grid', gridTemplateColumns:'repeat(5,1fr)', gridTemplateRows:'36px repeat(5,50px)', gap:6 }}>
 
-        {/* Col 5: % × + ÷ */}
-        <B k="%" t="op" style={{ gridColumn: 5, gridRow: 2 }} />
-        <B k="×" t="op" style={{ gridColumn: 5, gridRow: 3 }} />
-        <B k="+" t="op" style={{ gridColumn: 5, gridRow: 4 }} />
-        <B k="÷" t="op" style={{ gridColumn: 5, gridRow: 5 }} />
+        {/* Row 1 — function */}
+        <B k="MEM"  sub="M1" t="fn" rs={1} cs={1} />
+        <B k="HIST" sub="M2" t="fn" rs={1} cs={2} />
+        <B k="EQ"   sub="M3" t="fn" rs={1} cs={3} />
+        <B k="FUNC"          t="fn" rs={1} cs={4} />
+        <B k="SHIFT"         t="shift" rs={1} cs={5} />
 
-        {/* Col 6: AC DEL = (tall, spans rows 4-5) */}
-        <B k="AC" t="ac" style={{ gridColumn: 6, gridRow: 2 }} />
-        <B k="DEL" t="del" style={{ gridColumn: 6, gridRow: 3 }} />
-        <B k="=" t="ac" style={{ gridColumn: 6, gridRow: '4 / span 2', fontSize: '1.4rem' }} />
+        {/* Row 2 — memory + AC */}
+        <B k="MC"  t="fn"   rs={2} cs={1} />
+        <B k="MR"  t="fn"   rs={2} cs={2} />
+        <B k="M-"  t="fn"   rs={2} cs={3} />
+        <B k="M+"  t="fn"   rs={2} cs={4} />
+        <B k="AC"  t="blue" rs={2} cs={5} />
+
+        {/* Row 3 — 7 8 9 % ÷ */}
+        <B k="7" rs={3} cs={1} />
+        <B k="8" rs={3} cs={2} />
+        <B k="9" rs={3} cs={3} />
+        <B k="%" t="blue" rs={3} cs={4} />
+        <B k="÷" t="blue" rs={3} cs={5} />
+
+        {/* Row 4 — 4 5 6 × DEL */}
+        <B k="4" rs={4} cs={1} />
+        <B k="5" rs={4} cs={2} />
+        <B k="6" rs={4} cs={3} />
+        <B k="×" t="blue" rs={4} cs={4} />
+        <B k="DEL" t="blue" rs={4} cs={5} />
+
+        {/* Row 5 — 1 2 3 + = (tall) */}
+        <B k="1" rs={5} cs={1} />
+        <B k="2" rs={5} cs={2} />
+        <B k="3" rs={5} cs={3} />
+        <B k="+" t="blue" rs={5} cs={4} />
+        <B k="=" t="blue" rs="5 / span 2" cs={5} fs="1.5rem" />
+
+        {/* Row 6 — +/- 0 00 . */}
+        <B k="+/-" rs={6} cs={1} fs="0.7rem" />
+        <B k="0"   rs={6} cs={2} />
+        <B k="00"  rs={6} cs={3} fs="0.8rem" />
+        <B k="."   rs={6} cs={4} />
+        {/* col 5 row 6 is occupied by tall = */}
+      </div>
+
+      {/* ── Footer ── */}
+      <div style={{ textAlign:'center', marginTop:10 }}>
+        <div style={{ height:1, background:`linear-gradient(90deg,transparent,${CYAN_DIM}40,transparent)`, marginBottom:6 }} />
+        <span style={{ fontFamily:'"Share Tech Mono",monospace', fontSize:'0.42rem', color:`${CYAN_DIM}60`, letterSpacing:'0.2em' }}>
+          POWERED BY QUANTUM CORE
+        </span>
       </div>
     </div>
   )
@@ -1253,7 +1068,7 @@ function PenCalculator() {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 const TOOLS = [
   { id: 'clocks',     label: 'World Clocks',        icon: '🕰',  desc: 'Orlando · Tokyo · New York' },
-  { id: 'calc',       label: 'GRAV-7 Calculator',   icon: '🖩',  desc: 'Calculator + GST' },
+  { id: 'calc',       label: 'CALC 7.09',            icon: '🖩',  desc: 'Calculator + GST' },
   { id: 'pomodoro',   label: 'Pomodoro',             icon: '🍅',  desc: 'Focus & break timer' },
   { id: 'units',      label: 'Unit Converter',       icon: '📐',  desc: 'Length · Weight · Temp' },
   { id: 'qr',         label: 'QR Generator',         icon: '📱',  desc: 'URL to QR code' },
