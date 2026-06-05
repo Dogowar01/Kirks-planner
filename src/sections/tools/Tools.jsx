@@ -739,6 +739,127 @@ function UnitConverter() {
   )
 }
 
+// ─── Maps & Directions ────────────────────────────────────────────────────────
+function MapsSearch() {
+  const [query, setQuery] = useState('')
+  const [results, setResults] = useState([])
+  const [loading, setLoading] = useState(false)
+  const [selected, setSelected] = useState(null)
+  const [error, setError] = useState('')
+  const debounceRef = useRef()
+
+  const search = (q) => {
+    setQuery(q)
+    clearTimeout(debounceRef.current)
+    if (!q.trim()) { setResults([]); setSelected(null); return }
+    debounceRef.current = setTimeout(async () => {
+      setLoading(true); setError('')
+      try {
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=6&addressdetails=1`,
+          { headers: { 'Accept-Language': 'en', 'User-Agent': 'Signal9Planner/1.0' } }
+        )
+        const data = await res.json()
+        setResults(data)
+        if (!data.length) setError('No results found')
+      } catch { setError('Search failed — check connection') }
+      setLoading(false)
+    }, 500)
+  }
+
+  const openDirections = (place, app) => {
+    const lat = place.lat, lon = place.lon
+    const name = encodeURIComponent(place.display_name)
+    const url = app === 'apple'
+      ? `maps://maps.apple.com/?daddr=${lat},${lon}&dirflg=d`
+      : `https://www.google.com/maps/dir/?api=1&destination=${lat},${lon}`
+    window.open(url, '_blank')
+  }
+
+  const openMap = (place) => {
+    window.open(`https://www.openstreetmap.org/?mlat=${place.lat}&mlon=${place.lon}#map=15/${place.lat}/${place.lon}`, '_blank')
+  }
+
+  const shortAddress = (r) => {
+    const a = r.address || {}
+    const parts = [a.road, a.suburb || a.neighbourhood, a.city || a.town || a.village, a.state, a.country].filter(Boolean)
+    return parts.slice(0, 3).join(', ')
+  }
+
+  return (
+    <div className="card space-y-4">
+      <p className="section-label">Maps & Directions</p>
+
+      {/* Search box */}
+      <div style={{ position: 'relative' }}>
+        <input
+          className="input"
+          placeholder="Search for a place…"
+          value={query}
+          onChange={e => { setSelected(null); search(e.target.value) }}
+          onFocus={e => setTimeout(() => e.target.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 300)}
+        />
+        {loading && (
+          <span style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', fontFamily: '"DM Mono",monospace', fontSize: '0.6rem', color: 'var(--section-muted)' }}>searching…</span>
+        )}
+      </div>
+
+      {error && !loading && <p style={{ fontFamily: '"DM Mono",monospace', fontSize: '0.65rem', color: 'var(--section-muted)', textAlign: 'center' }}>{error}</p>}
+
+      {/* Results list */}
+      {!selected && results.length > 0 && (
+        <div className="space-y-2">
+          {results.map((r, i) => (
+            <button key={i} onClick={() => { setSelected(r); setResults([]) }}
+              className="card w-full text-left"
+              style={{ padding: '10px 12px' }}>
+              <p style={{ fontSize: '0.85rem', color: '#EDE8E0', fontWeight: 500, lineHeight: 1.3 }}>
+                {r.address?.amenity || r.address?.road || r.name || r.display_name.split(',')[0]}
+              </p>
+              <p style={{ fontFamily: '"DM Mono",monospace', fontSize: '0.58rem', color: 'var(--section-muted)', marginTop: 3 }}>
+                {shortAddress(r)}
+              </p>
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Selected place detail */}
+      {selected && (
+        <div className="space-y-3">
+          <div style={{ background: 'rgba(0,0,0,0.3)', borderRadius: 10, padding: '14px' }}>
+            <p style={{ fontSize: '0.9rem', color: '#EDE8E0', fontWeight: 500, marginBottom: 4 }}>
+              {selected.address?.amenity || selected.address?.road || selected.name || selected.display_name.split(',')[0]}
+            </p>
+            <p style={{ fontFamily: '"DM Mono",monospace', fontSize: '0.6rem', color: 'var(--section-muted)', lineHeight: 1.6 }}>
+              {selected.display_name}
+            </p>
+            <p style={{ fontFamily: '"DM Mono",monospace', fontSize: '0.55rem', color: 'var(--section-muted)', marginTop: 6, opacity: 0.6 }}>
+              {parseFloat(selected.lat).toFixed(5)}, {parseFloat(selected.lon).toFixed(5)}
+            </p>
+          </div>
+
+          {/* Direction buttons */}
+          <div className="grid grid-cols-2 gap-2">
+            <button onClick={() => openDirections(selected, 'apple')} className="btn-primary justify-center text-sm">
+              🍎 Apple Maps
+            </button>
+            <button onClick={() => openDirections(selected, 'google')} className="btn-ghost justify-center text-sm">
+              🗺 Google Maps
+            </button>
+          </div>
+          <button onClick={() => openMap(selected)} className="btn-ghost w-full justify-center text-xs">
+            View on OpenStreetMap
+          </button>
+          <button onClick={() => { setSelected(null); setQuery('') }} className="btn-ghost w-full justify-center text-xs">
+            ← New search
+          </button>
+        </div>
+      )}
+    </div>
+  )
+}
+
 // ─── QR Generator ────────────────────────────────────────────────────────────
 function QRGenerator() {
   const [url, setUrl] = useState('')
@@ -1141,6 +1262,7 @@ const TOOLS = [
   { id: 'bill',       label: 'Tip & Bill Splitter',  icon: '🧾',  desc: 'Split bills with tip' },
   { id: 'countdown',  label: 'Countdown Timers',     icon: '⏳',  desc: 'Days to any event' },
   { id: 'pen',        label: 'Pen Dose Calculator',  icon: '💉',  desc: 'Mounjaro · Ozempic · Compounded' },
+  { id: 'maps',       label: 'Maps & Directions',    icon: '📍',  desc: 'Search locations, get directions' },
 ]
 
 export default function Tools() {
@@ -1189,6 +1311,7 @@ export default function Tools() {
             {active === 'bill'      && <BillSplitter />}
             {active === 'countdown' && <CountdownTimer />}
             {active === 'pen'       && <PenCalculator />}
+            {active === 'maps'      && <MapsSearch />}
           </>
         )}
 
