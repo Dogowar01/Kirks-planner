@@ -1019,19 +1019,28 @@ const PEN_PRESETS = [
 
 function PenCalculator() {
   const [preset, setPreset] = useState('custom')
-  const [conc, setConc] = useState('')       // mg/mL
-  const [dose, setDose] = useState('')       // mg desired
-  const [clickVol, setClickVol] = useState('0.05') // mL per click
+  const [conc, setConc] = useState('')
+  const [clickVol, setClickVol] = useState('0.05')
+  const [mode, setMode] = useState('dose') // 'dose' → give mg, get clicks | 'clicks' → give clicks, get mg
+  const [dose, setDose] = useState('')
+  const [clicksIn, setClicksIn] = useState('')
 
   const p = PEN_PRESETS.find(x=>x.id===preset)
   const effConc = preset==='custom' ? parseFloat(conc) : p.conc
   const effClick = preset==='custom' ? parseFloat(clickVol) : p.clickVol
 
+  // dose → clicks
   const doseNum = parseFloat(dose)
-  const clicks = (effConc && effClick && doseNum)
-    ? Math.round(doseNum / effConc / effClick)
-    : null
-  const volMl = clicks ? Math.round(clicks * effClick * 1000)/1000 : null
+  const clicksOut = (effConc && effClick && doseNum)
+    ? Math.round(doseNum / effConc / effClick) : null
+  const volFromDose = clicksOut ? Math.round(clicksOut * effClick * 1000)/1000 : null
+
+  // clicks → dose
+  const clicksNum = parseFloat(clicksIn)
+  const doseOut = (effConc && effClick && clicksNum)
+    ? Math.round(clicksNum * effClick * effConc * 1000)/1000 : null
+  const volFromClicks = (effClick && clicksNum)
+    ? Math.round(clicksNum * effClick * 1000)/1000 : null
 
   return (
     <div className="card space-y-4">
@@ -1069,22 +1078,52 @@ function PenCalculator() {
         </div>
       )}
 
-      <div>
-        <label className="section-label mb-1 block">Desired Dose (mg)</label>
-        <input className="input" type="number" min="0" step="0.25" placeholder="e.g. 2.5" value={dose} onChange={e=>setDose(e.target.value)} />
+      {/* Mode toggle */}
+      <div className="flex gap-2">
+        <button onClick={()=>setMode('dose')} className={`chip flex-1 justify-center ${mode==='dose'?'active':''}`}>mg → clicks</button>
+        <button onClick={()=>setMode('clicks')} className={`chip flex-1 justify-center ${mode==='clicks'?'active':''}`}>clicks → mg</button>
       </div>
 
-      {clicks !== null && (
-        <div style={{background:'rgba(0,0,0,0.3)',borderRadius:10,padding:'16px',display:'grid',gridTemplateColumns:'1fr 1fr',gap:12,textAlign:'center'}}>
+      {mode==='dose' && (
+        <>
           <div>
-            <p className="section-label mb-1">Clicks</p>
-            <p style={{fontFamily:'"Playfair Display",serif',fontStyle:'italic',fontSize:'2.5rem',fontWeight:600,color:'var(--section-accent)',lineHeight:1}}>{clicks}</p>
+            <label className="section-label mb-1 block">Desired Dose (mg)</label>
+            <input className="input" type="number" min="0" step="0.25" placeholder="e.g. 2.5" value={dose} onChange={e=>setDose(e.target.value)} />
           </div>
+          {clicksOut !== null && (
+            <div style={{background:'rgba(0,0,0,0.3)',borderRadius:10,padding:'16px',display:'grid',gridTemplateColumns:'1fr 1fr',gap:12,textAlign:'center'}}>
+              <div>
+                <p className="section-label mb-1">Clicks</p>
+                <p style={{fontFamily:'"Playfair Display",serif',fontStyle:'italic',fontSize:'2.5rem',fontWeight:600,color:'var(--section-accent)',lineHeight:1}}>{clicksOut}</p>
+              </div>
+              <div>
+                <p className="section-label mb-1">Volume</p>
+                <p style={{fontFamily:'"Playfair Display",serif',fontStyle:'italic',fontSize:'2.5rem',fontWeight:600,color:'var(--section-accent)',lineHeight:1}}>{volFromDose}<span style={{fontSize:'1rem'}}> mL</span></p>
+              </div>
+            </div>
+          )}
+        </>
+      )}
+
+      {mode==='clicks' && (
+        <>
           <div>
-            <p className="section-label mb-1">Volume</p>
-            <p style={{fontFamily:'"Playfair Display",serif',fontStyle:'italic',fontSize:'2.5rem',fontWeight:600,color:'var(--section-accent)',lineHeight:1}}>{volMl}<span style={{fontSize:'1rem'}}> mL</span></p>
+            <label className="section-label mb-1 block">Number of Clicks</label>
+            <input className="input" type="number" min="0" step="1" placeholder="e.g. 10" value={clicksIn} onChange={e=>setClicksIn(e.target.value)} />
           </div>
-        </div>
+          {doseOut !== null && (
+            <div style={{background:'rgba(0,0,0,0.3)',borderRadius:10,padding:'16px',display:'grid',gridTemplateColumns:'1fr 1fr',gap:12,textAlign:'center'}}>
+              <div>
+                <p className="section-label mb-1">Dose</p>
+                <p style={{fontFamily:'"Playfair Display",serif',fontStyle:'italic',fontSize:'2.5rem',fontWeight:600,color:'var(--section-accent)',lineHeight:1}}>{doseOut}<span style={{fontSize:'1rem'}}> mg</span></p>
+              </div>
+              <div>
+                <p className="section-label mb-1">Volume</p>
+                <p style={{fontFamily:'"Playfair Display",serif',fontStyle:'italic',fontSize:'2.5rem',fontWeight:600,color:'var(--section-accent)',lineHeight:1}}>{volFromClicks}<span style={{fontSize:'1rem'}}> mL</span></p>
+              </div>
+            </div>
+          )}
+        </>
       )}
     </div>
   )
