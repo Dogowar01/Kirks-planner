@@ -1,5 +1,4 @@
 export default function SectionShell({ accent, bgImage, children, className = '' }) {
-  // Derive secondary palette from accent for consistent in-section theming
   return (
     <div
       className={className}
@@ -7,15 +6,14 @@ export default function SectionShell({ accent, bgImage, children, className = ''
         minHeight: '100%',
         position: 'relative',
         backgroundColor: '#0D0C0B',
-        // Expose the full palette as CSS vars so child components can use them
-        '--sa': accent,                                  // raw accent hex
+        '--sa': accent,
         '--section-accent': accent,
-        '--section-card-border': `color-mix(in srgb, ${accent} 30%, rgba(255,255,255,0.08))`,
-        '--section-card-tint': `color-mix(in srgb, ${accent} 8%, #181614)`,
-        '--section-chip-bg': `color-mix(in srgb, ${accent} 22%, transparent)`,
-        '--section-input-focus': `color-mix(in srgb, ${accent} 60%, transparent)`,
-        '--section-label': `color-mix(in srgb, ${accent} 45%, #B8B0A8)`,
-        '--section-muted': `color-mix(in srgb, ${accent} 25%, #C8BFB5)`,
+        '--section-card-border': `color-mix(in srgb, ${accent} 35%, rgba(255,255,255,0.1))`,
+        '--section-card-tint': `color-mix(in srgb, ${accent} 10%, #181614)`,
+        '--section-chip-bg': `color-mix(in srgb, ${accent} 28%, transparent)`,
+        '--section-input-focus': `color-mix(in srgb, ${accent} 70%, transparent)`,
+        '--section-label': `color-mix(in srgb, ${accent} 55%, #C8BFB5)`,
+        '--section-muted': `color-mix(in srgb, ${accent} 30%, #C8BFB5)`,
       }}
     >
       {/* Artwork background image */}
@@ -27,30 +25,31 @@ export default function SectionShell({ accent, bgImage, children, className = ''
           backgroundImage: `url(${bgImage})`,
           backgroundSize: 'cover',
           backgroundPosition: 'center top',
-          opacity: 0.05,
+          opacity: 0.07,
           pointerEvents: 'none',
         }} />
       )}
 
-      {/* Colour gradient overlay */}
+      {/* Colour gradient overlay — boosted for visible colour wash */}
       <div style={{
         position: 'fixed',
         inset: 0,
         zIndex: 1,
         background: [
-          `radial-gradient(ellipse 100% 40% at 50% -5%, ${accent}28 0%, ${accent}0a 45%, transparent 70%)`,
-          `radial-gradient(ellipse 40% 20% at 0% 15%, ${accent}0d 0%, transparent 55%)`,
-          `radial-gradient(ellipse 40% 20% at 100% 15%, ${accent}0a 0%, transparent 55%)`,
+          `radial-gradient(ellipse 110% 50% at 50% -5%, ${accent}48 0%, ${accent}18 45%, transparent 70%)`,
+          `radial-gradient(ellipse 55% 30% at 0% 20%, ${accent}20 0%, transparent 60%)`,
+          `radial-gradient(ellipse 55% 30% at 100% 20%, ${accent}18 0%, transparent 60%)`,
         ].join(', '),
         pointerEvents: 'none',
       }} />
 
-      {/* Top accent bar */}
+      {/* Top accent bar — brighter */}
       <div style={{
         position: 'relative',
         zIndex: 2,
         height: 2,
-        background: `linear-gradient(90deg, transparent 0%, ${accent}90 20%, ${accent} 50%, ${accent}90 80%, transparent 100%)`,
+        background: `linear-gradient(90deg, transparent 0%, ${accent}cc 15%, ${accent}ff 50%, ${accent}cc 85%, transparent 100%)`,
+        boxShadow: `0 0 16px 1px ${accent}88`,
       }} />
 
       {/* Content */}

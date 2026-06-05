@@ -115,10 +115,23 @@ function BottomNav() {
         }}>
         {primary.map(({ to, label, Icon }) => (
           <NavLink key={to} to={to}
-            className="flex-1 flex flex-col items-center py-2.5 gap-1 transition-colors duration-150"
-            style={({ isActive }) => ({ color: isActive ? '#C4522A' : '#B8B0A8' })}>
-            <Icon size={19} strokeWidth={1.5} />
-            <span style={{ fontSize: '9px', fontFamily: '"DM Mono", monospace', letterSpacing: '0.05em', textTransform: 'uppercase' }}>{label}</span>
+            className="flex-1 flex flex-col items-center py-2.5 gap-1 transition-colors duration-150 relative"
+            style={({ isActive }) => ({ color: isActive ? '#E06840' : '#B8B0A8' })}>
+            {({ isActive }) => (
+              <>
+                {/* Active indicator pip */}
+                {isActive && (
+                  <span style={{
+                    position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)',
+                    width: 24, height: 2, borderRadius: 1,
+                    background: '#E06840',
+                    boxShadow: '0 0 8px 1px rgba(224,104,64,0.7)',
+                  }} />
+                )}
+                <Icon size={19} strokeWidth={1.5} />
+                <span style={{ fontSize: '9px', fontFamily: '"DM Mono", monospace', letterSpacing: '0.05em', textTransform: 'uppercase' }}>{label}</span>
+              </>
+            )}
           </NavLink>
         ))}
         <button
