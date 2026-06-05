@@ -30,6 +30,11 @@
   #root { min-height: 100dvh; display: flex; flex-direction: column; }
   * { box-sizing: border-box; }
 
+  /* Prevent iOS Safari auto-zoom on focus (triggered when font-size < 16px) */
+  input, textarea, select {
+    font-size: 16px;
+  }
+
   /* Scroll focused inputs into view above the keyboard */
   input:focus, textarea:focus, select:focus {
     scroll-margin-bottom: 80px;
@@ -106,7 +111,8 @@
 
   /* Inputs use section accent on focus */
   .input {
-    @apply w-full text-sm outline-none transition-all duration-150 rounded-lg px-3 py-2;
+    @apply w-full outline-none transition-all duration-150 rounded-lg px-3 py-2;
+    font-size: 16px; /* Must be ≥16px to prevent iOS Safari auto-zoom on focus */
     background: rgba(10, 9, 8, 0.75);
     color: #F0EBE2;
     border: 0.5px solid rgba(255,255,255,0.14);
