@@ -30,6 +30,11 @@
   #root { min-height: 100dvh; display: flex; flex-direction: column; }
   * { box-sizing: border-box; }
 
+  /* Scroll focused inputs into view above the keyboard */
+  input:focus, textarea:focus, select:focus {
+    scroll-margin-bottom: 80px;
+  }
+
   ::-webkit-scrollbar { width: 3px; height: 3px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
@@ -39,8 +44,9 @@
   /* Cards pick up the section accent for their border and a faint tint */
   .card {
     @apply rounded-card p-4;
-    background: var(--section-card-tint, #161412);
-    border: 0.5px solid var(--section-card-border, rgba(255,255,255,0.07));
+    background: color-mix(in srgb, var(--section-card-tint, #161412) 85%, #0D0C0B);
+    backdrop-filter: blur(2px);
+    border: 0.5px solid var(--section-card-border, rgba(255,255,255,0.10));
     position: relative;
     overflow: hidden;
     transition: border-color 0.2s;
@@ -97,14 +103,15 @@
   /* Inputs use section accent on focus */
   .input {
     @apply w-full text-sm outline-none transition-all duration-150 rounded-lg px-3 py-2;
-    background: color-mix(in srgb, var(--section-accent, #1F1C19) 4%, #1A1714);
-    color: #EDE8E0;
-    border: 0.5px solid var(--section-card-border, rgba(255,255,255,0.1));
+    background: rgba(10, 9, 8, 0.75);
+    color: #F0EBE2;
+    border: 0.5px solid rgba(255,255,255,0.14);
   }
-  .input::placeholder { color: var(--section-muted, #5C5650); }
+  .input::placeholder { color: #6B6560; }
   .input:focus {
-    border-color: var(--section-input-focus, rgba(196,82,42,0.5));
-    box-shadow: 0 0 0 2px color-mix(in srgb, var(--section-accent, #C4522A) 10%, transparent);
+    border-color: var(--section-input-focus, rgba(196,82,42,0.6));
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--section-accent, #C4522A) 12%, transparent);
+    background: rgba(12, 11, 10, 0.9);
   }
 
   /* Chip — reusable filter pill */
@@ -129,7 +136,7 @@
   .section-label {
     font-family: 'DM Mono', monospace;
     font-size: 0.6rem;
-    color: var(--section-muted, #5C5650);
+    color: var(--section-label, #7A7470);
     letter-spacing: 0.18em;
     text-transform: uppercase;
   }

@@ -47,6 +47,7 @@ function NoteEditor({ note, onUpdate, onClose, onDelete }) {
         value={body}
         onChange={e => handleBody(e.target.value)}
         placeholder="Start writing…"
+        onFocus={e => setTimeout(() => e.target.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 300)}
       />
       <div className="flex gap-2 justify-between mt-4">
         <button onClick={() => onDelete(note.id)} className="btn-danger text-xs">
