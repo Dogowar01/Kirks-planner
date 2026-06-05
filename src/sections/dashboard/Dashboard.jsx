@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { format, isToday, isPast, parseISO, startOfDay, addDays, isWithinInterval, startOfMonth, endOfMonth } from 'date-fns'
-import { Bell, Plus, Calendar, CheckSquare, Briefcase, TrendingUp } from 'lucide-react'
+import { format, isToday, isPast, parseISO, startOfDay, addDays, isWithinInterval, startOfMonth, endOfMonth, differenceInDays } from 'date-fns'
+import { Bell, Plus, Calendar, CheckSquare, Briefcase, TrendingUp, Target, Pencil, Trash2, X, ChevronRight } from 'lucide-react'
 import { useStore } from '../../hooks/useStore'
 import { BUSINESSES } from '../../lib/constants'
 import CategoryBadge from '../../components/CategoryBadge'
 import Modal from '../../components/Modal'
+import ConfirmDialog from '../../components/ConfirmDialog'
 import heroBg from '../../assets/art-newyork.jpg'
 
 const CAT_COLORS = {
@@ -430,9 +431,298 @@ function FinancePulse({ onNavigate }) {
   )
 }
 
+// ─── Missions ─────────────────────────────────────────────────────────────────
+
+const BIZ_ACCENT = { signal9: '#C4522A', app: '#3B82F6', writing: '#7C3AED', personal: '#7F77DD' }
+const BIZ_LABEL  = { signal9: 'Signal9', app: 'App Dev', writing: 'Writing', personal: 'Personal' }
+
+function MissionForm({ initial = {}, onSave, onClose }) {
+  const [form, setForm] = useState({
+    title: '', definedDone: '', businessId: 'app', targetDate: '', status: 'active',
+    ...initial,
+  })
+  const f = k => e => setForm(s => ({ ...s, [k]: e.target.value }))
+
+  return (
+    <form onSubmit={e => { e.preventDefault(); onSave(form) }} className="space-y-4">
+      <div>
+        <label className="text-text-secondary text-xs mb-1 block">Mission title *</label>
+        <input required className="input" placeholder="e.g. Launch Tether on App Store"
+          value={form.title} onChange={f('title')} />
+      </div>
+      <div>
+        <label className="text-text-secondary text-xs mb-1 block">What does done look like?</label>
+        <input className="input" placeholder="e.g. App is live, first 50 downloads"
+          value={form.definedDone} onChange={f('definedDone')} />
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <label className="text-text-secondary text-xs mb-1 block">Business arm</label>
+          <select className="input" value={form.businessId} onChange={f('businessId')}>
+            <option value="signal9">Signal9</option>
+            <option value="app">App Dev</option>
+            <option value="writing">Writing</option>
+            <option value="personal">Personal</option>
+          </select>
+        </div>
+        <div>
+          <label className="text-text-secondary text-xs mb-1 block">Target date</label>
+          <input type="date" className="input" value={form.targetDate} onChange={f('targetDate')} />
+        </div>
+      </div>
+      <div>
+        <label className="text-text-secondary text-xs mb-1 block">Status</label>
+        <div className="flex gap-2">
+          {['active', 'paused', 'complete'].map(s => (
+            <button key={s} type="button"
+              onClick={() => setForm(prev => ({ ...prev, status: s }))}
+              className="flex-1 py-1.5 rounded-lg text-xs font-medium transition-colors capitalize"
+              style={{
+                fontFamily: '"DM Mono", monospace', letterSpacing: '0.06em',
+                background: form.status === s
+                  ? s === 'active' ? 'rgba(45,158,90,0.2)' : s === 'complete' ? 'rgba(59,130,246,0.2)' : 'rgba(92,86,80,0.3)'
+                  : '#1F1C19',
+                color: form.status === s
+                  ? s === 'active' ? '#2D9E5A' : s === 'complete' ? '#60A5FA' : '#A09890'
+                  : '#C8BFB5',
+              }}>
+              {s}
+            </button>
+          ))}
+        </div>
+      </div>
+      <div className="flex gap-3 justify-end pt-2">
+        <button type="button" onClick={onClose} className="btn-ghost">Cancel</button>
+        <button type="submit" className="btn-primary">Save Mission</button>
+      </div>
+    </form>
+  )
+}
+
+function MissionsWidget({ onNavigateToTasks }) {
+  const { missions, tasks, addMission, updateMission, deleteMission } = useStore()
+  const [showAdd, setShowAdd]       = useState(false)
+  const [editing, setEditing]       = useState(null)   // mission object being edited
+  const [deleteId, setDeleteId]     = useState(null)
+  const [expanded, setExpanded]     = useState(null)   // mission id expanded to show tasks
+
+  const active = missions
+    .filter(m => m.status !== 'complete')
+    .sort((a, b) => a.createdAt.localeCompare(b.createdAt))
+    .slice(0, 5)
+
+  const completed = missions.filter(m => m.status === 'complete')
+
+  function taskStats(missionId) {
+    const linked = tasks.filter(t => t.missionId === missionId)
+    const done   = linked.filter(t => t.done).length
+    return { total: linked.length, done }
+  }
+
+  function daysLabel(targetDate) {
+    if (!targetDate) return null
+    const diff = differenceInDays(new Date(targetDate), new Date())
+    if (diff < 0)  return { label: `${Math.abs(diff)}d overdue`, color: '#f87171' }
+    if (diff === 0) return { label: 'due today', color: '#FBBF24' }
+    return { label: `${diff}d left`, color: diff < 7 ? '#FBBF24' : '#A09890' }
+  }
+
+  return (
+    <section>
+      {/* Header */}
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2">
+          <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', color: '#A09890', letterSpacing: '0.18em', textTransform: 'uppercase' }}>
+            Active Missions
+          </p>
+          {active.length > 0 && (
+            <span style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.55rem', color: '#5C5650',
+              background: '#1F1C19', border: '0.5px solid rgba(255,255,255,0.07)',
+              borderRadius: 999, padding: '1px 6px' }}>
+              {active.length}/5
+            </span>
+          )}
+        </div>
+        {active.length < 5 && (
+          <button onClick={() => setShowAdd(true)} className="btn-ghost text-xs py-1">
+            <Plus size={12} /> Mission
+          </button>
+        )}
+      </div>
+
+      {/* Empty state */}
+      {active.length === 0 && (
+        <button onClick={() => setShowAdd(true)}
+          className="card w-full flex flex-col items-center justify-center gap-2 py-6 hover:border-white/10 transition-colors"
+          style={{ borderStyle: 'dashed', borderColor: 'rgba(255,255,255,0.08)' }}>
+          <Target size={20} style={{ color: '#5C5650' }} />
+          <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', color: '#5C5650', letterSpacing: '0.12em', textTransform: 'uppercase' }}>
+            No active missions — add one
+          </p>
+          <p style={{ fontSize: '0.7rem', color: '#7A7470', maxWidth: 220, textAlign: 'center', lineHeight: 1.5 }}>
+            What are the 3–5 things you're actively driving right now?
+          </p>
+        </button>
+      )}
+
+      {/* Mission cards */}
+      {active.length > 0 && (
+        <div className="space-y-2">
+          {active.map(m => {
+            const color = BIZ_ACCENT[m.businessId] || '#A09890'
+            const { total, done } = taskStats(m.id)
+            const pct = total > 0 ? Math.round((done / total) * 100) : 0
+            const days = daysLabel(m.targetDate)
+            const isExpanded = expanded === m.id
+            const linkedTasks = tasks.filter(t => t.missionId === m.id && !t.done).slice(0, 4)
+
+            return (
+              <div key={m.id} className="card" style={{ padding: 0, overflow: 'hidden' }}>
+                {/* Top accent bar */}
+                <div style={{ height: 2, background: `linear-gradient(90deg, ${color}, transparent)` }} />
+
+                <div style={{ padding: '12px 14px' }}>
+                  {/* Row 1: title + actions */}
+                  <div className="flex items-start gap-2">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <p style={{ fontSize: '0.875rem', color: '#EDE8E0', fontWeight: 500, lineHeight: 1.3 }}>
+                          {m.title}
+                        </p>
+                        <span style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.5rem', color, letterSpacing: '0.1em',
+                          background: color + '18', border: `0.5px solid ${color}40`, borderRadius: 999, padding: '1px 5px' }}>
+                          {BIZ_LABEL[m.businessId] || m.businessId}
+                        </span>
+                        {m.status === 'paused' && (
+                          <span style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.5rem', color: '#A09890', letterSpacing: '0.1em',
+                            background: 'rgba(92,86,80,0.2)', borderRadius: 999, padding: '1px 5px' }}>
+                            PAUSED
+                          </span>
+                        )}
+                      </div>
+                      {m.definedDone && (
+                        <p style={{ fontSize: '0.7rem', color: '#7A7470', marginTop: 3, lineHeight: 1.4 }}>
+                          ✓ {m.definedDone}
+                        </p>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-1 shrink-0">
+                      <button onClick={() => setEditing(m)}
+                        className="p-1 rounded transition-colors hover:bg-white/5" style={{ color: '#5C5650' }}>
+                        <Pencil size={12} />
+                      </button>
+                      <button onClick={() => setDeleteId(m.id)}
+                        className="p-1 rounded transition-colors hover:bg-red-900/20" style={{ color: '#5C5650' }}>
+                        <Trash2 size={12} />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Row 2: progress + days */}
+                  <div className="flex items-center gap-3 mt-3">
+                    <div className="flex-1" style={{ height: 3, background: 'rgba(255,255,255,0.06)', borderRadius: 2 }}>
+                      <div style={{ height: '100%', width: `${pct}%`, borderRadius: 2,
+                        background: pct === 100 ? '#2D9E5A' : color,
+                        boxShadow: pct > 0 ? `0 0 6px ${color}80` : 'none',
+                        transition: 'width 0.4s ease' }} />
+                    </div>
+                    <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.55rem', color: '#A09890', flexShrink: 0 }}>
+                      {total > 0 ? `${done}/${total} tasks` : 'no linked tasks'}
+                    </p>
+                    {days && (
+                      <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.55rem', color: days.color, flexShrink: 0 }}>
+                        {days.label}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Row 3: quick actions */}
+                  <div className="flex items-center gap-3 mt-2.5">
+                    <button onClick={() => setExpanded(isExpanded ? null : m.id)}
+                      className="flex items-center gap-1 transition-colors"
+                      style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.55rem', color: '#5C5650', letterSpacing: '0.08em' }}>
+                      <ChevronRight size={10} style={{ transform: isExpanded ? 'rotate(90deg)' : 'none', transition: 'transform 0.2s' }} />
+                      {isExpanded ? 'HIDE TASKS' : 'TASKS'}
+                    </button>
+                    <button onClick={() => updateMission(m.id, { status: m.status === 'active' ? 'complete' : 'active' })}
+                      className="transition-colors"
+                      style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.55rem',
+                        color: m.status === 'complete' ? '#2D9E5A' : '#5C5650', letterSpacing: '0.08em' }}>
+                      {m.status === 'complete' ? '✓ COMPLETE' : 'MARK DONE'}
+                    </button>
+                  </div>
+
+                  {/* Expanded task list */}
+                  {isExpanded && (
+                    <div style={{ marginTop: 10, borderTop: '0.5px solid rgba(255,255,255,0.06)', paddingTop: 10 }}>
+                      {linkedTasks.length === 0 ? (
+                        <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.55rem', color: '#5C5650' }}>
+                          No open tasks linked to this mission. Add tasks in the Tasks tab and assign this mission.
+                        </p>
+                      ) : (
+                        <div className="space-y-1.5">
+                          {linkedTasks.map(t => (
+                            <div key={t.id} className="flex items-center gap-2">
+                              <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: color }} />
+                              <p style={{ fontSize: '0.75rem', color: '#C8BFB5', flex: 1, minWidth: 0 }} className="truncate">{t.text}</p>
+                              {t.priority === 'high' && (
+                                <span style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.5rem', color: '#C4522A' }}>HIGH</span>
+                              )}
+                            </div>
+                          ))}
+                          {tasks.filter(t => t.missionId === m.id && !t.done).length > 4 && (
+                            <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.5rem', color: '#5C5650' }}>
+                              +{tasks.filter(t => t.missionId === m.id && !t.done).length - 4} more
+                            </p>
+                          )}
+                        </div>
+                      )}
+                      <button onClick={() => onNavigateToTasks(m.id)}
+                        style={{ marginTop: 8, fontFamily: '"DM Mono", monospace', fontSize: '0.55rem',
+                          color, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+                        VIEW ALL IN TASKS →
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      )}
+
+      {/* Completed missions count */}
+      {completed.length > 0 && (
+        <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.55rem', color: '#5C5650', marginTop: 10, letterSpacing: '0.1em' }}>
+          {completed.length} mission{completed.length !== 1 ? 's' : ''} completed
+        </p>
+      )}
+
+      {/* Modals */}
+      {showAdd && (
+        <Modal title="New Mission" onClose={() => setShowAdd(false)}>
+          <MissionForm onSave={data => { addMission(data); setShowAdd(false) }} onClose={() => setShowAdd(false)} />
+        </Modal>
+      )}
+      {editing && (
+        <Modal title="Edit Mission" onClose={() => setEditing(null)}>
+          <MissionForm initial={editing} onSave={data => { updateMission(editing.id, data); setEditing(null) }} onClose={() => setEditing(null)} />
+        </Modal>
+      )}
+      {deleteId && (
+        <ConfirmDialog title="Delete Mission"
+          message="Delete this mission? Tasks linked to it won't be deleted, just unlinked."
+          onConfirm={() => { deleteMission(deleteId); setDeleteId(null) }}
+          onCancel={() => setDeleteId(null)} />
+      )}
+    </section>
+  )
+}
+
 export default function Dashboard() {
   const navigate = useNavigate()
   const { tasks, events, projects, notes, addTask } = useStore()
+  const [missionFilter, setMissionFilter] = useState(null)
 
   const today = startOfDay(new Date())
   const in7 = addDays(today, 7)
@@ -477,6 +767,12 @@ export default function Dashboard() {
 
         {/* Quick Add */}
         <QuickAdd onAdd={(data) => addTask(data)} />
+
+        {/* Missions */}
+        <MissionsWidget onNavigateToTasks={(missionId) => {
+          setMissionFilter(missionId)
+          navigate('/tasks')
+        }} />
 
         {/* Today */}
         {todayEvents.length > 0 && (

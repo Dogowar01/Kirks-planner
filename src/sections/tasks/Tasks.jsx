@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { format, parseISO } from 'date-fns'
-import { Plus, Bell, Trash2, ChevronDown, ChevronUp } from 'lucide-react'
+import { Plus, Bell, Trash2, ChevronDown, ChevronUp, Target } from 'lucide-react'
 import { useStore } from '../../hooks/useStore'
 import { CATEGORIES } from '../../lib/constants'
 import SectionShell from '../../components/SectionShell'
@@ -11,7 +11,7 @@ import ConfirmDialog from '../../components/ConfirmDialog'
 import EmptyState from '../../components/EmptyState'
 import { CheckSquare } from 'lucide-react'
 
-const FILTERS = [
+const CAT_FILTERS = [
   { id: 'all',      label: 'All' },
   { id: 'signal9',  label: 'Signal9' },
   { id: 'app',      label: 'App Dev' },
@@ -20,10 +20,10 @@ const FILTERS = [
   { id: 'reminders',label: 'Reminders' },
 ]
 
-function TaskForm({ initial = {}, projects, onSave, onClose }) {
+function TaskForm({ initial = {}, projects, missions, onSave, onClose }) {
   const [form, setForm] = useState({
     text: '', category: 'personal', priority: 'normal', reminder: false,
-    reminderDate: '', reminderTime: '', note: '', projectId: '',
+    reminderDate: '', reminderTime: '', note: '', projectId: '', missionId: '',
     ...initial
   })
   const f = (k) => (v) => setForm(s => ({ ...s, [k]: typeof v === 'object' ? v.target.value : v }))
@@ -59,6 +59,15 @@ function TaskForm({ initial = {}, projects, onSave, onClose }) {
           </select>
         </div>
       )}
+      {missions.filter(m => m.status !== 'complete').length > 0 && (
+        <div>
+          <label className="text-text-secondary text-xs mb-1 block">Mission</label>
+          <select className="input" value={form.missionId} onChange={f('missionId')}>
+            <option value="">None</option>
+            {missions.filter(m => m.status !== 'complete').map(m => <option key={m.id} value={m.id}>{m.title}</option>)}
+          </select>
+        </div>
+      )}
       <div className="flex items-center gap-2">
         <input type="checkbox" id="rem" checked={form.reminder} onChange={e => setForm(s=>({...s,reminder:e.target.checked}))} className="accent-signal9" />
         <label htmlFor="rem" className="text-text-secondary text-sm">Set reminder</label>
@@ -87,9 +96,10 @@ function TaskForm({ initial = {}, projects, onSave, onClose }) {
   )
 }
 
-function TaskItem({ task, onToggle, onDelete, onEdit, projects }) {
+function TaskItem({ task, onToggle, onDelete, onEdit, projects, missions }) {
   const [showDetail, setShowDetail] = useState(false)
-  const proj = projects.find(p => p.id === task.projectId)
+  const proj    = projects.find(p => p.id === task.projectId)
+  const mission = missions?.find(m => m.id === task.missionId)
   const priorityColor = task.priority === 'high' ? '#D85A30' : task.priority === 'low' ? '#A09890' : undefined
 
   return (
@@ -110,6 +120,11 @@ function TaskItem({ task, onToggle, onDelete, onEdit, projects }) {
             {task.reminder && <Bell size={10} className="text-text-tertiary" />}
             {task.priority !== 'normal' && (
               <span className="text-[10px] font-medium" style={{ color: priorityColor }}>{task.priority}</span>
+            )}
+            {mission && (
+              <span className="flex items-center gap-0.5 text-[10px]" style={{ color: '#7C3AED', fontFamily: '"DM Mono", monospace' }}>
+                <Target size={8} /> {mission.title}
+              </span>
             )}
             {proj && <span className="text-text-tertiary text-[10px] truncate">{proj.name}</span>}
           </div>
@@ -136,14 +151,18 @@ function TaskItem({ task, onToggle, onDelete, onEdit, projects }) {
 }
 
 export default function Tasks() {
-  const { tasks, projects, addTask, updateTask, deleteTask } = useStore()
-  const [filter, setFilter] = useState('all')
+  const { tasks, projects, missions = [], addTask, updateTask, deleteTask } = useStore()
+  const [filter, setFilter]       = useState('all')
+  const [missionFilter, setMissionFilter] = useState('')   // mission id or ''
   const [showModal, setShowModal] = useState(false)
-  const [showDone, setShowDone] = useState(false)
-  const [deleteId, setDeleteId] = useState(null)
+  const [showDone, setShowDone]   = useState(false)
+  const [deleteId, setDeleteId]   = useState(null)
+
+  const activeMissions = missions.filter(m => m.status !== 'complete')
 
   const filtered = tasks.filter(t => {
     if (t.done) return false
+    if (missionFilter) return t.missionId === missionFilter
     if (filter === 'all') return true
     if (filter === 'reminders') return t.reminder
     return t.category === filter
@@ -166,21 +185,39 @@ export default function Tasks() {
         </button>
       </div>
 
-      {/* Filter bar */}
-      <div className="flex gap-1.5 flex-wrap mb-4">
-        {FILTERS.map(f => (
-          <button key={f.id} onClick={() => setFilter(f.id)}
-            className={`chip ${filter === f.id ? 'active' : ''}`}>
+      {/* Category filter bar */}
+      <div className="flex gap-1.5 flex-wrap mb-2">
+        {CAT_FILTERS.map(f => (
+          <button key={f.id} onClick={() => { setFilter(f.id); setMissionFilter('') }}
+            className={`chip ${filter === f.id && !missionFilter ? 'active' : ''}`}>
             {f.label}
           </button>
         ))}
       </div>
 
+      {/* Mission filter bar */}
+      {activeMissions.length > 0 && (
+        <div className="flex gap-1.5 flex-wrap mb-4 items-center">
+          <span style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.5rem', color: '#5C5650', letterSpacing: '0.12em', textTransform: 'uppercase' }}>
+            Mission:
+          </span>
+          {activeMissions.map(m => (
+            <button key={m.id}
+              onClick={() => setMissionFilter(missionFilter === m.id ? '' : m.id)}
+              className={`chip ${missionFilter === m.id ? 'active' : ''}`}
+              style={{ '--section-accent': '#7C3AED', '--section-chip-bg': 'rgba(124,58,237,0.2)', '--section-card-border': 'rgba(124,58,237,0.4)' }}>
+              <Target size={8} style={{ display: 'inline', marginRight: 3 }} />
+              {m.title}
+            </button>
+          ))}
+        </div>
+      )}
+
       {filtered.length === 0
         ? <EmptyState icon={CheckSquare} title="No tasks" description="Add a task above or quick-add from the dashboard." />
         : <div className="space-y-2">
             {filtered.map(t => (
-              <TaskItem key={t.id} task={t} projects={projects}
+              <TaskItem key={t.id} task={t} projects={projects} missions={missions}
                 onToggle={(id, done) => updateTask(id, { done })}
                 onDelete={(id) => setDeleteId(id)}
                 onEdit={() => {}} />
@@ -198,7 +235,7 @@ export default function Tasks() {
           {showDone && (
             <div className="space-y-2 opacity-60">
               {done.map(t => (
-                <TaskItem key={t.id} task={t} projects={projects}
+                <TaskItem key={t.id} task={t} projects={projects} missions={missions}
                   onToggle={(id, d) => updateTask(id, { done: d })}
                   onDelete={(id) => setDeleteId(id)}
                   onEdit={() => {}} />
@@ -210,7 +247,9 @@ export default function Tasks() {
 
       {showModal && (
         <Modal title="Add Task" onClose={() => setShowModal(false)}>
-          <TaskForm projects={projects} onSave={(data) => { addTask(data); setShowModal(false) }} onClose={() => setShowModal(false)} />
+          <TaskForm projects={projects} missions={missions}
+            onSave={(data) => { addTask(data); setShowModal(false) }}
+            onClose={() => setShowModal(false)} />
         </Modal>
       )}
 

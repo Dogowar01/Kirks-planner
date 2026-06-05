@@ -16,6 +16,7 @@ function initStore() {
     storage.set(KEYS.finance,   seed.finance)
     storage.set(KEYS.settings,  seed.settings)
     storage.set(KEYS.contacts,  seed.contacts)
+    storage.set(KEYS.missions,  seed.missions)
     return seed
   }
   return {
@@ -26,6 +27,7 @@ function initStore() {
     notes:     storage.get(KEYS.notes)     || [],
     finance:   storage.get(KEYS.finance)   || { entries: [], goals: { signal9: { monthly: 0 }, app: { monthly: 0 } } },
     settings:  storage.get(KEYS.settings)  || { displayName: 'Kirk', theme: 'dark', notificationsEnabled: false, firedReminders: [] },
+    missions:  storage.get(KEYS.missions)  || [],
   }
 }
 
@@ -46,6 +48,7 @@ export function StoreProvider({ children }) {
       [KEYS.notes]:     'notes',
       [KEYS.finance]:   'finance',
       [KEYS.settings]:  'settings',
+      [KEYS.missions]:  'missions',
     }
     return map[key]
   }
@@ -155,6 +158,21 @@ export function StoreProvider({ children }) {
     persist(KEYS.finance, next)
   }, [state.finance, persist])
 
+  // ── Missions ──
+  const addMission = useCallback((data) => {
+    const item = { id: uuid(), status: 'active', businessId: null, targetDate: null, definedDone: '', ...data, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }
+    persist(KEYS.missions, [...state.missions, item])
+    return item
+  }, [state.missions, persist])
+
+  const updateMission = useCallback((id, data) => {
+    persist(KEYS.missions, state.missions.map(m => m.id === id ? { ...m, ...data, updatedAt: new Date().toISOString() } : m))
+  }, [state.missions, persist])
+
+  const deleteMission = useCallback((id) => {
+    persist(KEYS.missions, state.missions.filter(m => m.id !== id))
+  }, [state.missions, persist])
+
   // ── Settings ──
   const updateSettings = useCallback((data) => {
     const next = { ...state.settings, ...data }
@@ -183,6 +201,7 @@ export function StoreProvider({ children }) {
       if (data.notes)     persist(KEYS.notes,     data.notes)
       if (data.finance)   persist(KEYS.finance,   data.finance)
       if (data.settings)  persist(KEYS.settings,  data.settings)
+      if (data.missions)  persist(KEYS.missions,  data.missions)
       return true
     } catch { return false }
   }, [persist])
@@ -198,6 +217,7 @@ export function StoreProvider({ children }) {
       [KEYS.notes]:    seed.notes,
       [KEYS.finance]:  seed.finance,
       [KEYS.settings]: seed.settings,
+      [KEYS.missions]: seed.missions,
     }).forEach(([k,v]) => storage.set(k,v))
   }, [])
 
@@ -209,6 +229,7 @@ export function StoreProvider({ children }) {
     addContact, updateContact, deleteContact,
     addNote, updateNote, deleteNote,
     addFinanceEntry, deleteFinanceEntry, setFinanceGoal,
+    addMission, updateMission, deleteMission,
     updateSettings,
     exportData, importData, clearAllData,
   }

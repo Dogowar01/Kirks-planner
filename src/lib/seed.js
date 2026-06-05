@@ -50,5 +50,6 @@ export function getSeedData() {
     notes:     [],
     finance:   { entries: [], goals: { signal9: { monthly: 0 }, app: { monthly: 0 } } },
     settings,
+    missions:  [],
   }
 }

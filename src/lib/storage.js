@@ -16,4 +16,5 @@ export const KEYS = {
   notes:    'kirk_planner_v1_notes',
   finance:  'kirk_planner_v1_finance',
   settings: 'kirk_planner_v1_settings',
+  missions: 'kirk_planner_v1_missions',
 }
