@@ -37,6 +37,16 @@ export default defineConfig({
             handler: 'NetworkOnly',
           },
           {
+            // Tesseract.js CDN — worker + WASM + language data
+            urlPattern: /^https:\/\/(cdn\.jsdelivr\.net|tessdata\.projectnaptha\.com)\/.*/i,
+            handler: 'CacheFirst',
+            options: { cacheName: 'tesseract-cache', expiration: { maxEntries: 20, maxAgeSeconds: 604800 } },
+          },
+          {
+            urlPattern: /^https:\/\/nominatim\.openstreetmap\.org\/.*/i,
+            handler: 'NetworkOnly',
+          },
+          {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
             handler: 'CacheFirst',
             options: { cacheName: 'google-fonts-cache', expiration: { maxEntries: 10, maxAgeSeconds: 31536000 } },
