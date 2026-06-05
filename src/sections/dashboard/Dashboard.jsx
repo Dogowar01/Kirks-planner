@@ -124,13 +124,13 @@ function LiveClock() {
 
       {/* Content */}
       <div className="relative px-6 pt-10 pb-6">
-        <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.65rem', color: '#5C5650', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: 8 }}>
+        <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.65rem', color: '#A09890', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: 8 }}>
           {format(now, "EEEE · d MMMM yyyy")}
         </p>
         <h1 style={{ fontFamily: '"Playfair Display", serif', fontStyle: 'italic', fontWeight: 600, fontSize: 'clamp(1.6rem, 5vw, 2.4rem)', color: '#EDE8E0', lineHeight: 1.15, letterSpacing: '-0.02em' }}>
           {greeting} Kirk.
         </h1>
-        <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.75rem', color: '#5C5650', marginTop: 6, marginBottom: 16 }}>
+        <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.75rem', color: '#A09890', marginTop: 6, marginBottom: 16 }}>
           {format(now, "HH:mm")}
         </p>
 
@@ -142,7 +142,7 @@ function LiveClock() {
               <span style={{ fontFamily: '"Playfair Display", serif', fontWeight: 600, fontSize: '1.4rem', color: '#EDE8E0' }}>
                 {weather.temp}°
               </span>
-              <span style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', color: '#5C5650', letterSpacing: '0.08em' }}>
+              <span style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', color: '#A09890', letterSpacing: '0.08em' }}>
                 {WMO_CODES[weather.code] || 'Unknown'} · {weather.wind} km/h
               </span>
             </div>
@@ -162,8 +162,8 @@ function LiveClock() {
                 const up = val && pval ? val > pval : null
                 return (
                   <div key={ccy} style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
-                    <span style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.55rem', color: '#5C5650', letterSpacing: '0.1em', textTransform: 'uppercase' }}>{ccy}</span>
-                    <span style={{ fontFamily: '"Playfair Display", serif', fontWeight: 600, fontSize: '1.1rem', color: '#9A9088' }}>
+                    <span style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.55rem', color: '#A09890', letterSpacing: '0.1em', textTransform: 'uppercase' }}>{ccy}</span>
+                    <span style={{ fontFamily: '"Playfair Display", serif', fontWeight: 600, fontSize: '1.1rem', color: '#C8BFB5' }}>
                       {val ? val.toFixed(dp) : '—'}
                     </span>
                     {up !== null && (
@@ -174,16 +174,16 @@ function LiveClock() {
                   </div>
                 )
               })}
-              <span style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.5rem', color: '#3D3A36', alignSelf: 'center' }}>1 AUD</span>
+              <span style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.5rem', color: '#7A7470', alignSelf: 'center' }}>1 AUD</span>
             </>
           )}
 
           {/* Loading states */}
           {!weather && (
-            <span style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', color: '#3D3A36' }}>loading weather…</span>
+            <span style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', color: '#7A7470' }}>loading weather…</span>
           )}
           {!rates && !ratesError && (
-            <span style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', color: '#3D3A36' }}>loading rates…</span>
+            <span style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', color: '#7A7470' }}>loading rates…</span>
           )}
         </div>
       </div>
@@ -196,7 +196,7 @@ function StatCard({ icon: Icon, label, value, color, onClick }) {
     <button onClick={onClick} className="card text-left w-full transition-all duration-150 hover:border-white/10 group">
       <div className="flex items-start justify-between">
         <div>
-          <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', color: '#5C5650', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: 10 }}>
+          <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', color: '#A09890', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: 10 }}>
             {label}
           </p>
           <p style={{ fontFamily: '"Playfair Display", serif', fontWeight: 600, fontSize: '2rem', color: '#EDE8E0', lineHeight: 1 }}>
@@ -227,7 +227,7 @@ function QuickAdd({ onAdd }) {
       style={{ background: '#161412', border: '0.5px solid rgba(255,255,255,0.07)', borderRadius: 10, padding: '10px 12px' }}>
       <select value={category} onChange={e => setCategory(e.target.value)}
         className="text-xs py-1 px-2 rounded-md outline-none shrink-0"
-        style={{ background: '#1F1C19', color: '#9A9088', border: '0.5px solid rgba(255,255,255,0.08)', fontFamily: '"DM Mono", monospace', fontSize: '0.65rem' }}>
+        style={{ background: '#1F1C19', color: '#C8BFB5', border: '0.5px solid rgba(255,255,255,0.08)', fontFamily: '"DM Mono", monospace', fontSize: '0.65rem' }}>
         <option value="signal9">Signal9</option>
         <option value="app">App Dev</option>
         <option value="writing">Writing</option>
@@ -251,7 +251,7 @@ function QuickAdd({ onAdd }) {
 
 function SectionLabel({ children }) {
   return (
-    <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', color: '#5C5650', letterSpacing: '0.18em', textTransform: 'uppercase', marginBottom: 10 }}>
+    <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', color: '#A09890', letterSpacing: '0.18em', textTransform: 'uppercase', marginBottom: 10 }}>
       {children}
     </p>
   )
@@ -295,7 +295,7 @@ function QuickEntryForm({ onSave, onClose }) {
             style={{
               fontFamily: '"DM Mono", monospace', letterSpacing: '0.08em', textTransform: 'uppercase',
               background: form.type === t ? (t === 'income' ? 'rgba(45,158,90,0.2)' : 'rgba(220,38,38,0.15)') : '#1F1C19',
-              color: form.type === t ? (t === 'income' ? '#2D9E5A' : '#DC2626') : '#9A9088',
+              color: form.type === t ? (t === 'income' ? '#2D9E5A' : '#DC2626') : '#C8BFB5',
             }}>
             {t === 'income' ? '+ Income' : '− Expense'}
           </button>
@@ -360,12 +360,12 @@ function FinancePulse({ onNavigate }) {
   return (
     <section>
       <div className="flex items-center justify-between mb-3">
-        <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', color: '#5C5650', letterSpacing: '0.18em', textTransform: 'uppercase' }}>
+        <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', color: '#A09890', letterSpacing: '0.18em', textTransform: 'uppercase' }}>
           Finance
         </p>
         <div className="flex gap-2">
           <button onClick={() => setShowAdd(true)} className="btn-ghost text-xs py-1"><Plus size={12}/> Entry</button>
-          <button onClick={onNavigate} style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', color: '#5C5650', letterSpacing: '0.1em' }}>
+          <button onClick={onNavigate} style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', color: '#A09890', letterSpacing: '0.1em' }}>
             ALL →
           </button>
         </div>
@@ -375,7 +375,7 @@ function FinancePulse({ onNavigate }) {
         {/* Month net summary */}
         <div className="flex items-end justify-between mb-4">
           <div>
-            <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.5rem', color: '#5C5650', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 4 }}>
+            <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.5rem', color: '#A09890', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 4 }}>
               {format(now, 'MMMM')} net
             </p>
             <p style={{ fontFamily: '"Playfair Display", serif', fontWeight: 600, fontSize: '1.8rem', lineHeight: 1, color: monthNet >= 0 ? '#2D9E5A' : '#DC2626' }}>
@@ -384,12 +384,12 @@ function FinancePulse({ onNavigate }) {
           </div>
           <div className="flex gap-4 text-right">
             <div>
-              <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.48rem', color: '#5C5650', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 3 }}>In</p>
+              <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.48rem', color: '#A09890', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 3 }}>In</p>
               <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.75rem', color: '#2D9E5A' }}>{aud(monthIncome)}</p>
             </div>
             <div>
-              <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.48rem', color: '#5C5650', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 3 }}>Out</p>
-              <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.75rem', color: monthExpense > 0 ? '#DC2626' : '#5C5650' }}>{aud(monthExpense)}</p>
+              <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.48rem', color: '#A09890', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 3 }}>Out</p>
+              <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.75rem', color: monthExpense > 0 ? '#DC2626' : '#A09890' }}>{aud(monthExpense)}</p>
             </div>
           </div>
         </div>
@@ -399,14 +399,14 @@ function FinancePulse({ onNavigate }) {
           <div className="space-y-2" style={{ borderTop: '0.5px solid rgba(255,255,255,0.06)', paddingTop: 10 }}>
             {recent.map(e => {
               const isExp = e.type === 'expense'
-              const color = BIZ_COLORS[e.businessId] || '#9A9088'
+              const color = BIZ_COLORS[e.businessId] || '#C8BFB5'
               return (
                 <div key={e.id} className="flex items-center gap-2">
                   <div className="w-1 h-3 rounded-full shrink-0" style={{ backgroundColor: color }} />
-                  <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.5rem', color: '#5C5650', width: 36, flexShrink: 0 }}>
+                  <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.5rem', color: '#A09890', width: 36, flexShrink: 0 }}>
                     {format(parseISO(e.date), 'dd MMM')}
                   </p>
-                  <p className="flex-1 min-w-0 truncate" style={{ fontSize: '0.7rem', color: '#9A9088' }}>{e.source}</p>
+                  <p className="flex-1 min-w-0 truncate" style={{ fontSize: '0.7rem', color: '#C8BFB5' }}>{e.source}</p>
                   <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.7rem', color: isExp ? '#DC2626' : '#2D9E5A', fontWeight: 600, flexShrink: 0 }}>
                     {isExp ? '−' : '+'}{aud(e.amount)}
                   </p>
@@ -415,7 +415,7 @@ function FinancePulse({ onNavigate }) {
             })}
           </div>
         ) : (
-          <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.55rem', color: '#3D3A36' }}>No entries yet.</p>
+          <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.55rem', color: '#7A7470' }}>No entries yet.</p>
         )}
       </div>
 
@@ -489,9 +489,9 @@ export default function Dashboard() {
                   <div className="w-0.5 h-8 rounded-full shrink-0" style={{ background: CAT_COLORS[ev.category] }} />
                   <div className="flex-1 min-w-0">
                     <p className="text-sm truncate" style={{ color: '#EDE8E0' }}>{ev.title}</p>
-                    {ev.time && <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.65rem', color: '#5C5650' }}>{ev.time}{ev.endTime ? ` — ${ev.endTime}` : ''}</p>}
+                    {ev.time && <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.65rem', color: '#A09890' }}>{ev.time}{ev.endTime ? ` — ${ev.endTime}` : ''}</p>}
                   </div>
-                  {ev.reminder && <Bell size={11} style={{ color: '#5C5650' }} />}
+                  {ev.reminder && <Bell size={11} style={{ color: '#A09890' }} />}
                   <CategoryBadge category={ev.category} size="xs" />
                 </button>
               ))}
@@ -503,19 +503,19 @@ export default function Dashboard() {
         <section>
           <div className="flex items-center justify-between mb-2.5">
             <SectionLabel>Active Tasks</SectionLabel>
-            <button onClick={() => navigate('/tasks')} style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', color: '#5C5650', letterSpacing: '0.1em' }}>
+            <button onClick={() => navigate('/tasks')} style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', color: '#A09890', letterSpacing: '0.1em' }}>
               ALL →
             </button>
           </div>
           {topTasks.length === 0
-            ? <p style={{ color: '#5C5650', fontSize: '0.875rem' }}>No open tasks.</p>
+            ? <p style={{ color: '#A09890', fontSize: '0.875rem' }}>No open tasks.</p>
             : <div className="space-y-2">
                 {topTasks.map(t => (
                   <button key={t.id} onClick={() => navigate('/tasks')}
                     className="card w-full text-left flex items-center gap-3 hover:border-white/10 transition-colors">
                     <div className="w-3.5 h-3.5 rounded-sm border shrink-0" style={{ borderColor: CAT_COLORS[t.category] + '80' }} />
-                    <p className="text-sm flex-1 min-w-0 truncate" style={{ color: '#9A9088' }}>{t.text}</p>
-                    {t.reminder && <Bell size={11} style={{ color: '#5C5650' }} />}
+                    <p className="text-sm flex-1 min-w-0 truncate" style={{ color: '#C8BFB5' }}>{t.text}</p>
+                    {t.reminder && <Bell size={11} style={{ color: '#A09890' }} />}
                     {t.priority === 'high' && <span style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', color: '#C4522A', letterSpacing: '0.1em' }}>HIGH</span>}
                   </button>
                 ))}
@@ -538,11 +538,11 @@ export default function Dashboard() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <p className="text-sm font-medium" style={{ color: '#EDE8E0' }}>{biz.label}</p>
-                      <span style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', color: '#5C5650' }}>{bizProjects.length} active</span>
+                      <span style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', color: '#A09890' }}>{bizProjects.length} active</span>
                     </div>
-                    {latestNote && <p className="text-xs truncate mt-0.5" style={{ color: '#5C5650' }}>{latestNote.title}</p>}
+                    {latestNote && <p className="text-xs truncate mt-0.5" style={{ color: '#A09890' }}>{latestNote.title}</p>}
                   </div>
-                  <span style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', color: '#5C5650' }}>→</span>
+                  <span style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', color: '#A09890' }}>→</span>
                 </button>
               )
             })}
@@ -556,18 +556,18 @@ export default function Dashboard() {
         <section>
           <div className="flex items-center justify-between mb-2.5">
             <SectionLabel>Upcoming</SectionLabel>
-            <button onClick={() => navigate('/calendar')} style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', color: '#5C5650', letterSpacing: '0.1em' }}>
+            <button onClick={() => navigate('/calendar')} style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', color: '#A09890', letterSpacing: '0.1em' }}>
               CALENDAR →
             </button>
           </div>
           {next5Events.length === 0
-            ? <p style={{ color: '#5C5650', fontSize: '0.875rem' }}>No upcoming events.</p>
+            ? <p style={{ color: '#A09890', fontSize: '0.875rem' }}>No upcoming events.</p>
             : <div className="space-y-2">
                 {next5Events.map(ev => (
                   <button key={ev.id} onClick={() => navigate('/calendar')}
                     className="card w-full text-left flex items-center gap-3 hover:border-white/10 transition-colors">
                     <div className="shrink-0 text-center w-9">
-                      <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.55rem', color: '#5C5650', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                      <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.55rem', color: '#A09890', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
                         {format(parseISO(ev.date), 'MMM')}
                       </p>
                       <p style={{ fontFamily: '"Playfair Display", serif', fontWeight: 600, fontSize: '1.3rem', color: '#EDE8E0', lineHeight: 1 }}>
@@ -575,8 +575,8 @@ export default function Dashboard() {
                       </p>
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm truncate" style={{ color: '#9A9088' }}>{ev.title}</p>
-                      {ev.time && <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.65rem', color: '#5C5650' }}>{ev.time}</p>}
+                      <p className="text-sm truncate" style={{ color: '#C8BFB5' }}>{ev.title}</p>
+                      {ev.time && <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.65rem', color: '#A09890' }}>{ev.time}</p>}
                     </div>
                     <CategoryBadge category={ev.category} size="xs" />
                   </button>

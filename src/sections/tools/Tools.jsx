@@ -90,7 +90,7 @@ function NixieClock({ time, day, temp, city }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
       {/* City label */}
-      <p style={{ fontFamily: '"DM Mono",monospace', fontSize: '0.58rem', color: '#5C5650', letterSpacing: '0.2em', textTransform: 'uppercase' }}>{city}</p>
+      <p style={{ fontFamily: '"DM Mono",monospace', fontSize: '0.58rem', color: '#A09890', letterSpacing: '0.2em', textTransform: 'uppercase' }}>{city}</p>
 
       {/* Tube row */}
       <div style={{
@@ -936,8 +936,8 @@ function ColourPicker() {
               {copied===sw.color && <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',background:'rgba(0,0,0,0.4)',fontSize:'0.7rem',color:'#fff'}}>Copied!</div>}
             </div>
             <div style={{padding:'4px 6px',background:'#161412'}}>
-              <p style={{fontFamily:'"DM Mono",monospace',fontSize:'0.5rem',color:'#5C5650',letterSpacing:'0.06em'}}>{sw.label}</p>
-              <p style={{fontFamily:'"DM Mono",monospace',fontSize:'0.65rem',color:'#9A9088'}}>{sw.color}</p>
+              <p style={{fontFamily:'"DM Mono",monospace',fontSize:'0.5rem',color:'#A09890',letterSpacing:'0.06em'}}>{sw.label}</p>
+              <p style={{fontFamily:'"DM Mono",monospace',fontSize:'0.65rem',color:'#C8BFB5'}}>{sw.color}</p>
             </div>
           </button>
         ))}
@@ -996,7 +996,7 @@ function RegexTester() {
           <div style={{background:'rgba(0,0,0,0.3)',borderRadius:8,padding:'10px 12px',fontFamily:'"DM Mono",monospace',fontSize:'0.8rem',lineHeight:1.6,wordBreak:'break-all'}}>
             {parts.map((p,i)=>p.m
               ? <mark key={i} style={{background:'color-mix(in srgb,var(--section-accent) 35%,transparent)',color:'#EDE8E0',borderRadius:3,padding:'0 2px'}}>{p.t}</mark>
-              : <span key={i} style={{color:'#5C5650'}}>{p.t}</span>
+              : <span key={i} style={{color:'#A09890'}}>{p.t}</span>
             )}
           </div>
         </div>
@@ -1100,7 +1100,7 @@ function CountdownTimer() {
             <div key={ev.id} style={{background:'rgba(0,0,0,0.25)',borderRadius:10,padding:'12px 14px'}}>
               <div className="flex justify-between items-start mb-2">
                 <p style={{fontSize:'0.85rem',color:'#EDE8E0',fontWeight:500}}>{ev.label}</p>
-                <button onClick={()=>remove(ev.id)} style={{color:'#5C5650',background:'none',border:'none',cursor:'pointer',fontSize:'0.8rem'}}>✕</button>
+                <button onClick={()=>remove(ev.id)} style={{color:'#A09890',background:'none',border:'none',cursor:'pointer',fontSize:'0.8rem'}}>✕</button>
               </div>
               {t ? (
                 <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:6,textAlign:'center'}}>

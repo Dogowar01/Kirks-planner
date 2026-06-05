@@ -15,7 +15,7 @@ export default function SectionShell({ accent, bgImage, children, className = ''
         '--section-chip-bg': `color-mix(in srgb, ${accent} 22%, transparent)`,
         '--section-input-focus': `color-mix(in srgb, ${accent} 60%, transparent)`,
         '--section-label': `color-mix(in srgb, ${accent} 45%, #B8B0A8)`,
-        '--section-muted': `color-mix(in srgb, ${accent} 25%, #9A9088)`,
+        '--section-muted': `color-mix(in srgb, ${accent} 25%, #C8BFB5)`,
       }}
     >
       {/* Artwork background image */}

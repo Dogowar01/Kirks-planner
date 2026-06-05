@@ -52,7 +52,7 @@ function EntryForm({ bizId, onSave, onClose }) {
             className="flex-1 py-2 rounded-lg text-sm font-medium transition-colors"
             style={{
               background: form.type === t ? (t === 'income' ? 'rgba(45,158,90,0.2)' : 'rgba(220,38,38,0.15)') : '#1F1C19',
-              color: form.type === t ? (t === 'income' ? '#2D9E5A' : '#DC2626') : '#9A9088',
+              color: form.type === t ? (t === 'income' ? '#2D9E5A' : '#DC2626') : '#C8BFB5',
               fontFamily: '"DM Mono", monospace',
               fontSize: '0.7rem',
               letterSpacing: '0.1em',
@@ -116,11 +116,11 @@ function MonthlyChart({ entries, bizId, goal }) {
       <p className="text-text-tertiary text-[10px] uppercase tracking-wide mb-3">6-Month Overview</p>
       <ResponsiveContainer width="100%" height={100}>
         <BarChart data={data} barGap={2} barSize={10}>
-          <XAxis dataKey="label" tick={{ fontSize: 9, fill: '#6B6762' }} axisLine={false} tickLine={false} />
+          <XAxis dataKey="label" tick={{ fontSize: 9, fill: '#A09890' }} axisLine={false} tickLine={false} />
           <YAxis hide />
           <Tooltip
             contentStyle={{ background: '#282826', border: '0.5px solid rgba(255,255,255,0.12)', borderRadius: 8, fontSize: 11 }}
-            labelStyle={{ color: '#A8A49C' }}
+            labelStyle={{ color: '#C8BFB5' }}
             formatter={(v, name) => [aud(v), name.charAt(0).toUpperCase() + name.slice(1)]}
           />
           <Bar dataKey="income" radius={[2,2,0,0]}>
@@ -187,7 +187,7 @@ function QuickEntryStrip({ onSave, onFullForm }) {
               style={{
                 padding: '6px 10px', fontSize: '0.65rem', fontFamily: '"DM Mono", monospace',
                 background: biz === id ? BIZ_COLORS[id] + '33' : 'transparent',
-                color: biz === id ? BIZ_COLORS[id] : '#5C5650',
+                color: biz === id ? BIZ_COLORS[id] : '#A09890',
                 border: 'none', cursor: 'pointer', letterSpacing: '0.05em',
               }}>{lbl}</button>
           ))}
@@ -199,7 +199,7 @@ function QuickEntryStrip({ onSave, onFullForm }) {
               style={{
                 padding: '6px 10px', fontSize: '0.75rem', fontFamily: '"DM Mono", monospace',
                 background: type === t ? (t === 'income' ? 'rgba(45,158,90,0.25)' : 'rgba(220,38,38,0.2)') : 'transparent',
-                color: type === t ? (t === 'income' ? '#2D9E5A' : '#DC2626') : '#5C5650',
+                color: type === t ? (t === 'income' ? '#2D9E5A' : '#DC2626') : '#A09890',
                 border: 'none', cursor: 'pointer', fontWeight: 700,
               }}>{sym}</button>
           ))}
@@ -216,7 +216,7 @@ function QuickEntryStrip({ onSave, onFullForm }) {
           style={{
             background: 'none', border: 'none', cursor: 'pointer',
             fontSize: '0.6rem', fontFamily: '"DM Mono", monospace',
-            color: '#5C5650', letterSpacing: '0.08em', textDecoration: 'underline',
+            color: '#A09890', letterSpacing: '0.08em', textDecoration: 'underline',
           }}>More options</button>
       </div>
     </div>
@@ -310,7 +310,7 @@ export default function Finance() {
         </div>
         <div className="card">
           <p className="text-text-tertiary text-[10px] uppercase tracking-wide mb-1">Outgoings</p>
-          <p className="text-xl font-mono font-semibold" style={{ color: monthExpense > 0 ? '#DC2626' : '#5C5650' }}>{aud(monthExpense)}</p>
+          <p className="text-xl font-mono font-semibold" style={{ color: monthExpense > 0 ? '#DC2626' : '#A09890' }}>{aud(monthExpense)}</p>
           <div className="mt-2">
             <label className="text-text-tertiary text-[9px]">Monthly goal (AUD)</label>
             <input type="number" step="100" className="input text-xs py-0.5 mt-1"
@@ -370,7 +370,7 @@ export default function Finance() {
                   <div className="flex-1 min-w-0">
                     <p className="text-text-primary text-sm truncate">{e.source}</p>
                     <div className="flex gap-2 mt-0.5">
-                      {e.category && <span style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.55rem', color: '#5C5650' }}>{e.category}</span>}
+                      {e.category && <span style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.55rem', color: '#A09890' }}>{e.category}</span>}
                       {e.note && <span className="text-text-tertiary text-[10px] truncate">{e.note}</span>}
                     </div>
                   </div>

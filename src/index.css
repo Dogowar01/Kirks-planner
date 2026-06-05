@@ -78,7 +78,7 @@
   }
   .btn-ghost {
     @apply btn;
-    color: var(--section-muted, #9A9088);
+    color: var(--section-muted, #C8BFB5);
     border: 0.5px solid var(--section-card-border, rgba(255,255,255,0.08));
   }
   .btn-ghost:hover {
@@ -108,7 +108,7 @@
     color: #F0EBE2;
     border: 0.5px solid rgba(255,255,255,0.14);
   }
-  .input::placeholder { color: #6B6560; }
+  .input::placeholder { color: #A09890; }
   .input:focus {
     border-color: var(--section-input-focus, rgba(196,82,42,0.6));
     box-shadow: 0 0 0 2px color-mix(in srgb, var(--section-accent, #C4522A) 12%, transparent);
@@ -120,7 +120,7 @@
     @apply px-3 py-1 rounded-full text-xs font-medium transition-colors cursor-pointer;
     font-family: 'DM Mono', monospace;
     background: color-mix(in srgb, var(--section-accent, #fff) 0%, #1F1C19);
-    color: var(--section-muted, #9A9088);
+    color: var(--section-muted, #C8BFB5);
     border: 0.5px solid var(--section-card-border, rgba(255,255,255,0.08));
   }
   .chip:hover {
@@ -157,9 +157,9 @@
 
   .nav-item {
     @apply flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150 cursor-pointer;
-    color: #5C5650;
+    color: #A09890;
   }
-  .nav-item:hover { color: #9A9088; background: rgba(255,255,255,0.04); }
+  .nav-item:hover { color: #C8BFB5; background: rgba(255,255,255,0.04); }
   .nav-item.active { color: #EDE8E0; background: rgba(255,255,255,0.06); }
 
   .vignette {

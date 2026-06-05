@@ -117,7 +117,7 @@ function CardScanner({ onParsed, onClose }) {
         {preview ? (
           <img src={preview} alt="Card" className="w-full object-contain" style={{ maxHeight: 240 }} />
         ) : (
-          <div className="flex flex-col items-center gap-3 py-8" style={{ color: '#5C5650' }}>
+          <div className="flex flex-col items-center gap-3 py-8" style={{ color: '#A09890' }}>
             <ScanLine size={32} strokeWidth={1.2} />
             <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.65rem', letterSpacing: '0.12em' }}>
               TAP TO PHOTOGRAPH / SELECT IMAGE
@@ -139,7 +139,7 @@ function CardScanner({ onParsed, onClose }) {
               }} />
             </div>
             <Loader2 size={22} style={{ color: '#C4522A', animation: 'spin 1s linear infinite' }} />
-            <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', color: '#9A9088', letterSpacing: '0.1em' }}>
+            <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', color: '#C8BFB5', letterSpacing: '0.1em' }}>
               {scanText}
             </p>
           </div>
@@ -168,7 +168,7 @@ function CardScanner({ onParsed, onClose }) {
       )}
 
       {status === 'scanning' && (
-        <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', color: '#5C5650', textAlign: 'center', letterSpacing: '0.1em' }}>
+        <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', color: '#A09890', textAlign: 'center', letterSpacing: '0.1em' }}>
           This takes 5–15 seconds the first time while the OCR engine loads…
         </p>
       )}
@@ -226,7 +226,7 @@ function ContactForm({ initial = {}, onSave, onClose }) {
           style={{
             background: showScanner ? 'rgba(196,82,42,0.12)' : 'rgba(255,255,255,0.03)',
             border: `0.5px solid ${showScanner ? 'rgba(196,82,42,0.4)' : 'rgba(255,255,255,0.1)'}`,
-            color: showScanner ? '#C4522A' : '#9A9088',
+            color: showScanner ? '#C4522A' : '#C8BFB5',
             fontFamily: '"DM Mono", monospace',
             fontSize: '0.65rem',
             letterSpacing: '0.12em',
@@ -360,7 +360,7 @@ export default function Contacts() {
   }).sort((a,b) => a.name.localeCompare(b.name))
 
   return (
-    <SectionShell accent="#9A9088" bgImage={bgImg}>
+    <SectionShell accent="#C8BFB5" bgImage={bgImg}>
     <div className="p-4 md:p-6 max-w-2xl">
       <div className="flex items-center justify-between mb-6">
         <h1 className="section-title">Contacts</h1>

@@ -18,9 +18,9 @@ export default {
           glass:    'rgba(22,20,18,0.85)',
         },
         text: {
-          primary:   '#F2EDE6',  // warm off-white — aged paper
-          secondary: '#C8BFB5',  // readable warm mid-grey
-          tertiary:  '#9A9088',  // muted — was far too dark before
+          primary:   '#F5F0EA',  // warm off-white
+          secondary: '#D8D0C8',  // readable warm mid
+          tertiary:  '#B8B0A8',  // muted but legible
         },
         // Accent pulls from the triptych
         crimson: '#8B1A1A',

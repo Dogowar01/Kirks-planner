@@ -50,7 +50,7 @@ function EventSearchModal({ onClose, onAdd }) {
   return (
     <Modal title="Find Local Events" onClose={onClose}>
       <div className="space-y-4">
-        <p style={{ color: '#9A9088', fontSize: '0.8rem', lineHeight: 1.5 }}>
+        <p style={{ color: '#C8BFB5', fontSize: '0.8rem', lineHeight: 1.5 }}>
           Search Google Events — it aggregates Eventbrite, Facebook, Humanitix, council sites and more. No account needed.
         </p>
 
@@ -62,7 +62,7 @@ function EventSearchModal({ onClose, onAdd }) {
               className="px-3 py-1 rounded-full text-xs font-medium transition-colors"
               style={{
                 background: activeFilter === f.q ? 'rgba(59,130,246,0.2)' : '#1F1C19',
-                color: activeFilter === f.q ? '#3B82F6' : '#9A9088',
+                color: activeFilter === f.q ? '#3B82F6' : '#C8BFB5',
                 fontFamily: '"DM Mono", monospace',
               }}>
               {f.label}
@@ -73,7 +73,7 @@ function EventSearchModal({ onClose, onAdd }) {
         {/* Location + search */}
         <div className="flex gap-2">
           <div className="relative flex-1">
-            <MapPin size={13} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: '#5C5650' }} />
+            <MapPin size={13} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: '#A09890' }} />
             <input className="input pl-8" placeholder="Suburb or city…" value={location}
               onChange={e => setLocation(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && openGoogle()} />
@@ -83,7 +83,7 @@ function EventSearchModal({ onClose, onAdd }) {
           </button>
         </div>
 
-        <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', color: '#5C5650' }}>
+        <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', color: '#A09890' }}>
           Opens Google Events in a new tab · find what you like · come back and add it below
         </p>
 
@@ -92,7 +92,7 @@ function EventSearchModal({ onClose, onAdd }) {
 
         {/* Quick-add form */}
         <div>
-          <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', color: '#5C5650', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 10 }}>
+          <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', color: '#A09890', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 10 }}>
             Add to calendar
           </p>
           <form onSubmit={handleQuickAdd} className="space-y-3">

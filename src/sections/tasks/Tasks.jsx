@@ -90,7 +90,7 @@ function TaskForm({ initial = {}, projects, onSave, onClose }) {
 function TaskItem({ task, onToggle, onDelete, onEdit, projects }) {
   const [showDetail, setShowDetail] = useState(false)
   const proj = projects.find(p => p.id === task.projectId)
-  const priorityColor = task.priority === 'high' ? '#D85A30' : task.priority === 'low' ? '#6B6762' : undefined
+  const priorityColor = task.priority === 'high' ? '#D85A30' : task.priority === 'low' ? '#A09890' : undefined
 
   return (
     <div className="card">

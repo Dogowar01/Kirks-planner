@@ -28,7 +28,7 @@ function SideNav() {
         <h1 style={{ fontFamily: '"Playfair Display", serif', fontStyle: 'italic', fontWeight: 600, fontSize: '1.2rem', color: '#C4522A', letterSpacing: '-0.01em', lineHeight: 1.2 }}>
           Signal9
         </h1>
-        <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', color: '#5C5650', letterSpacing: '0.18em', textTransform: 'uppercase', marginTop: 3 }}>
+        <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', color: '#B8B0A8', letterSpacing: '0.18em', textTransform: 'uppercase', marginTop: 3 }}>
           Life Planner
         </p>
       </div>
@@ -116,7 +116,7 @@ function BottomNav() {
         {primary.map(({ to, label, Icon }) => (
           <NavLink key={to} to={to}
             className="flex-1 flex flex-col items-center py-2.5 gap-1 transition-colors duration-150"
-            style={({ isActive }) => ({ color: isActive ? '#C4522A' : '#5C5650' })}>
+            style={({ isActive }) => ({ color: isActive ? '#C4522A' : '#B8B0A8' })}>
             <Icon size={19} strokeWidth={1.5} />
             <span style={{ fontSize: '9px', fontFamily: '"DM Mono", monospace', letterSpacing: '0.05em', textTransform: 'uppercase' }}>{label}</span>
           </NavLink>
@@ -124,7 +124,7 @@ function BottomNav() {
         <button
           onClick={() => setOpen(o => !o)}
           className="flex-1 flex flex-col items-center py-2.5 gap-1 transition-colors duration-150"
-          style={{ color: overflowActive ? '#C4522A' : open ? '#EDE8E0' : '#5C5650', background: 'none', border: 'none', cursor: 'pointer' }}>
+          style={{ color: overflowActive ? '#C4522A' : open ? '#EDE8E0' : '#B8B0A8', background: 'none', border: 'none', cursor: 'pointer' }}>
           {open ? <X size={19} strokeWidth={1.5} /> : <MoreHorizontal size={19} strokeWidth={1.5} />}
           <span style={{ fontSize: '9px', fontFamily: '"DM Mono", monospace', letterSpacing: '0.05em', textTransform: 'uppercase' }}>More</span>
         </button>

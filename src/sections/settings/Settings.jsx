@@ -24,7 +24,7 @@ export default function Settings() {
   }
 
   return (
-    <SectionShell accent="#5C5650" bgImage={bgImg}>
+    <SectionShell accent="#A09890" bgImage={bgImg}>
     <div className="p-4 md:p-6 max-w-xl">
       <h1 className="section-title mb-6">Settings</h1>
 
@@ -63,7 +63,7 @@ export default function Settings() {
           <button onClick={() => setShowClear(true)} className="btn-danger w-full justify-center">Clear all data</button>
         </section>
 
-        <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', color: '#5C5650', textAlign: 'center', letterSpacing: '0.08em' }}>
+        <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', color: '#A09890', textAlign: 'center', letterSpacing: '0.08em' }}>
           Signal9 Life Planner · data stored locally on this device
         </p>
       </div>

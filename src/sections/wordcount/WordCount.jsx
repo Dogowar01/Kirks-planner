@@ -137,11 +137,11 @@ export default function WordCount() {
                   <p className="text-text-tertiary text-xs font-medium uppercase tracking-wide mb-3">Last 14 Days</p>
                   <ResponsiveContainer width="100%" height={120}>
                     <BarChart data={chartData} barSize={14}>
-                      <XAxis dataKey="day" tick={{ fontSize: 10, fill: '#6B6762' }} axisLine={false} tickLine={false} />
+                      <XAxis dataKey="day" tick={{ fontSize: 10, fill: '#A09890' }} axisLine={false} tickLine={false} />
                       <YAxis hide />
                       <Tooltip
                         contentStyle={{ background: '#282826', border: '0.5px solid rgba(255,255,255,0.12)', borderRadius: 8, fontSize: 12 }}
-                        labelStyle={{ color: '#A8A49C' }}
+                        labelStyle={{ color: '#C8BFB5' }}
                         itemStyle={{ color: '#1D9E75' }}
                         formatter={(v) => [v.toLocaleString() + ' words', '']}
                       />
