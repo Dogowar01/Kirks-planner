@@ -26,6 +26,5 @@ export const NAV_ITEMS = [
   { id: 'businesses',  label: 'Businesses',  icon: 'Briefcase' },
   { id: 'contacts',    label: 'Contacts',    icon: 'Users' },
   { id: 'notes',       label: 'Notes',       icon: 'BookOpen' },
-  { id: 'wordcount',   label: 'Word Count',  icon: 'PenLine' },
   { id: 'finance',     label: 'Finance',     icon: 'DollarSign' },
 ]

@@ -13,7 +13,6 @@ function initStore() {
     storage.set(KEYS.events,    seed.events)
     storage.set(KEYS.tasks,     seed.tasks)
     storage.set(KEYS.notes,     seed.notes)
-    storage.set(KEYS.wordcount, seed.wordcount)
     storage.set(KEYS.finance,   seed.finance)
     storage.set(KEYS.settings,  seed.settings)
     storage.set(KEYS.contacts,  seed.contacts)
@@ -25,9 +24,8 @@ function initStore() {
     tasks:     storage.get(KEYS.tasks)     || [],
     contacts:  storage.get(KEYS.contacts)  || [],
     notes:     storage.get(KEYS.notes)     || [],
-    wordcount: storage.get(KEYS.wordcount) || { sessions: [], goals: {} },
     finance:   storage.get(KEYS.finance)   || { entries: [], goals: { signal9: { monthly: 0 }, app: { monthly: 0 } } },
-    settings:  storage.get(KEYS.settings)  || { displayName: 'Kirk', dailyWordGoal: 1000, theme: 'dark', notificationsEnabled: false, firedReminders: [] },
+    settings:  storage.get(KEYS.settings)  || { displayName: 'Kirk', theme: 'dark', notificationsEnabled: false, firedReminders: [] },
   }
 }
 
@@ -46,7 +44,6 @@ export function StoreProvider({ children }) {
       [KEYS.tasks]:     'tasks',
       [KEYS.contacts]:  'contacts',
       [KEYS.notes]:     'notes',
-      [KEYS.wordcount]: 'wordcount',
       [KEYS.finance]:   'finance',
       [KEYS.settings]:  'settings',
     }
@@ -140,19 +137,6 @@ export function StoreProvider({ children }) {
     persist(KEYS.notes, state.notes.filter(n => n.id !== id))
   }, [state.notes, persist])
 
-  // ── Word Count ──
-  const addWordSession = useCallback((data) => {
-    const item = { id: uuid(), ...data, createdAt: new Date().toISOString() }
-    const next = { ...state.wordcount, sessions: [...state.wordcount.sessions, item] }
-    persist(KEYS.wordcount, next)
-    return item
-  }, [state.wordcount, persist])
-
-  const setWordGoal = useCallback((projectId, goal) => {
-    const next = { ...state.wordcount, goals: { ...state.wordcount.goals, [projectId]: goal } }
-    persist(KEYS.wordcount, next)
-  }, [state.wordcount, persist])
-
   // ── Finance ──
   const addFinanceEntry = useCallback((data) => {
     const item = { id: uuid(), ...data, createdAt: new Date().toISOString() }
@@ -197,7 +181,6 @@ export function StoreProvider({ children }) {
       if (data.tasks)     persist(KEYS.tasks,     data.tasks)
       if (data.contacts)  persist(KEYS.contacts,  data.contacts)
       if (data.notes)     persist(KEYS.notes,     data.notes)
-      if (data.wordcount) persist(KEYS.wordcount, data.wordcount)
       if (data.finance)   persist(KEYS.finance,   data.finance)
       if (data.settings)  persist(KEYS.settings,  data.settings)
       return true
@@ -208,7 +191,14 @@ export function StoreProvider({ children }) {
     Object.values(KEYS).forEach(k => storage.remove(k))
     const seed = getSeedData()
     setState(seed)
-    Object.entries({ [KEYS.projects]: seed.projects, [KEYS.events]: seed.events, [KEYS.tasks]: seed.tasks, [KEYS.notes]: seed.notes, [KEYS.wordcount]: seed.wordcount, [KEYS.finance]: seed.finance, [KEYS.settings]: seed.settings }).forEach(([k,v]) => storage.set(k,v))
+    Object.entries({
+      [KEYS.projects]: seed.projects,
+      [KEYS.events]:   seed.events,
+      [KEYS.tasks]:    seed.tasks,
+      [KEYS.notes]:    seed.notes,
+      [KEYS.finance]:  seed.finance,
+      [KEYS.settings]: seed.settings,
+    }).forEach(([k,v]) => storage.set(k,v))
   }, [])
 
   const value = {
@@ -218,7 +208,6 @@ export function StoreProvider({ children }) {
     addTask, updateTask, deleteTask,
     addContact, updateContact, deleteContact,
     addNote, updateNote, deleteNote,
-    addWordSession, setWordGoal,
     addFinanceEntry, deleteFinanceEntry, setFinanceGoal,
     updateSettings,
     exportData, importData, clearAllData,

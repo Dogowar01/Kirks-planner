@@ -48,7 +48,6 @@ export function getSeedData() {
     tasks:     [],
     contacts:  [],
     notes:     [],
-    wordcount: { sessions: [], goals: {} },
     finance:   { entries: [], goals: { signal9: { monthly: 0 }, app: { monthly: 0 } } },
     settings,
   }
