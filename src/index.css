@@ -44,9 +44,10 @@
   /* Cards pick up the section accent for their border and a faint tint */
   .card {
     @apply rounded-card p-4;
-    background: color-mix(in srgb, var(--section-card-tint, #161412) 85%, #0D0C0B);
-    backdrop-filter: blur(2px);
-    border: 0.5px solid var(--section-card-border, rgba(255,255,255,0.10));
+    background: color-mix(in srgb, var(--section-card-tint, #1a1714) 60%, rgba(11,10,9,0.97));
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 0.5px solid var(--section-card-border, rgba(255,255,255,0.12));
     position: relative;
     overflow: hidden;
     transition: border-color 0.2s;

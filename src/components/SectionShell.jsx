@@ -14,8 +14,8 @@ export default function SectionShell({ accent, bgImage, children, className = ''
         '--section-card-tint': `color-mix(in srgb, ${accent} 8%, #181614)`,
         '--section-chip-bg': `color-mix(in srgb, ${accent} 22%, transparent)`,
         '--section-input-focus': `color-mix(in srgb, ${accent} 60%, transparent)`,
-        '--section-label': `color-mix(in srgb, ${accent} 55%, #A09890)`,
-        '--section-muted': `color-mix(in srgb, ${accent} 30%, #7A7470)`,
+        '--section-label': `color-mix(in srgb, ${accent} 45%, #B8B0A8)`,
+        '--section-muted': `color-mix(in srgb, ${accent} 25%, #9A9088)`,
       }}
     >
       {/* Artwork background image */}
@@ -27,7 +27,7 @@ export default function SectionShell({ accent, bgImage, children, className = ''
           backgroundImage: `url(${bgImage})`,
           backgroundSize: 'cover',
           backgroundPosition: 'center top',
-          opacity: 0.08,
+          opacity: 0.05,
           pointerEvents: 'none',
         }} />
       )}
@@ -38,9 +38,9 @@ export default function SectionShell({ accent, bgImage, children, className = ''
         inset: 0,
         zIndex: 1,
         background: [
-          `radial-gradient(ellipse 110% 55% at 50% -5%, ${accent}55 0%, ${accent}18 40%, transparent 70%)`,
-          `radial-gradient(ellipse 50% 25% at 0% 20%, ${accent}15 0%, transparent 55%)`,
-          `radial-gradient(ellipse 50% 25% at 100% 20%, ${accent}10 0%, transparent 55%)`,
+          `radial-gradient(ellipse 100% 40% at 50% -5%, ${accent}28 0%, ${accent}0a 45%, transparent 70%)`,
+          `radial-gradient(ellipse 40% 20% at 0% 15%, ${accent}0d 0%, transparent 55%)`,
+          `radial-gradient(ellipse 40% 20% at 100% 15%, ${accent}0a 0%, transparent 55%)`,
         ].join(', '),
         pointerEvents: 'none',
       }} />
