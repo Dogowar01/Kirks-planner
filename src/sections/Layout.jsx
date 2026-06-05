@@ -5,14 +5,14 @@ import { LayoutDashboard, CalendarDays, CheckSquare, Briefcase, Users, BookOpen,
 
 const NAV = [
   { to: '/dashboard',  label: 'Dashboard',  Icon: LayoutDashboard },
-  { to: '/calendar',   label: 'Calendar',   Icon: CalendarDays },
   { to: '/tasks',      label: 'Tasks',      Icon: CheckSquare },
+  { to: '/finance',    label: 'Finance',    Icon: DollarSign },
+  { to: '/notes',      label: 'Notes',      Icon: BookOpen },
+  { to: '/tools',      label: 'Tools',      Icon: Wrench },
+  { to: '/calendar',   label: 'Calendar',   Icon: CalendarDays },
   { to: '/businesses', label: 'Businesses', Icon: Briefcase },
   { to: '/contacts',   label: 'Contacts',   Icon: Users },
-  { to: '/notes',      label: 'Notes',      Icon: BookOpen },
   { to: '/wordcount',  label: 'Word Count', Icon: PenLine },
-  { to: '/finance',    label: 'Finance',    Icon: DollarSign },
-  { to: '/tools',      label: 'Tools',      Icon: Wrench },
 ]
 
 function SideNav() {
@@ -64,16 +64,16 @@ function SideNav() {
 }
 
 const OVERFLOW = [
-  { to: '/wordcount', label: 'Word Count', Icon: PenLine },
-  { to: '/finance',   label: 'Finance',    Icon: DollarSign },
-  { to: '/tools',     label: 'Tools',      Icon: Wrench },
-  { to: '/settings',  label: 'Settings',   Icon: Settings },
+  { to: '/businesses', label: 'Businesses', Icon: Briefcase },
+  { to: '/contacts',   label: 'Contacts',   Icon: Users },
+  { to: '/wordcount',  label: 'Word Count', Icon: PenLine },
+  { to: '/settings',   label: 'Settings',   Icon: Settings },
 ]
 
 function BottomNav() {
   const [open, setOpen] = useState(false)
   const location = useLocation()
-  const primary = NAV.slice(0, 6)
+  const primary = NAV.slice(0, 6) // dashboard, tasks, finance, notes, tools, calendar
   const overflowActive = OVERFLOW.some(o => location.pathname.startsWith(o.to))
 
   return (

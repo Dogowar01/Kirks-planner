@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { format, isToday, isPast, parseISO, startOfDay, addDays, isWithinInterval, startOfMonth, endOfMonth, startOfYear } from 'date-fns'
+import { format, isToday, isPast, parseISO, startOfDay, addDays, isWithinInterval, startOfMonth, endOfMonth } from 'date-fns'
 import { Bell, Plus, Calendar, CheckSquare, Briefcase, TrendingUp } from 'lucide-react'
 import { useStore } from '../../hooks/useStore'
 import { BUSINESSES } from '../../lib/constants'
@@ -339,122 +339,84 @@ function QuickEntryForm({ onSave, onClose }) {
   )
 }
 
-function BusinessLedger({ onNavigate }) {
+function FinancePulse({ onNavigate }) {
   const { finance, addFinanceEntry } = useStore()
   const [showAdd, setShowAdd] = useState(false)
-  const { entries = [], goals = {} } = finance
+  const { entries = [] } = finance
 
   const now = new Date()
   const mStart = startOfMonth(now)
   const mEnd   = endOfMonth(now)
-  const yStart = startOfYear(now)
+
+  // Combined month totals across both businesses
+  const monthEntries = entries.filter(e => { const d = parseISO(e.date); return d >= mStart && d <= mEnd })
+  const monthIncome  = monthEntries.filter(e => (e.type || 'income') === 'income').reduce((a, e) => a + e.amount, 0)
+  const monthExpense = monthEntries.filter(e => e.type === 'expense').reduce((a, e) => a + e.amount, 0)
+  const monthNet     = monthIncome - monthExpense
+
+  // Last 4 entries across all businesses, newest first
+  const recent = [...entries].sort((a, b) => b.date.localeCompare(a.date) || b.id.localeCompare(a.id)).slice(0, 4)
 
   return (
     <section>
       <div className="flex items-center justify-between mb-3">
         <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', color: '#5C5650', letterSpacing: '0.18em', textTransform: 'uppercase' }}>
-          Business Ledger
+          Finance
         </p>
         <div className="flex gap-2">
           <button onClick={() => setShowAdd(true)} className="btn-ghost text-xs py-1"><Plus size={12}/> Entry</button>
           <button onClick={onNavigate} style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', color: '#5C5650', letterSpacing: '0.1em' }}>
-            FINANCE →
+            ALL →
           </button>
         </div>
       </div>
 
-      <div className="space-y-3">
-        {['signal9', 'app'].map(bizId => {
-          const color = BIZ_COLORS[bizId]
-          const label = BIZ_LABELS[bizId]
-          const bizEntries = entries.filter(e => e.businessId === bizId)
+      <div className="card">
+        {/* Month net summary */}
+        <div className="flex items-end justify-between mb-4">
+          <div>
+            <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.5rem', color: '#5C5650', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 4 }}>
+              {format(now, 'MMMM')} net
+            </p>
+            <p style={{ fontFamily: '"Playfair Display", serif', fontWeight: 600, fontSize: '1.8rem', lineHeight: 1, color: monthNet >= 0 ? '#2D9E5A' : '#DC2626' }}>
+              {monthNet < 0 ? '−' : '+'}{aud(monthNet)}
+            </p>
+          </div>
+          <div className="flex gap-4 text-right">
+            <div>
+              <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.48rem', color: '#5C5650', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 3 }}>In</p>
+              <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.75rem', color: '#2D9E5A' }}>{aud(monthIncome)}</p>
+            </div>
+            <div>
+              <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.48rem', color: '#5C5650', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 3 }}>Out</p>
+              <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.75rem', color: monthExpense > 0 ? '#DC2626' : '#5C5650' }}>{aud(monthExpense)}</p>
+            </div>
+          </div>
+        </div>
 
-          const monthEntries = bizEntries.filter(e => { const d = parseISO(e.date); return d >= mStart && d <= mEnd })
-          const monthIncome  = monthEntries.filter(e => (e.type || 'income') === 'income').reduce((a, e) => a + e.amount, 0)
-          const monthExpense = monthEntries.filter(e => e.type === 'expense').reduce((a, e) => a + e.amount, 0)
-          const monthNet     = monthIncome - monthExpense
-
-          const ytdIncome  = bizEntries.filter(e => parseISO(e.date) >= yStart && (e.type || 'income') === 'income').reduce((a, e) => a + e.amount, 0)
-          const ytdExpense = bizEntries.filter(e => parseISO(e.date) >= yStart && e.type === 'expense').reduce((a, e) => a + e.amount, 0)
-          const ytdNet     = ytdIncome - ytdExpense
-
-          const monthGoal = goals[bizId]?.monthly || 0
-          const progress  = monthGoal > 0 ? Math.min(monthIncome / monthGoal, 1) : 0
-          const recent    = [...bizEntries].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 3)
-
-          return (
-            <div key={bizId} className="card" style={{ borderColor: color + '22' }}>
-              {/* Header */}
-              <div className="flex items-center gap-2 mb-3">
-                <div className="w-1 h-5 rounded-full shrink-0" style={{ backgroundColor: color }} />
-                <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', color: '#9A9088', letterSpacing: '0.08em', flex: 1 }}>{label}</p>
-              </div>
-
-              {/* P&L strip */}
-              <div className="grid grid-cols-3 gap-2 mb-3">
-                <div>
-                  <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.5rem', color: '#5C5650', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 3 }}>Income</p>
-                  <p style={{ fontFamily: '"Playfair Display", serif', fontWeight: 600, fontSize: '1rem', color: '#2D9E5A', lineHeight: 1 }}>{aud(monthIncome)}</p>
-                </div>
-                <div>
-                  <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.5rem', color: '#5C5650', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 3 }}>Outgoings</p>
-                  <p style={{ fontFamily: '"Playfair Display", serif', fontWeight: 600, fontSize: '1rem', color: monthExpense > 0 ? '#DC2626' : '#5C5650', lineHeight: 1 }}>{aud(monthExpense)}</p>
-                </div>
-                <div>
-                  <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.5rem', color: '#5C5650', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 3 }}>Net</p>
-                  <p style={{ fontFamily: '"Playfair Display", serif', fontWeight: 600, fontSize: '1rem', color: monthNet >= 0 ? '#2D9E5A' : '#DC2626', lineHeight: 1 }}>
-                    {monthNet < 0 ? '−' : ''}{aud(monthNet)}
+        {/* Recent entries */}
+        {recent.length > 0 ? (
+          <div className="space-y-2" style={{ borderTop: '0.5px solid rgba(255,255,255,0.06)', paddingTop: 10 }}>
+            {recent.map(e => {
+              const isExp = e.type === 'expense'
+              const color = BIZ_COLORS[e.businessId] || '#9A9088'
+              return (
+                <div key={e.id} className="flex items-center gap-2">
+                  <div className="w-1 h-3 rounded-full shrink-0" style={{ backgroundColor: color }} />
+                  <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.5rem', color: '#5C5650', width: 36, flexShrink: 0 }}>
+                    {format(parseISO(e.date), 'dd MMM')}
+                  </p>
+                  <p className="flex-1 min-w-0 truncate" style={{ fontSize: '0.7rem', color: '#9A9088' }}>{e.source}</p>
+                  <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.7rem', color: isExp ? '#DC2626' : '#2D9E5A', fontWeight: 600, flexShrink: 0 }}>
+                    {isExp ? '−' : '+'}{aud(e.amount)}
                   </p>
                 </div>
-              </div>
-
-              {/* Goal progress bar */}
-              {monthGoal > 0 && (
-                <div className="mb-3">
-                  <div className="h-0.5 rounded-full" style={{ background: 'rgba(255,255,255,0.06)' }}>
-                    <div className="h-0.5 rounded-full transition-all duration-500"
-                      style={{ width: `${progress * 100}%`, backgroundColor: progress >= 1 ? '#2D9E5A' : color }} />
-                  </div>
-                  <div className="flex justify-between mt-1">
-                    <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.48rem', color: '#5C5650' }}>
-                      {Math.round(progress * 100)}% of {aud(monthGoal)} goal
-                    </p>
-                    <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.48rem', color: '#5C5650' }}>
-                      YTD net: <span style={{ color: ytdNet >= 0 ? '#2D9E5A' : '#DC2626' }}>{ytdNet < 0 ? '−' : ''}{aud(ytdNet)}</span>
-                    </p>
-                  </div>
-                </div>
-              )}
-
-              {/* Recent entries mini-ledger */}
-              {recent.length > 0 && (
-                <div className="space-y-1.5 pt-2" style={{ borderTop: '0.5px solid rgba(255,255,255,0.06)' }}>
-                  {recent.map(e => {
-                    const isExp = e.type === 'expense'
-                    return (
-                      <div key={e.id} className="flex items-center gap-2">
-                        <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.5rem', color: '#5C5650', width: 38, flexShrink: 0 }}>
-                          {format(parseISO(e.date), 'dd MMM')}
-                        </p>
-                        <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.48rem', color: isExp ? '#DC2626' : '#2D9E5A', width: 22, flexShrink: 0 }}>
-                          {isExp ? 'EXP' : 'INC'}
-                        </p>
-                        <p className="flex-1 min-w-0 truncate" style={{ fontSize: '0.7rem', color: '#9A9088' }}>{e.source}</p>
-                        <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.65rem', color: isExp ? '#DC2626' : '#EDE8E0', fontWeight: 600, flexShrink: 0 }}>
-                          {isExp ? '−' : '+'}{aud(e.amount)}
-                        </p>
-                      </div>
-                    )
-                  })}
-                </div>
-              )}
-
-              {recent.length === 0 && (
-                <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.55rem', color: '#3D3A36' }}>No entries yet.</p>
-              )}
-            </div>
-          )
-        })}
+              )
+            })}
+          </div>
+        ) : (
+          <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.55rem', color: '#3D3A36' }}>No entries yet.</p>
+        )}
       </div>
 
       {showAdd && (
@@ -587,8 +549,8 @@ export default function Dashboard() {
           </div>
         </section>
 
-        {/* Business Ledger */}
-        <BusinessLedger onNavigate={() => navigate('/finance')} />
+        {/* Finance Pulse */}
+        <FinancePulse onNavigate={() => navigate('/finance')} />
 
         {/* Upcoming */}
         <section>

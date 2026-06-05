@@ -143,6 +143,86 @@ function MonthlyChart({ entries, bizId, goal }) {
   )
 }
 
+function QuickEntryStrip({ onSave, onFullForm }) {
+  const [amount, setAmount] = useState('')
+  const [biz, setBiz] = useState('signal9')
+  const [type, setType] = useState('income')
+
+  function handleAdd() {
+    const n = parseFloat(amount)
+    if (!n || n <= 0) return
+    onSave({
+      businessId: biz,
+      type,
+      date: format(new Date(), 'yyyy-MM-dd'),
+      amount: n,
+      category: (type === 'income' ? BIZ_CATS[biz] : EXPENSE_CATS[biz])?.[0] || 'Other',
+      source: type === 'income' ? 'Quick entry' : 'Quick expense',
+      note: '',
+    })
+    setAmount('')
+  }
+
+  return (
+    <div className="card mb-5" style={{ padding: '10px 12px' }}>
+      <div className="flex gap-2 items-center flex-wrap">
+        {/* Amount */}
+        <input
+          type="number" inputMode="decimal" min="0.01" step="0.01"
+          placeholder="Amount $"
+          value={amount} onChange={e => setAmount(e.target.value)}
+          onKeyDown={e => e.key === 'Enter' && handleAdd()}
+          style={{
+            flex: '1 1 90px', minWidth: 80,
+            background: 'rgba(10,9,8,0.75)', color: '#F0EBE2',
+            border: '0.5px solid rgba(255,255,255,0.14)', borderRadius: 8,
+            padding: '6px 10px', fontSize: '0.875rem', outline: 'none',
+            fontFamily: '"DM Mono", monospace',
+          }}
+        />
+        {/* Business toggle */}
+        <div className="flex rounded-lg overflow-hidden" style={{ border: '0.5px solid rgba(255,255,255,0.1)' }}>
+          {[['signal9','S9'],['app','App']].map(([id, lbl]) => (
+            <button key={id} onClick={() => setBiz(id)}
+              style={{
+                padding: '6px 10px', fontSize: '0.65rem', fontFamily: '"DM Mono", monospace',
+                background: biz === id ? BIZ_COLORS[id] + '33' : 'transparent',
+                color: biz === id ? BIZ_COLORS[id] : '#5C5650',
+                border: 'none', cursor: 'pointer', letterSpacing: '0.05em',
+              }}>{lbl}</button>
+          ))}
+        </div>
+        {/* Income/Expense toggle */}
+        <div className="flex rounded-lg overflow-hidden" style={{ border: '0.5px solid rgba(255,255,255,0.1)' }}>
+          {[['income','+'],['expense','−']].map(([t, sym]) => (
+            <button key={t} onClick={() => setType(t)}
+              style={{
+                padding: '6px 10px', fontSize: '0.75rem', fontFamily: '"DM Mono", monospace',
+                background: type === t ? (t === 'income' ? 'rgba(45,158,90,0.25)' : 'rgba(220,38,38,0.2)') : 'transparent',
+                color: type === t ? (t === 'income' ? '#2D9E5A' : '#DC2626') : '#5C5650',
+                border: 'none', cursor: 'pointer', fontWeight: 700,
+              }}>{sym}</button>
+          ))}
+        </div>
+        {/* Add */}
+        <button onClick={handleAdd}
+          style={{
+            background: '#C4522A', color: 'white', border: 'none',
+            borderRadius: 8, padding: '6px 14px', cursor: 'pointer',
+            fontSize: '0.75rem', fontFamily: '"DM Mono", monospace',
+          }}>Add</button>
+        {/* Full form link */}
+        <button onClick={onFullForm}
+          style={{
+            background: 'none', border: 'none', cursor: 'pointer',
+            fontSize: '0.6rem', fontFamily: '"DM Mono", monospace',
+            color: '#5C5650', letterSpacing: '0.08em', textDecoration: 'underline',
+          }}>More options</button>
+      </div>
+    </div>
+  )
+}
+
 export default function Finance() {
   const { finance, addFinanceEntry, deleteFinanceEntry, setFinanceGoal } = useStore()
   const [tab, setTab] = useState('signal9')
@@ -189,10 +269,12 @@ export default function Finance() {
   return (
     <SectionShell accent="#D4A017" bgImage={bgImg}>
     <div className="p-4 md:p-6 max-w-2xl">
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-4">
         <h1 className="section-title">Finance</h1>
-        <button onClick={() => setShowAdd(true)} className="btn-primary"><Plus size={16}/> Add Entry</button>
       </div>
+
+      {/* Quick-add strip */}
+      <QuickEntryStrip onSave={(data) => addFinanceEntry(data)} onFullForm={() => setShowAdd(true)} />
 
       {/* Business tabs */}
       <div className="flex gap-2 mb-6">
