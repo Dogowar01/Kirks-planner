@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Plus, Trash2, ChevronDown, ChevronUp, ExternalLink, Bell } from 'lucide-react'
+import { Plus, Trash2, ChevronDown, ChevronUp, ExternalLink, CheckSquare } from 'lucide-react'
 import { useStore } from '../../hooks/useStore'
 import { BUSINESSES, STATUSES } from '../../lib/constants'
 import StatusBadge from '../../components/StatusBadge'
@@ -54,9 +54,173 @@ function ProjectForm({ initial = {}, businessId, onSave, onClose }) {
   )
 }
 
-function ProjectCard({ project, tasks, events, onDelete, onEdit }) {
+function ProjectTaskPanel({ project, accent, tasks, addTask, updateTask, deleteTask }) {
+  const [newText, setNewText]       = useState('')
+  const [newPriority, setNewPriority] = useState('normal')
+  const [deleteId, setDeleteId]     = useState(null)
+  const [showDone, setShowDone]     = useState(false)
+
+  const linked   = tasks.filter(t => t.projectId === project.id)
+  const open     = linked.filter(t => !t.done)
+  const done     = linked.filter(t => t.done)
+  const total    = linked.length
+  const pct      = total > 0 ? Math.round((done.length / total) * 100) : 0
+
+  function handleAdd(e) {
+    e.preventDefault()
+    if (!newText.trim()) return
+    addTask({
+      text: newText.trim(),
+      category: project.businessId || 'personal',
+      projectId: project.id,
+      priority: newPriority,
+    })
+    setNewText('')
+    setNewPriority('normal')
+  }
+
+  const priorityColor = { high: '#D85A30', normal: accent, low: '#5C5650' }
+
+  return (
+    <div style={{ marginTop: 14, paddingTop: 14, borderTop: '0.5px solid rgba(255,255,255,0.07)' }}>
+
+      {/* Progress bar */}
+      <div className="flex items-center gap-3 mb-3">
+        <div className="flex-1" style={{ height: 3, background: 'rgba(255,255,255,0.07)', borderRadius: 2 }}>
+          <div style={{
+            height: '100%', borderRadius: 2,
+            width: `${pct}%`,
+            background: pct === 100 ? '#2D9E5A' : accent,
+            boxShadow: pct > 0 ? `0 0 6px ${accent}70` : 'none',
+            transition: 'width 0.35s ease',
+          }} />
+        </div>
+        <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.55rem', color: '#A09890', flexShrink: 0 }}>
+          {done.length}/{total} done{pct === 100 && total > 0 ? ' ✓' : ''}
+        </p>
+      </div>
+
+      {/* Open tasks */}
+      {open.length > 0 && (
+        <div className="space-y-1.5 mb-3">
+          {open.map(t => (
+            <div key={t.id} className="flex items-center gap-2 group">
+              {/* Checkbox */}
+              <button
+                onClick={() => updateTask(t.id, { done: true })}
+                className="shrink-0 w-4 h-4 rounded border flex items-center justify-center transition-colors"
+                style={{ borderColor: priorityColor[t.priority] || accent, background: 'transparent' }}>
+              </button>
+              {/* Text */}
+              <p className="flex-1 min-w-0 truncate" style={{ fontSize: '0.8rem', color: '#C8BFB5' }}>
+                {t.text}
+              </p>
+              {/* Priority pip */}
+              {t.priority !== 'normal' && (
+                <span style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.5rem',
+                  color: priorityColor[t.priority], letterSpacing: '0.08em', flexShrink: 0 }}>
+                  {t.priority.toUpperCase()}
+                </span>
+              )}
+              {/* Delete */}
+              <button
+                onClick={() => setDeleteId(t.id)}
+                className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity p-0.5 rounded hover:text-red-400"
+                style={{ color: '#5C5650' }}>
+                <Trash2 size={11} />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {open.length === 0 && done.length === 0 && (
+        <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', color: '#5C5650', marginBottom: 12 }}>
+          No tasks yet — add one below
+        </p>
+      )}
+
+      {/* Completed tasks toggle */}
+      {done.length > 0 && (
+        <div className="mb-3">
+          <button
+            onClick={() => setShowDone(s => !s)}
+            className="flex items-center gap-1.5 mb-1.5"
+            style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.55rem', color: '#5C5650', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+            {showDone ? <ChevronUp size={10} /> : <ChevronDown size={10} />}
+            {done.length} completed
+          </button>
+          {showDone && (
+            <div className="space-y-1.5 opacity-50">
+              {done.map(t => (
+                <div key={t.id} className="flex items-center gap-2 group">
+                  <button
+                    onClick={() => updateTask(t.id, { done: false })}
+                    className="shrink-0 w-4 h-4 rounded border flex items-center justify-center transition-colors"
+                    style={{ borderColor: accent, background: accent }}>
+                    <span style={{ color: 'white', fontSize: '0.5rem', lineHeight: 1 }}>✓</span>
+                  </button>
+                  <p className="flex-1 min-w-0 truncate line-through" style={{ fontSize: '0.8rem', color: '#7A7470' }}>
+                    {t.text}
+                  </p>
+                  <button
+                    onClick={() => setDeleteId(t.id)}
+                    className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity p-0.5 rounded hover:text-red-400"
+                    style={{ color: '#5C5650' }}>
+                    <Trash2 size={11} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Quick-add form */}
+      <form onSubmit={handleAdd} className="flex items-center gap-2"
+        style={{ background: 'rgba(0,0,0,0.2)', borderRadius: 8, padding: '6px 10px',
+          border: '0.5px solid rgba(255,255,255,0.06)' }}>
+        <input
+          className="flex-1 bg-transparent outline-none text-sm"
+          style={{ color: '#EDE8E0', fontFamily: '"DM Sans", sans-serif', fontSize: '0.8rem' }}
+          placeholder="Add a task…"
+          value={newText}
+          onChange={e => setNewText(e.target.value)}
+        />
+        <select
+          value={newPriority}
+          onChange={e => setNewPriority(e.target.value)}
+          className="outline-none text-xs rounded shrink-0"
+          style={{ background: '#1F1C19', color: '#A09890', border: '0.5px solid rgba(255,255,255,0.08)',
+            fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', padding: '2px 4px', borderRadius: 5 }}>
+          <option value="low">Low</option>
+          <option value="normal">Normal</option>
+          <option value="high">High</option>
+        </select>
+        <button type="submit"
+          style={{ background: accent, color: 'white', border: 'none', borderRadius: 5,
+            padding: '3px 8px', cursor: 'pointer', flexShrink: 0,
+            boxShadow: `0 0 8px ${accent}60` }}>
+          <Plus size={13} />
+        </button>
+      </form>
+
+      {deleteId && (
+        <ConfirmDialog title="Delete Task" message="Delete this task? This cannot be undone."
+          onConfirm={() => { deleteTask(deleteId); setDeleteId(null) }}
+          onCancel={() => setDeleteId(null)} />
+      )}
+    </div>
+  )
+}
+
+function ProjectCard({ project, tasks, events, accent, onDelete, onEdit, addTask, updateTask, deleteTask }) {
   const [open, setOpen] = useState(false)
-  const linked = tasks.filter(t => t.projectId === project.id && !t.done)
+
+  const linked = tasks.filter(t => t.projectId === project.id)
+  const done   = linked.filter(t => t.done).length
+  const total  = linked.length
+  const pct    = total > 0 ? Math.round((done / total) * 100) : 0
 
   return (
     <div className="card">
@@ -69,6 +233,23 @@ function ProjectCard({ project, tasks, events, onDelete, onEdit }) {
             <StatusBadge status={project.status} />
           </div>
           {project.description && <p className="text-text-tertiary text-xs mt-1 truncate">{project.description}</p>}
+
+          {/* Inline mini progress bar */}
+          {total > 0 && (
+            <div className="flex items-center gap-2 mt-2">
+              <div style={{ flex: 1, height: 2, background: 'rgba(255,255,255,0.07)', borderRadius: 2, maxWidth: 120 }}>
+                <div style={{
+                  height: '100%', borderRadius: 2, width: `${pct}%`,
+                  background: pct === 100 ? '#2D9E5A' : accent,
+                  transition: 'width 0.3s ease',
+                }} />
+              </div>
+              <span style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.5rem', color: '#5C5650' }}>
+                {done}/{total}
+              </span>
+            </div>
+          )}
+
           {project.tags?.length > 0 && (
             <div className="flex gap-1 flex-wrap mt-1.5">
               {project.tags.map(tag => (
@@ -89,7 +270,7 @@ function ProjectCard({ project, tasks, events, onDelete, onEdit }) {
       </div>
 
       {open && (
-        <div className="mt-4 space-y-3 pt-3 border-t" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
+        <div className="mt-3 space-y-3 pt-3 border-t" style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
           {project.note && (
             <p className="text-text-secondary text-xs whitespace-pre-wrap">{project.note}</p>
           )}
@@ -103,19 +284,16 @@ function ProjectCard({ project, tasks, events, onDelete, onEdit }) {
               ))}
             </div>
           )}
-          {linked.length > 0 && (
-            <div>
-              <p className="text-text-tertiary text-[10px] uppercase tracking-wide mb-2">Open Tasks</p>
-              <div className="space-y-1">
-                {linked.map(t => (
-                  <div key={t.id} className="flex items-center gap-2 text-xs text-text-secondary">
-                    <div className="w-3 h-3 rounded border border-text-tertiary shrink-0" />
-                    {t.text}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+
+          {/* Full task panel */}
+          <ProjectTaskPanel
+            project={project}
+            accent={accent}
+            tasks={tasks}
+            addTask={addTask}
+            updateTask={updateTask}
+            deleteTask={deleteTask}
+          />
         </div>
       )}
     </div>
@@ -123,11 +301,13 @@ function ProjectCard({ project, tasks, events, onDelete, onEdit }) {
 }
 
 function BusinessSection({ bizId, biz }) {
-  const { projects, tasks, events, addProject, updateProject, deleteProject, updateSettings, settings } = useStore()
-  const [showAdd, setShowAdd] = useState(false)
+  const { projects, tasks, events, addProject, updateProject, deleteProject,
+          addTask, updateTask, deleteTask,
+          updateSettings, settings } = useStore()
+  const [showAdd, setShowAdd]     = useState(false)
   const [editProject, setEditProject] = useState(null)
-  const [deleteId, setDeleteId] = useState(null)
-  const [editNote, setEditNote] = useState(false)
+  const [deleteId, setDeleteId]   = useState(null)
+  const [editNote, setEditNote]   = useState(false)
   const [statusNote, setStatusNote] = useState(settings?.[`${bizId}StatusNote`] || '')
 
   const bizProjects = projects
@@ -171,6 +351,8 @@ function BusinessSection({ bizId, biz }) {
           ? <p className="text-text-tertiary text-sm">No projects yet.</p>
           : bizProjects.map(p => (
               <ProjectCard key={p.id} project={p} tasks={tasks} events={events}
+                accent={biz.color}
+                addTask={addTask} updateTask={updateTask} deleteTask={deleteTask}
                 onDelete={(id) => setDeleteId(id)}
                 onEdit={(p) => setEditProject(p)} />
             ))
