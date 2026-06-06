@@ -970,44 +970,59 @@ function CountdownTimer() {
 }
 
 // ─── Pen Dose Calculator ──────────────────────────────────────────────────────
+// Mounjaro KwikPen (multi-dose): 4 doses × 0.6 mL = 2.4 mL total
+//   1 click = 0.01 mL  →  60 clicks = 0.60 mL = 1 full standard dose
+//   Concentration = pen-strength-mg ÷ 0.60 mL
+//   e.g. 5 mg pen: 5 ÷ 0.60 = 8.333 mg/mL  (verified against click chart)
 const PEN_PRESETS = [
-  { id: 'custom',     label: 'Compounded (custom)', conc: '', clickVol: 0.05 },
-  { id: 'mounjaro25', label: 'Mounjaro 2.5 mg',     conc: 4,    clickVol: 0.05 },
-  { id: 'mounjaro5',  label: 'Mounjaro 5 mg',        conc: 8,    clickVol: 0.05 },
-  { id: 'mounjaro75', label: 'Mounjaro 7.5 mg',      conc: 12,   clickVol: 0.05 },
-  { id: 'mounjaro10', label: 'Mounjaro 10 mg',       conc: 16,   clickVol: 0.05 },
-  { id: 'mounjaro125',label: 'Mounjaro 12.5 mg',     conc: 20,   clickVol: 0.05 },
-  { id: 'mounjaro15', label: 'Mounjaro 15 mg',       conc: 24,   clickVol: 0.05 },
-  { id: 'ozempic025', label: 'Ozempic 0.25 mg',      conc: 1.34, clickVol: 0.05 },
-  { id: 'ozempic05',  label: 'Ozempic 0.5 mg',       conc: 1.34, clickVol: 0.05 },
-  { id: 'ozempic1',   label: 'Ozempic 1 mg',         conc: 1.34, clickVol: 0.05 },
-  { id: 'ozempic2',   label: 'Ozempic 2 mg',         conc: 2.68, clickVol: 0.05 },
+  { id: 'custom',      label: 'Compounded (custom)',         conc: '',          clickVol: 0.01, isMounjaro: false },
+  // ── Mounjaro KwikPen ──────────────────────────────────────────────────────
+  { id: 'mounjaro25',  label: 'Mounjaro 2.5 mg KwikPen',    conc: 25/6,        clickVol: 0.01, isMounjaro: true },  // 4.1667 mg/mL
+  { id: 'mounjaro5',   label: 'Mounjaro 5 mg KwikPen',      conc: 50/6,        clickVol: 0.01, isMounjaro: true },  // 8.3333 mg/mL
+  { id: 'mounjaro75',  label: 'Mounjaro 7.5 mg KwikPen',    conc: 12.5,        clickVol: 0.01, isMounjaro: true },  // 12.5 mg/mL
+  { id: 'mounjaro10',  label: 'Mounjaro 10 mg KwikPen',     conc: 50/3,        clickVol: 0.01, isMounjaro: true },  // 16.6667 mg/mL
+  { id: 'mounjaro125', label: 'Mounjaro 12.5 mg KwikPen',   conc: 125/6,       clickVol: 0.01, isMounjaro: true },  // 20.8333 mg/mL
+  { id: 'mounjaro15',  label: 'Mounjaro 15 mg KwikPen',     conc: 25,          clickVol: 0.01, isMounjaro: true },  // 25 mg/mL
+  // ── Ozempic FlexPen ───────────────────────────────────────────────────────
+  { id: 'ozempic025',  label: 'Ozempic 0.25 mg',            conc: 1.34,        clickVol: 0.05, isMounjaro: false },
+  { id: 'ozempic05',   label: 'Ozempic 0.5 mg',             conc: 1.34,        clickVol: 0.05, isMounjaro: false },
+  { id: 'ozempic1',    label: 'Ozempic 1 mg',               conc: 1.34,        clickVol: 0.05, isMounjaro: false },
+  { id: 'ozempic2',    label: 'Ozempic 2 mg',               conc: 2.68,        clickVol: 0.05, isMounjaro: false },
 ]
 
+// Total pen volume for KwikPen: 4 doses × 0.6 mL = 2.4 mL
+const KWIKPEN_TOTAL_ML = 2.4
+
 function PenCalculator() {
-  const [preset, setPreset] = useState('custom')
+  const [preset, setPreset] = useState('mounjaro5')
   const [conc, setConc] = useState('')
-  const [clickVol, setClickVol] = useState('0.05')
-  const [mode, setMode] = useState('dose') // 'dose' → give mg, get clicks | 'clicks' → give clicks, get mg
+  const [clickVol, setClickVol] = useState('0.01')
+  const [mode, setMode] = useState('clicks') // 'dose' → mg → clicks | 'clicks' → clicks → mg
   const [dose, setDose] = useState('')
   const [clicksIn, setClicksIn] = useState('')
 
-  const p = PEN_PRESETS.find(x=>x.id===preset)
-  const effConc = preset==='custom' ? parseFloat(conc) : p.conc
-  const effClick = preset==='custom' ? parseFloat(clickVol) : p.clickVol
+  const p = PEN_PRESETS.find(x => x.id === preset)
+  const effConc  = preset === 'custom' ? parseFloat(conc)     : p.conc
+  const effClick = preset === 'custom' ? parseFloat(clickVol) : p.clickVol
+  const isMounjaro = preset === 'custom' ? false : p.isMounjaro
 
-  // dose → clicks
-  const doseNum = parseFloat(dose)
+  // dose (mg) → clicks
+  const doseNum   = parseFloat(dose)
   const clicksOut = (effConc && effClick && doseNum)
     ? Math.round(doseNum / effConc / effClick) : null
-  const volFromDose = clicksOut ? Math.round(clicksOut * effClick * 1000)/1000 : null
+  const volFromDose = clicksOut != null ? Math.round(clicksOut * effClick * 1000) / 1000 : null
+  const dosesPerPenFromDose = (isMounjaro && volFromDose && volFromDose > 0)
+    ? Math.floor(KWIKPEN_TOTAL_ML / volFromDose) : null
 
-  // clicks → dose
-  const clicksNum = parseFloat(clicksIn)
-  const doseOut = (effConc && effClick && clicksNum)
-    ? Math.round(clicksNum * effClick * effConc * 1000)/1000 : null
-  const volFromClicks = (effClick && clicksNum)
-    ? Math.round(clicksNum * effClick * 1000)/1000 : null
+  // clicks → dose (mg)
+  const clicksNum    = parseFloat(clicksIn)
+  const volFromClicks = (effClick && clicksNum) ? Math.round(clicksNum * effClick * 1000) / 1000 : null
+  const doseOut       = (effConc && effClick && clicksNum)
+    ? Math.round(clicksNum * effClick * effConc * 100) / 100 : null
+  const dosesPerPenFromClicks = (isMounjaro && volFromClicks && volFromClicks > 0)
+    ? Math.floor(KWIKPEN_TOTAL_ML / volFromClicks) : null
+
+  const concDisplay = effConc ? effConc.toFixed(4).replace(/\.?0+$/, '') : '—'
 
   return (
     <div className="card space-y-4">
@@ -1020,74 +1035,109 @@ function PenCalculator() {
 
       <div>
         <label className="section-label mb-1 block">Pen Type</label>
-        <select className="input" value={preset} onChange={e=>setPreset(e.target.value)}>
-          {PEN_PRESETS.map(p=><option key={p.id} value={p.id}>{p.label}</option>)}
+        <select className="input" value={preset} onChange={e => { setPreset(e.target.value); setDose(''); setClicksIn('') }}>
+          <optgroup label="Mounjaro KwikPen (multi-dose, 1 click = 0.01 mL)">
+            {PEN_PRESETS.filter(x => x.isMounjaro).map(x => <option key={x.id} value={x.id}>{x.label}</option>)}
+          </optgroup>
+          <optgroup label="Ozempic FlexPen">
+            {PEN_PRESETS.filter(x => !x.isMounjaro && x.id !== 'custom').map(x => <option key={x.id} value={x.id}>{x.label}</option>)}
+          </optgroup>
+          <optgroup label="Other">
+            <option value="custom">Compounded (custom)</option>
+          </optgroup>
         </select>
       </div>
 
-      {preset==='custom' && (
-        <div className="grid grid-cols-2 gap-3">
+      {/* Pen spec row */}
+      {preset !== 'custom' && (
+        <div style={{background:'rgba(0,0,0,0.2)',borderRadius:8,padding:'8px 12px',display:'flex',gap:16,flexWrap:'wrap'}}>
           <div>
-            <label className="section-label mb-1 block">Concentration (mg/mL)</label>
-            <input className="input" type="number" min="0" step="0.1" placeholder="e.g. 5" value={conc} onChange={e=>setConc(e.target.value)} />
+            <p className="section-label">Concentration</p>
+            <p style={{fontFamily:'"DM Mono",monospace',fontSize:'0.8rem',color:'var(--section-accent)'}}>{concDisplay} mg/mL</p>
           </div>
           <div>
-            <label className="section-label mb-1 block">mL per click</label>
-            <input className="input" type="number" min="0" step="0.01" placeholder="0.05" value={clickVol} onChange={e=>setClickVol(e.target.value)} />
+            <p className="section-label">Per click</p>
+            <p style={{fontFamily:'"DM Mono",monospace',fontSize:'0.8rem',color:'var(--section-accent)'}}>{p.clickVol} mL</p>
           </div>
+          {isMounjaro && (
+            <div>
+              <p className="section-label">Pen total</p>
+              <p style={{fontFamily:'"DM Mono",monospace',fontSize:'0.8rem',color:'var(--section-accent)'}}>2.4 mL (4 × 0.6 mL)</p>
+            </div>
+          )}
         </div>
       )}
 
-      {preset!=='custom' && (
-        <div style={{background:'rgba(0,0,0,0.2)',borderRadius:8,padding:'8px 12px',display:'flex',gap:16}}>
-          <div><p className="section-label">Concentration</p><p style={{fontFamily:'"DM Mono",monospace',fontSize:'0.8rem',color:'var(--section-accent)'}}>{p.conc} mg/mL</p></div>
-          <div><p className="section-label">Per click</p><p style={{fontFamily:'"DM Mono",monospace',fontSize:'0.8rem',color:'var(--section-accent)'}}>{p.clickVol} mL</p></div>
+      {preset === 'custom' && (
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="section-label mb-1 block">Concentration (mg/mL)</label>
+            <input className="input" type="number" min="0" step="0.01" placeholder="e.g. 8.33" value={conc} onChange={e=>setConc(e.target.value)} />
+          </div>
+          <div>
+            <label className="section-label mb-1 block">mL per click</label>
+            <input className="input" type="number" min="0" step="0.001" placeholder="0.01" value={clickVol} onChange={e=>setClickVol(e.target.value)} />
+          </div>
         </div>
       )}
 
       {/* Mode toggle */}
       <div className="flex gap-2">
-        <button onClick={()=>setMode('dose')} className={`chip flex-1 justify-center ${mode==='dose'?'active':''}`}>mg → clicks</button>
-        <button onClick={()=>setMode('clicks')} className={`chip flex-1 justify-center ${mode==='clicks'?'active':''}`}>clicks → mg</button>
+        <button onClick={() => setMode('clicks')} className={`chip flex-1 justify-center ${mode==='clicks' ? 'active' : ''}`}>clicks → mg</button>
+        <button onClick={() => setMode('dose')}   className={`chip flex-1 justify-center ${mode==='dose'   ? 'active' : ''}`}>mg → clicks</button>
       </div>
 
-      {mode==='dose' && (
+      {/* clicks → mg */}
+      {mode === 'clicks' && (
         <>
           <div>
-            <label className="section-label mb-1 block">Desired Dose (mg)</label>
-            <input className="input" type="number" min="0" step="0.25" placeholder="e.g. 2.5" value={dose} onChange={e=>setDose(e.target.value)} />
+            <label className="section-label mb-1 block">Number of Clicks</label>
+            <input className="input" type="number" min="0" step="1" placeholder="e.g. 40" value={clicksIn} onChange={e=>setClicksIn(e.target.value)} />
           </div>
-          {clicksOut !== null && (
-            <div style={{background:'rgba(0,0,0,0.3)',borderRadius:10,padding:'16px',display:'grid',gridTemplateColumns:'1fr 1fr',gap:12,textAlign:'center'}}>
+          {doseOut !== null && (
+            <div style={{background:'rgba(0,0,0,0.3)',borderRadius:10,padding:'16px',display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:12,textAlign:'center'}}>
               <div>
-                <p className="section-label mb-1">Clicks</p>
-                <p style={{fontFamily:'"Playfair Display",serif',fontStyle:'italic',fontSize:'2.5rem',fontWeight:600,color:'var(--section-accent)',lineHeight:1}}>{clicksOut}</p>
+                <p className="section-label mb-1">Dose</p>
+                <p style={{fontFamily:'"Playfair Display",serif',fontStyle:'italic',fontSize:'2rem',fontWeight:600,color:'var(--section-accent)',lineHeight:1}}>{doseOut}<span style={{fontSize:'0.9rem'}}> mg</span></p>
               </div>
               <div>
                 <p className="section-label mb-1">Volume</p>
-                <p style={{fontFamily:'"Playfair Display",serif',fontStyle:'italic',fontSize:'2.5rem',fontWeight:600,color:'var(--section-accent)',lineHeight:1}}>{volFromDose}<span style={{fontSize:'1rem'}}> mL</span></p>
+                <p style={{fontFamily:'"Playfair Display",serif',fontStyle:'italic',fontSize:'2rem',fontWeight:600,color:'var(--section-accent)',lineHeight:1}}>{volFromClicks}<span style={{fontSize:'0.9rem'}}> mL</span></p>
               </div>
+              {dosesPerPenFromClicks !== null && (
+                <div>
+                  <p className="section-label mb-1">Doses / pen</p>
+                  <p style={{fontFamily:'"Playfair Display",serif',fontStyle:'italic',fontSize:'2rem',fontWeight:600,color:'var(--section-accent)',lineHeight:1}}>{dosesPerPenFromClicks}<span style={{fontSize:'0.75rem'}}> wks</span></p>
+                </div>
+              )}
             </div>
           )}
         </>
       )}
 
-      {mode==='clicks' && (
+      {/* mg → clicks */}
+      {mode === 'dose' && (
         <>
           <div>
-            <label className="section-label mb-1 block">Number of Clicks</label>
-            <input className="input" type="number" min="0" step="1" placeholder="e.g. 10" value={clicksIn} onChange={e=>setClicksIn(e.target.value)} />
+            <label className="section-label mb-1 block">Desired Dose (mg)</label>
+            <input className="input" type="number" min="0" step="0.25" placeholder="e.g. 5" value={dose} onChange={e=>setDose(e.target.value)} />
           </div>
-          {doseOut !== null && (
-            <div style={{background:'rgba(0,0,0,0.3)',borderRadius:10,padding:'16px',display:'grid',gridTemplateColumns:'1fr 1fr',gap:12,textAlign:'center'}}>
+          {clicksOut !== null && (
+            <div style={{background:'rgba(0,0,0,0.3)',borderRadius:10,padding:'16px',display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:12,textAlign:'center'}}>
               <div>
-                <p className="section-label mb-1">Dose</p>
-                <p style={{fontFamily:'"Playfair Display",serif',fontStyle:'italic',fontSize:'2.5rem',fontWeight:600,color:'var(--section-accent)',lineHeight:1}}>{doseOut}<span style={{fontSize:'1rem'}}> mg</span></p>
+                <p className="section-label mb-1">Clicks</p>
+                <p style={{fontFamily:'"Playfair Display",serif',fontStyle:'italic',fontSize:'2rem',fontWeight:600,color:'var(--section-accent)',lineHeight:1}}>{clicksOut}</p>
               </div>
               <div>
                 <p className="section-label mb-1">Volume</p>
-                <p style={{fontFamily:'"Playfair Display",serif',fontStyle:'italic',fontSize:'2.5rem',fontWeight:600,color:'var(--section-accent)',lineHeight:1}}>{volFromClicks}<span style={{fontSize:'1rem'}}> mL</span></p>
+                <p style={{fontFamily:'"Playfair Display",serif',fontStyle:'italic',fontSize:'2rem',fontWeight:600,color:'var(--section-accent)',lineHeight:1}}>{volFromDose}<span style={{fontSize:'0.9rem'}}> mL</span></p>
               </div>
+              {dosesPerPenFromDose !== null && (
+                <div>
+                  <p className="section-label mb-1">Doses / pen</p>
+                  <p style={{fontFamily:'"Playfair Display",serif',fontStyle:'italic',fontSize:'2rem',fontWeight:600,color:'var(--section-accent)',lineHeight:1}}>{dosesPerPenFromDose}<span style={{fontSize:'0.75rem'}}> wks</span></p>
+                </div>
+              )}
             </div>
           )}
         </>
