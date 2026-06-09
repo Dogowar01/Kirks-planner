@@ -330,11 +330,25 @@ export default function Calendar() {
               <span className={`text-xs font-mono ${isToday(day) ? 'w-5 h-5 rounded-full bg-signal9 text-white flex items-center justify-center text-[10px]' : isCurrentMonth ? 'text-text-primary' : 'text-text-tertiary'}`}>
                 {format(day, 'd')}
               </span>
-              <div className="flex gap-0.5 flex-wrap mt-1">
-                {dayEvents.slice(0,3).map((e, i) => (
-                  <div key={i} className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: CATEGORIES[e.category]?.color }} />
-                ))}
-                {dayEvents.length > 3 && <span className="text-[8px] text-text-tertiary">+{dayEvents.length - 3}</span>}
+              <div className="flex gap-0.5 flex-wrap mt-1 items-center">
+                {(() => {
+                  const binEvents = dayEvents.filter(e => e.title?.startsWith('🟢 FOGO') || e.title?.startsWith('🗑️ Waste'))
+                  const otherEvents = dayEvents.filter(e => !e.title?.startsWith('🟢 FOGO') && !e.title?.startsWith('🗑️ Waste'))
+                  const hasFOGO = binEvents.some(e => e.title?.startsWith('🟢 FOGO'))
+                  const hasWaste = binEvents.some(e => e.title?.startsWith('🗑️ Waste'))
+                  return <>
+                    {hasFOGO && (
+                      <span title="FOGO bin night" style={{ fontSize: '10px', lineHeight: 1 }}>🟢</span>
+                    )}
+                    {hasWaste && (
+                      <Trash2 size={10} style={{ color: '#94a3b8', flexShrink: 0 }} title="Waste & recycling bin night" />
+                    )}
+                    {otherEvents.slice(0, 3 - binEvents.length).map((e, i) => (
+                      <div key={i} className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: CATEGORIES[e.category]?.color }} />
+                    ))}
+                    {dayEvents.length > 3 && <span className="text-[8px] text-text-tertiary">+{dayEvents.length - 3}</span>}
+                  </>
+                })()}
               </div>
             </button>
           )
