@@ -95,7 +95,7 @@ function useWeather() {
 }
 
 const RATES_CACHE_KEY = 's9_rates_cache'
-const RATES_TTL = 60 * 60 * 1000 // 1 hour
+const RATES_TTL = 12 * 60 * 60 * 1000 // 12 hours
 
 function useRates() {
   const [history, setHistory] = useState(() => {
