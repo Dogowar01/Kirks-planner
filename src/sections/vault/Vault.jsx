@@ -150,7 +150,7 @@ function SetupScreen({ vault }) {
         <p style={{ fontSize: 12, color: '#E53E3E', margin: '0 0 12px', fontFamily: '"DM Mono", monospace' }}>{error}</p>
       )}
 
-      <PinPad onKey={handleKey} disabled={busy} />
+      <PinPad onKey={handleKey} disabled={busyRef.current} />
     </div>
   )
 }
@@ -202,9 +202,9 @@ function LockScreen({ vault, onReset }) {
   }
 
   async function handleBio() {
-    setBusy(true)
+    busyRef.current = true
     const ok = await vault.unlockBio()
-    setBusy(false)
+    busyRef.current = false
     if (!ok) showError('Biometric failed — use PIN')
   }
 
@@ -224,12 +224,12 @@ function LockScreen({ vault, onReset }) {
         <p style={{ fontSize: 12, color: '#E53E3E', margin: '0 0 12px', fontFamily: '"DM Mono", monospace' }}>{error}</p>
       )}
 
-      <PinPad onKey={handleKey} disabled={busy} />
+      <PinPad onKey={handleKey} disabled={busyRef.current} />
 
       {bioAvail && bioEnrolled && (
         <button
           onClick={handleBio}
-          disabled={busy}
+          disabled={busyRef.current}
           style={{
             marginTop: 20, display: 'flex', alignItems: 'center', gap: 10,
             background: PLUM_DIM, border: `1px solid ${PLUM_BORDER}`,
