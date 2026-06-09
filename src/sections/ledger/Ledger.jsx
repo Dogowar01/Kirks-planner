@@ -193,7 +193,7 @@ const S9LandingBg = () => (
 // ─── SHARED UI ────────────────────────────────────────────────────────────────
 
 const TopBar = ({t, left, center, right}) => (
-  <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"0.85rem 1rem",borderBottom:`1px solid ${t.border}`,background: t.id==="ap"?"rgba(2,8,16,0.92)":"rgba(10,7,5,0.78)",position:"sticky",top:0,zIndex:20,backdropFilter:"blur(12px)",gap:"0.5rem"}}>
+  <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:`calc(env(safe-area-inset-top) + 0.85rem) 1rem 0.85rem`,borderBottom:`1px solid ${t.border}`,background: t.id==="ap"?"rgba(2,8,16,0.92)":"rgba(10,7,5,0.78)",position:"sticky",top:0,zIndex:20,backdropFilter:"blur(12px)",gap:"0.5rem"}}>
     {left}
     <span style={{fontSize:t.id==="ap"?"0.78rem":"0.88rem",letterSpacing:t.id==="ap"?"0.2em":"0.14em",textTransform:"uppercase",flex:1,textAlign:"center",color:t.textPrimary,fontFamily:t.font}}>{center}</span>
     {right}
@@ -307,7 +307,7 @@ export default function Ledger() {
       </div>
       <div style={{position:"fixed",left:"50%",top:0,bottom:0,width:"1px",background:"linear-gradient(to bottom,transparent 5%,rgba(160,80,160,0.5) 30%,rgba(180,100,180,0.3) 50%,rgba(0,229,255,0.4) 70%,transparent 95%)",zIndex:1}}/>
 
-      <div style={{position:"relative",zIndex:2,minHeight:"100vh",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"2rem 1.25rem"}}>
+      <div style={{position:"relative",zIndex:2,minHeight:"100vh",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:`calc(env(safe-area-inset-top) + 2rem) 1.25rem calc(env(safe-area-inset-bottom) + 2rem)`}}>
         <div style={{textAlign:"center",marginBottom:"2.5rem"}}>
           <div style={{fontSize:"0.65rem",letterSpacing:"0.35em",textTransform:"uppercase",color:"rgba(160,130,90,0.7)",marginBottom:"0.8rem"}}>Business Ledger</div>
           <h1 style={{fontSize:"2.6rem",fontWeight:"normal",margin:0,letterSpacing:"0.12em",background:"linear-gradient(135deg,#e07020 0%,#c9a96e 45%,#00e5ff 100%)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>LEDGER</h1>
