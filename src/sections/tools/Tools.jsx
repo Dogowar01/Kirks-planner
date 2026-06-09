@@ -762,65 +762,6 @@ function ColourPicker() {
   )
 }
 
-// ─── Regex Tester ─────────────────────────────────────────────────────────────
-function RegexTester() {
-  const [pattern, setPattern] = useState('')
-  const [flags, setFlags] = useState('g')
-  const [text, setText] = useState('')
-
-  const { parts, count, error } = (() => {
-    if (!pattern || !text) return { parts: [{ t: text, m: false }], count: 0, error: null }
-    try {
-      const re = new RegExp(pattern, flags.includes('g') ? flags : flags+'g')
-      const parts = [], matches = [...text.matchAll(re)]
-      if (!matches.length) return { parts: [{ t: text, m: false }], count: 0, error: null }
-      let i = 0
-      matches.forEach(m => {
-        if (m.index > i) parts.push({ t: text.slice(i, m.index), m: false })
-        parts.push({ t: m[0], m: true })
-        i = m.index + m[0].length
-      })
-      if (i < text.length) parts.push({ t: text.slice(i), m: false })
-      return { parts, count: matches.length, error: null }
-    } catch(e) { return { parts: [{ t: text, m: false }], count: 0, error: e.message } }
-  })()
-
-  return (
-    <div className="card space-y-3">
-      <p className="section-label">Regex Tester</p>
-      <div className="flex gap-2">
-        <div className="flex-1">
-          <label className="section-label mb-1 block">Pattern</label>
-          <input className="input" value={pattern} onChange={e=>setPattern(e.target.value)} placeholder="e.g. \d+" style={{fontFamily:'"DM Mono",monospace'}} />
-        </div>
-        <div style={{width:72}}>
-          <label className="section-label mb-1 block">Flags</label>
-          <input className="input" value={flags} onChange={e=>setFlags(e.target.value)} placeholder="gi" style={{fontFamily:'"DM Mono",monospace'}} />
-        </div>
-      </div>
-      {error && <p style={{fontFamily:'"DM Mono",monospace',fontSize:'0.7rem',color:'#f87171'}}>{error}</p>}
-      <div>
-        <label className="section-label mb-1 block">Test String</label>
-        <textarea className="input h-24 resize-none" value={text} onChange={e=>setText(e.target.value)} placeholder="Paste text to test…" style={{fontFamily:'"DM Mono",monospace',fontSize:'0.8rem'}} />
-      </div>
-      {text && (
-        <div>
-          <div className="flex items-center justify-between mb-2">
-            <label className="section-label">Matches</label>
-            <span style={{fontFamily:'"DM Mono",monospace',fontSize:'0.65rem',color:'var(--section-accent)'}}>{count} match{count!==1?'es':''}</span>
-          </div>
-          <div style={{background:'rgba(0,0,0,0.3)',borderRadius:8,padding:'10px 12px',fontFamily:'"DM Mono",monospace',fontSize:'0.8rem',lineHeight:1.6,wordBreak:'break-all'}}>
-            {parts.map((p,i)=>p.m
-              ? <mark key={i} style={{background:'color-mix(in srgb,var(--section-accent) 35%,transparent)',color:'#EDE8E0',borderRadius:3,padding:'0 2px'}}>{p.t}</mark>
-              : <span key={i} style={{color:'#A09890'}}>{p.t}</span>
-            )}
-          </div>
-        </div>
-      )}
-    </div>
-  )
-}
-
 // ─── Tip & Bill Splitter ──────────────────────────────────────────────────────
 function BillSplitter() {
   const [bill, setBill] = useState('')
@@ -1154,7 +1095,6 @@ const TOOLS = [
   { id: 'units',      label: 'Unit Converter',       icon: '📐',  desc: 'Length · Weight · Temp' },
   { id: 'qr',         label: 'QR Generator',         icon: '📱',  desc: 'URL to QR code' },
   { id: 'colour',     label: 'Colour Palette',       icon: '🎨',  desc: 'Swatches from any hex colour' },
-  { id: 'regex',      label: 'Regex Tester',         icon: '🔍',  desc: 'Live pattern matching' },
   { id: 'bill',       label: 'Tip & Bill Splitter',  icon: '🧾',  desc: 'Split bills with tip' },
   { id: 'countdown',  label: 'Countdown Timers',     icon: '⏳',  desc: 'Days to any event' },
   { id: 'pen',        label: 'Pen Dose Calculator',  icon: '💉',  desc: 'Mounjaro · Ozempic · Compounded' },
@@ -1203,7 +1143,6 @@ export default function Tools() {
             {active === 'units'     && <UnitConverter />}
             {active === 'qr'        && <QRGenerator />}
             {active === 'colour'    && <ColourPicker />}
-            {active === 'regex'     && <RegexTester />}
             {active === 'bill'      && <BillSplitter />}
             {active === 'countdown' && <CountdownTimer />}
             {active === 'pen'       && <PenCalculator />}

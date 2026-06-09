@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { format, isToday, isPast, parseISO, startOfDay, addDays, isWithinInterval, startOfMonth, endOfMonth, differenceInDays } from 'date-fns'
-import { Bell, Plus, Calendar, CheckSquare, Briefcase, TrendingUp, Target, Pencil, Trash2, X, ChevronRight } from 'lucide-react'
+import { Bell, Plus, Calendar, CheckSquare, Briefcase, TrendingUp, Target, Pencil, Trash2, X, ChevronRight, Zap, ArrowRight, RotateCcw } from 'lucide-react'
 import { useStore } from '../../hooks/useStore'
 import { BUSINESSES } from '../../lib/constants'
 import CategoryBadge from '../../components/CategoryBadge'
@@ -287,6 +287,310 @@ function StatCard({ icon: Icon, label, value, color, onClick }) {
         </div>
       </div>
     </button>
+  )
+}
+
+// ─── Focus Moment ────────────────────────────────────────────────────────────
+const FOCUS_BLOCKS = [
+  {
+    id: 'stuck',
+    label: "I don't know where to start.",
+    blurb: "Everything's loaded. The hardest part is picking the first brick.",
+    rituals: ['one_thing', 'two_minute'],
+  },
+  {
+    id: 'overwhelmed',
+    label: "I'm overwhelmed — too much.",
+    blurb: "You can't do everything today. You can do one thing.",
+    rituals: ['brain_dump', 'pick_one'],
+  },
+  {
+    id: 'scattered',
+    label: "I can't focus — my mind's everywhere.",
+    blurb: "Scattered attention isn't a character flaw. It's a signal.",
+    rituals: ['ground_now', 'clear_desk'],
+  },
+  {
+    id: 'drained',
+    label: "I'm exhausted. No energy.",
+    blurb: "Running on empty is data, not failure.",
+    rituals: ['honest_audit', 'minimum_viable'],
+  },
+  {
+    id: 'avoidance',
+    label: "I'm avoiding something.",
+    blurb: "Avoidance always costs more than the thing you're avoiding.",
+    rituals: ['name_it', 'five_minutes'],
+  },
+]
+
+const FOCUS_RITUALS = {
+  one_thing: {
+    title: 'The One Thing',
+    steps: [
+      { body: "You have a list. Maybe a long one. But today only one thing actually needs to move." },
+      { body: "If you could only get one thing done today — and it had to actually matter — what would it be?", input: 'What is that one thing?' },
+      { body: "That's your target. Everything else is noise until that's done. Go do it.", release: true },
+    ],
+  },
+  two_minute: {
+    title: 'Two-Minute Start',
+    steps: [
+      { body: "You don't have to finish it. You just have to start it. Two minutes — that's the only commitment." },
+      { body: "What's the smallest possible action you could take on the most important thing right now?", input: 'e.g. Open the file. Write the first line. Send that one email.' },
+      { body: "Set a two-minute timer and do just that. When it ends — you'll probably keep going. But you don't have to.", release: true },
+    ],
+  },
+  brain_dump: {
+    title: 'Get It Out of Your Head',
+    steps: [
+      { body: "Your brain is trying to hold everything at once. That's why it's noisy. Write it all down and let your head go quiet." },
+      { body: "Dump everything that's pulling at you — tasks, worries, things half-done, things you promised.", input: 'Just list them. No order, no filter.' },
+      { body: "Good. It's on paper, not in your head. Now pick one and only one to touch today.", release: true },
+    ],
+  },
+  pick_one: {
+    title: 'One or None',
+    steps: [
+      { body: "Trying to prioritise everything is the same as prioritising nothing. You need a rule." },
+      { body: "Look at everything on your plate. What has the highest real consequence if it slips?", input: 'Name it.' },
+      { body: "That's your one. The rest go on a list where they'll wait. They're not forgotten — they're parked.", release: true },
+    ],
+  },
+  ground_now: {
+    title: 'Right Here, Right Now',
+    steps: [
+      { body: "Take a breath. A real one — slow in, slow out. You don't have to fix tomorrow before you can work today." },
+      { body: "What's one thing that's physically true right now — about where you are, what you can see or feel?", input: 'e.g. Sun on the desk. Coffee going cold. Quiet room.' },
+      { body: "You're here. The work is here. Start with what's in front of you — just that.", release: true },
+    ],
+  },
+  clear_desk: {
+    title: 'Clear the Decks',
+    steps: [
+      { body: "A scattered environment feeds a scattered mind. Before you work — two minutes to clear the space." },
+      { body: "Close tabs you don't need right now. Put your phone face-down. Clear one surface near you." },
+      { body: "Now: one task, one window, one focus. Everything else can wait 25 minutes.", release: true },
+    ],
+  },
+  honest_audit: {
+    title: 'Honest Check-In',
+    steps: [
+      { body: "Before you push through, be honest about what's actually going on. Pushing harder when you're depleted just digs the hole deeper." },
+      { body: "On a scale of 1–10, how's your actual energy right now — not what you wish it was?", input: 'Be honest. Nobody sees this.' },
+      { body: "If it's below 5, your job today isn't to produce — it's to protect tomorrow. Rest is work.", release: true },
+    ],
+  },
+  minimum_viable: {
+    title: 'Minimum Viable Day',
+    steps: [
+      { body: "You're not at full capacity. That's fine. The move isn't to push through — it's to set a minimum viable target." },
+      { body: "What's one small, real thing you can do today that would mean the day wasn't wasted?", input: 'Small is right. Small is honest.' },
+      { body: "Do that one thing. Then decide if you have more. Low-output days protect high-output weeks.", release: true },
+    ],
+  },
+  name_it: {
+    title: 'Name the Thing',
+    steps: [
+      { body: "Avoidance grows in the dark. The moment you name the thing, it gets smaller." },
+      { body: "What are you actually avoiding — be specific. Not 'that project' — what exactly about it?", input: 'Name it precisely.' },
+      { body: "Usually it's one of three things: you don't know how to start, you're afraid it won't be good enough, or it's going to require a hard conversation. Which is it?", release: true },
+    ],
+  },
+  five_minutes: {
+    title: 'Five Minutes Only',
+    steps: [
+      { body: "You're not going to do it all right now. You're just going to touch it. Five minutes — that breaks the seal." },
+      { body: "What's the one micro-action that would count as progress on the thing you're avoiding?", input: 'e.g. Open the document. Write the first bullet. Send the draft.' },
+      { body: "Set a five-minute timer. Do only that. When it ends, you decide if you continue. But you'll have started.", release: true },
+    ],
+  },
+}
+
+function FocusMomentModal({ onClose }) {
+  const [phase, setPhase]   = useState('blocks')  // 'blocks' | 'rituals' | 'ritual'
+  const [block, setBlock]   = useState(null)
+  const [ritual, setRitual] = useState(null)
+  const [step, setStep]     = useState(0)
+  const [input, setInput]   = useState('')
+
+  const PLUM = '#C084FC'
+
+  function pickBlock(b) {
+    setBlock(b)
+    if (b.rituals.length === 1) {
+      setRitual(FOCUS_RITUALS[b.rituals[0]])
+      setStep(0)
+      setInput('')
+      setPhase('ritual')
+    } else {
+      setPhase('rituals')
+    }
+  }
+
+  function pickRitual(id) {
+    setRitual(FOCUS_RITUALS[id])
+    setStep(0)
+    setInput('')
+    setPhase('ritual')
+  }
+
+  function next() {
+    const r = ritual
+    if (step < r.steps.length - 1) {
+      setStep(s => s + 1)
+      setInput('')
+    } else {
+      onClose()
+    }
+  }
+
+  function reset() {
+    setPhase('blocks')
+    setBlock(null)
+    setRitual(null)
+    setStep(0)
+    setInput('')
+  }
+
+  const currentStep = ritual?.steps[step]
+  const isLast = ritual && step === ritual.steps.length - 1
+
+  return (
+    <div
+      style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}
+      onClick={onClose}>
+      <div
+        style={{ background: '#0F0D0C', borderRadius: '24px 24px 0 0', width: '100%', maxWidth: 520, maxHeight: '85vh', overflowY: 'auto', padding: '24px 24px calc(env(safe-area-inset-bottom) + 28px)', borderTop: `1.5px solid ${PLUM}55` }}
+        onClick={e => e.stopPropagation()}>
+
+        {/* Header */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <Zap size={16} color={PLUM} strokeWidth={1.5} style={{ filter: `drop-shadow(0 0 6px ${PLUM})` }} />
+            <span style={{ fontFamily: '"DM Mono", monospace', fontSize: 12, letterSpacing: '0.15em', color: PLUM }}>
+              {phase === 'blocks' ? 'FOCUS MOMENT' : phase === 'rituals' ? block?.blurb.toUpperCase().slice(0,30)+'…' : ritual?.title.toUpperCase()}
+            </span>
+          </div>
+          <div style={{ display: 'flex', gap: 8 }}>
+            {phase !== 'blocks' && (
+              <button onClick={reset} style={{ background: 'none', border: 'none', color: '#666', cursor: 'pointer', padding: 4 }}>
+                <RotateCcw size={14} />
+              </button>
+            )}
+            <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#666', cursor: 'pointer', padding: 4 }}>
+              <X size={18} />
+            </button>
+          </div>
+        </div>
+
+        {/* Phase: pick what's going on */}
+        {phase === 'blocks' && (
+          <div>
+            <p style={{ fontFamily: '"Playfair Display", serif', fontStyle: 'italic', fontSize: '1.15rem', color: '#EDE8E0', marginBottom: 6, lineHeight: 1.4 }}>
+              What's going on right now?
+            </p>
+            <p style={{ fontSize: 11, color: '#7A7068', fontFamily: '"DM Mono", monospace', marginBottom: 20 }}>Pick the one that fits closest.</p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {FOCUS_BLOCKS.map(b => (
+                <button
+                  key={b.id}
+                  onClick={() => pickBlock(b)}
+                  style={{ textAlign: 'left', background: 'rgba(255,255,255,0.04)', border: '0.5px solid rgba(255,255,255,0.1)', borderRadius: 14, padding: '14px 16px', cursor: 'pointer', touchAction: 'manipulation', transition: 'border-color 0.15s, background 0.15s' }}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor = `${PLUM}55`; e.currentTarget.style.background = `${PLUM}0a` }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'; e.currentTarget.style.background = 'rgba(255,255,255,0.04)' }}>
+                  <p style={{ fontSize: 14, color: '#EDE8E0', fontWeight: 500, marginBottom: 3 }}>{b.label}</p>
+                  <p style={{ fontSize: 11, color: '#7A7068', fontFamily: '"DM Mono", monospace', lineHeight: 1.5 }}>{b.blurb}</p>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Phase: pick ritual */}
+        {phase === 'rituals' && block && (
+          <div>
+            <p style={{ fontFamily: '"Playfair Display", serif', fontStyle: 'italic', fontSize: '1.1rem', color: '#EDE8E0', marginBottom: 16, lineHeight: 1.5 }}>
+              "{block.blurb}"
+            </p>
+            <p style={{ fontSize: 11, color: '#7A7068', fontFamily: '"DM Mono", monospace', marginBottom: 16, letterSpacing: '0.1em' }}>PICK AN APPROACH</p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {block.rituals.map(rid => {
+                const r = FOCUS_RITUALS[rid]
+                return (
+                  <button
+                    key={rid}
+                    onClick={() => pickRitual(rid)}
+                    style={{ textAlign: 'left', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(255,255,255,0.04)', border: '0.5px solid rgba(255,255,255,0.1)', borderRadius: 14, padding: '14px 16px', cursor: 'pointer', touchAction: 'manipulation' }}
+                    onMouseEnter={e => { e.currentTarget.style.borderColor = `${PLUM}55` }}
+                    onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)' }}>
+                    <span style={{ fontSize: 14, color: '#EDE8E0' }}>{r.title}</span>
+                    <ArrowRight size={14} color={PLUM} />
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Phase: step through ritual */}
+        {phase === 'ritual' && ritual && currentStep && (
+          <div>
+            {/* Step progress */}
+            <div style={{ display: 'flex', gap: 5, marginBottom: 20 }}>
+              {ritual.steps.map((_, i) => (
+                <div key={i} style={{ flex: 1, height: 2, borderRadius: 1, background: i <= step ? PLUM : 'rgba(255,255,255,0.1)', boxShadow: i === step ? `0 0 6px ${PLUM}` : 'none', transition: 'all 0.3s ease' }} />
+              ))}
+            </div>
+
+            {/* Body */}
+            <p style={{ fontSize: 15, color: '#EDE8E0', lineHeight: 1.7, marginBottom: currentStep.input ? 20 : 32, fontWeight: step === 0 ? 400 : 400 }}>
+              {currentStep.body.split('*').map((part, i) =>
+                i % 2 === 1
+                  ? <em key={i} style={{ color: PLUM, fontStyle: 'italic' }}>{part}</em>
+                  : <span key={i}>{part}</span>
+              )}
+            </p>
+
+            {/* Input */}
+            {currentStep.input && (
+              <textarea
+                autoFocus
+                placeholder={currentStep.input}
+                value={input}
+                onChange={e => setInput(e.target.value)}
+                style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: `0.5px solid ${PLUM}44`, borderRadius: 12, padding: '12px 14px', color: '#EDE8E0', fontSize: 13, fontFamily: '"DM Mono", monospace', resize: 'none', minHeight: 80, outline: 'none', marginBottom: 20, boxSizing: 'border-box' }}
+                onFocus={e => e.target.style.borderColor = `${PLUM}99`}
+                onBlur={e => e.target.style.borderColor = `${PLUM}44`}
+              />
+            )}
+
+            {/* CTA */}
+            <button
+              onClick={next}
+              style={{ width: '100%', background: isLast ? PLUM : 'rgba(255,255,255,0.08)', border: isLast ? 'none' : '0.5px solid rgba(255,255,255,0.15)', borderRadius: 14, padding: '15px 20px', color: isLast ? '#000' : '#EDE8E0', fontFamily: '"DM Mono", monospace', fontSize: 13, fontWeight: isLast ? 700 : 400, letterSpacing: '0.1em', cursor: 'pointer', boxShadow: isLast ? `0 0 20px rgba(192,132,252,0.45)` : 'none', touchAction: 'manipulation' }}>
+              {isLast ? (currentStep.release ? 'GO DO IT →' : 'DONE') : 'CONTINUE →'}
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+function FocusMomentButton() {
+  const [open, setOpen] = useState(false)
+  const PLUM = '#C084FC'
+  return (
+    <>
+      <button
+        onClick={() => setOpen(true)}
+        style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, background: `linear-gradient(135deg, rgba(192,132,252,0.12) 0%, rgba(192,132,252,0.06) 100%)`, border: `1px solid rgba(192,132,252,0.25)`, borderRadius: 14, padding: '13px 20px', color: PLUM, fontFamily: '"DM Mono", monospace', fontSize: 12, letterSpacing: '0.15em', cursor: 'pointer', touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent', boxShadow: `0 0 20px rgba(192,132,252,0.08)` }}>
+        <Zap size={14} strokeWidth={1.5} style={{ filter: `drop-shadow(0 0 4px ${PLUM})` }} />
+        FOCUS MOMENT
+      </button>
+      {open && <FocusMomentModal onClose={() => setOpen(false)} />}
+    </>
   )
 }
 
@@ -845,6 +1149,9 @@ export default function Dashboard() {
 
         {/* Quick Add */}
         <QuickAdd onAdd={(data) => addTask(data)} />
+
+        {/* Focus Moment */}
+        <FocusMomentButton />
 
         {/* Missions */}
         <MissionsWidget onNavigateToTasks={(missionId) => {
