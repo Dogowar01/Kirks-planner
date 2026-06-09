@@ -108,38 +108,54 @@ function BottomNav() {
       {/* Bottom bar */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 flex"
         style={{
-          background: 'rgba(13,12,11,0.97)',
-          backdropFilter: 'blur(20px)',
-          borderTop: '0.5px solid rgba(255,255,255,0.08)',
+          background: 'linear-gradient(to top, rgba(10,9,7,0.99) 0%, rgba(14,12,10,0.96) 100%)',
+          backdropFilter: 'blur(24px)',
+          WebkitBackdropFilter: 'blur(24px)',
+          borderTop: '0.5px solid rgba(196,82,42,0.12)',
           paddingBottom: 'env(safe-area-inset-bottom)',
+          boxShadow: '0 -4px 24px rgba(0,0,0,0.5)',
         }}>
         {primary.map(({ to, label, Icon }) => (
           <NavLink key={to} to={to}
-            className="flex-1 flex flex-col items-center py-2.5 gap-1 transition-colors duration-150 relative"
-            style={({ isActive }) => ({ color: isActive ? '#E06840' : '#B8B0A8' })}>
+            className="flex-1 flex flex-col items-center py-2.5 gap-1 transition-all duration-200 relative"
+            style={({ isActive }) => ({ color: isActive ? '#E06840' : '#7A7268' })}>
             {({ isActive }) => (
               <>
-                {/* Active indicator pip */}
+                {/* Active: top pip + warm radial glow behind icon */}
                 {isActive && (
-                  <span style={{
-                    position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)',
-                    width: 24, height: 2, borderRadius: 1,
-                    background: '#E06840',
-                    boxShadow: '0 0 8px 1px rgba(224,104,64,0.7)',
-                  }} />
+                  <>
+                    <span style={{
+                      position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)',
+                      width: 28, height: 2, borderRadius: 1,
+                      background: 'linear-gradient(to right, transparent, #E06840, transparent)',
+                      boxShadow: '0 0 10px 1px rgba(224,104,64,0.8)',
+                    }} />
+                    <span style={{
+                      position: 'absolute', top: 4, left: '50%', transform: 'translateX(-50%)',
+                      width: 40, height: 36,
+                      background: 'radial-gradient(ellipse, rgba(196,82,42,0.18) 0%, transparent 70%)',
+                      pointerEvents: 'none',
+                    }} />
+                  </>
                 )}
-                <Icon size={19} strokeWidth={1.5} />
-                <span style={{ fontSize: '9px', fontFamily: '"DM Mono", monospace', letterSpacing: '0.05em', textTransform: 'uppercase' }}>{label}</span>
+                <Icon size={20} strokeWidth={isActive ? 1.8 : 1.4} />
+                <span style={{
+                  fontSize: '8px',
+                  fontFamily: '"DM Mono", monospace',
+                  letterSpacing: '0.08em',
+                  textTransform: 'uppercase',
+                  opacity: isActive ? 1 : 0.7,
+                }}>{label}</span>
               </>
             )}
           </NavLink>
         ))}
         <button
           onClick={() => setOpen(o => !o)}
-          className="flex-1 flex flex-col items-center py-2.5 gap-1 transition-colors duration-150"
-          style={{ color: overflowActive ? '#C4522A' : open ? '#EDE8E0' : '#B8B0A8', background: 'none', border: 'none', cursor: 'pointer' }}>
-          {open ? <X size={19} strokeWidth={1.5} /> : <MoreHorizontal size={19} strokeWidth={1.5} />}
-          <span style={{ fontSize: '9px', fontFamily: '"DM Mono", monospace', letterSpacing: '0.05em', textTransform: 'uppercase' }}>More</span>
+          className="flex-1 flex flex-col items-center py-2.5 gap-1 transition-all duration-200"
+          style={{ color: overflowActive ? '#C4522A' : open ? '#EDE8E0' : '#7A7268', background: 'none', border: 'none', cursor: 'pointer' }}>
+          {open ? <X size={20} strokeWidth={1.4} /> : <MoreHorizontal size={20} strokeWidth={1.4} />}
+          <span style={{ fontSize: '8px', fontFamily: '"DM Mono", monospace', letterSpacing: '0.08em', textTransform: 'uppercase', opacity: 0.7 }}>More</span>
         </button>
       </nav>
     </>

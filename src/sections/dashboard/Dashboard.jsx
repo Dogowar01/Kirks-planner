@@ -788,19 +788,22 @@ function SectionLabel({ children, color }) {
 function SectionShell({ color, children, style }) {
   return (
     <div style={{
+      '--section-accent': color,
+      '--section-card-tint': color + '14',
+      '--section-card-border': color + '28',
       borderRadius: 14,
       padding: '14px 14px 16px',
-      background: `linear-gradient(135deg, ${color}18 0%, ${color}08 60%, transparent 100%)`,
-      border: `0.5px solid ${color}35`,
-      boxShadow: `0 0 32px ${color}12`,
+      background: `linear-gradient(160deg, ${color}14 0%, ${color}06 55%, transparent 100%)`,
+      border: `0.5px solid ${color}30`,
+      boxShadow: `0 0 40px ${color}0E, inset 0 1px 0 ${color}18`,
       ...style,
     }}>
       <div style={{
-        height: 3,
-        borderRadius: 2,
+        height: 2,
+        borderRadius: 1,
         marginBottom: 14,
-        background: `linear-gradient(to right, ${color} 0%, ${color}80 50%, transparent 100%)`,
-        boxShadow: `0 0 10px ${color}60`,
+        background: `linear-gradient(to right, ${color} 0%, ${color}70 45%, transparent 100%)`,
+        boxShadow: `0 0 12px ${color}80`,
       }} />
       {children}
     </div>
@@ -1081,7 +1084,7 @@ function MissionsWidget({ onNavigateToTasks }) {
       {/* Header */}
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
-          <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', color: '#2DD4BF', letterSpacing: '0.18em', textTransform: 'uppercase' }}>
+          <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', color: '#C89840', letterSpacing: '0.18em', textTransform: 'uppercase' }}>
             Active Missions
           </p>
           {active.length > 0 && (
@@ -1308,18 +1311,18 @@ export default function Dashboard() {
       <div className="p-5 md:p-6 max-w-3xl space-y-7">
 
         {/* Stats */}
-        <SectionShell color="#3B82F6">
-          <SectionLabel color="#60A5FA">Overview</SectionLabel>
+        <SectionShell color="#C4522A">
+          <SectionLabel color="#D4724A">Overview</SectionLabel>
           <div className="grid grid-cols-3 gap-3">
-            <StatCard icon={CheckSquare} label="Open Tasks"      value={openTasks.length}       color="#60A5FA" onClick={() => navigate('/tasks')} />
-            <StatCard icon={Calendar}    label="Events (7d)"     value={upcomingEvents.length}   color="#60A5FA" onClick={() => navigate('/calendar')} />
-            <StatCard icon={Briefcase}   label="Active Projects" value={activeProjects.length}   color="#60A5FA" onClick={() => navigate('/tasks')} />
+            <StatCard icon={CheckSquare} label="Open Tasks"      value={openTasks.length}       color="#D4724A" onClick={() => navigate('/tasks')} />
+            <StatCard icon={Calendar}    label="Events (7d)"     value={upcomingEvents.length}   color="#D4724A" onClick={() => navigate('/calendar')} />
+            <StatCard icon={Briefcase}   label="Active Projects" value={activeProjects.length}   color="#D4724A" onClick={() => navigate('/tasks')} />
           </div>
         </SectionShell>
 
         {/* Quick Add + Focus Moment */}
-        <SectionShell color="#8B5CF6">
-          <SectionLabel color="#A78BFA">Actions</SectionLabel>
+        <SectionShell color="#9A58A8">
+          <SectionLabel color="#B878C8">Actions</SectionLabel>
           <div className="space-y-3">
             <QuickAdd onAdd={(data) => addTask(data)} />
             <FocusMomentButton />
@@ -1327,7 +1330,7 @@ export default function Dashboard() {
         </SectionShell>
 
         {/* Missions */}
-        <SectionShell color="#0D9488">
+        <SectionShell color="#A07828">
           <MissionsWidget onNavigateToTasks={(missionId) => {
             setMissionFilter(missionId)
             navigate('/tasks')
@@ -1336,9 +1339,9 @@ export default function Dashboard() {
 
         {/* Today */}
         {todayEvents.length > 0 && (
-          <SectionShell color="#0EA5E9">
+          <SectionShell color="#267A68">
             <section>
-              <SectionLabel color="#38BDF8">Today</SectionLabel>
+              <SectionLabel color="#38A88E">Today</SectionLabel>
               <div className="space-y-2">
                 {todayEvents.map(ev => (
                   <button key={ev.id} onClick={() => navigate('/calendar')}
@@ -1358,10 +1361,10 @@ export default function Dashboard() {
         )}
 
         {/* Top tasks */}
-        <SectionShell color="#2563EB">
+        <SectionShell color="#8A3A20">
         <section>
           <div className="flex items-center justify-between mb-2.5">
-            <SectionLabel color="#60A5FA">Active Tasks</SectionLabel>
+            <SectionLabel color="#B85A38">Active Tasks</SectionLabel>
             <button onClick={() => navigate('/tasks')} style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', color: '#A09890', letterSpacing: '0.1em' }}>
               ALL →
             </button>
@@ -1384,10 +1387,10 @@ export default function Dashboard() {
         </SectionShell>
 
         {/* Upcoming */}
-        <SectionShell color="#7C3AED">
+        <SectionShell color="#6A3A88">
           <section>
             <div className="flex items-center justify-between mb-2.5">
-              <SectionLabel color="#A78BFA">Upcoming</SectionLabel>
+              <SectionLabel color="#9060B8">Upcoming</SectionLabel>
               <button onClick={() => navigate('/calendar')} style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', color: '#A09890', letterSpacing: '0.1em' }}>
                 CALENDAR →
               </button>

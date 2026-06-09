@@ -294,10 +294,15 @@ export default function Calendar() {
       </div>
 
       {/* Month nav */}
-      <div className="flex items-center gap-4 mb-4">
+      <div className="flex items-center gap-3 mb-4">
         <button onClick={() => setMonth(m => subMonths(m, 1))} className="btn-ghost p-2"><ChevronLeft size={16}/></button>
-        <button onClick={() => setMonth(new Date())} className="text-text-secondary text-sm hover:text-text-primary flex-1 text-center font-display font-semibold text-lg text-text-primary">
-          {format(month, 'MMMM yyyy')}
+        <button onClick={() => setMonth(new Date())} className="flex-1 text-center">
+          <span style={{ fontFamily: '"Playfair Display", serif', fontStyle: 'italic', fontWeight: 600, fontSize: '1.4rem', color: '#EDE8E0', letterSpacing: '-0.01em' }}>
+            {format(month, 'MMMM')}
+          </span>
+          <span style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.7rem', color: '#A09890', marginLeft: 8, letterSpacing: '0.1em' }}>
+            {format(month, 'yyyy')}
+          </span>
         </button>
         <button onClick={() => setMonth(m => addMonths(m, 1))} className="btn-ghost p-2"><ChevronRight size={16}/></button>
       </div>
@@ -318,7 +323,7 @@ export default function Calendar() {
           <div key={d} className="text-center text-[10px] font-medium text-text-tertiary py-1">{d}</div>
         ))}
       </div>
-      <div className="grid grid-cols-7 gap-px bg-bg-elevated rounded-card overflow-hidden border" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
+      <div className="grid grid-cols-7 gap-px rounded-card overflow-hidden" style={{ background: 'rgba(255,255,255,0.04)', border: '0.5px solid rgba(255,255,255,0.07)' }}>
         {days.map(day => {
           const dayEvents = eventsOnDay(day)
           const isCurrentMonth = isSameMonth(day, month)
@@ -326,8 +331,26 @@ export default function Calendar() {
           return (
             <button key={day.toISOString()}
               onClick={() => { setSelected(day); setAddDate(format(day, 'yyyy-MM-dd')) }}
-              className={`min-h-[60px] p-1.5 text-left transition-colors ${isCurrentMonth ? 'bg-bg-surface' : 'bg-bg-base'} ${isSelectedDay ? 'ring-1 ring-signal9' : ''} hover:bg-bg-elevated`}>
-              <span className={`text-xs font-mono ${isToday(day) ? 'w-5 h-5 rounded-full bg-signal9 text-white flex items-center justify-center text-[10px]' : isCurrentMonth ? 'text-text-primary' : 'text-text-tertiary'}`}>
+              className="min-h-[60px] p-1.5 text-left transition-colors hover:bg-white/5"
+              style={{
+                background: isSelectedDay
+                  ? 'rgba(196,82,42,0.15)'
+                  : isCurrentMonth ? 'rgba(20,18,16,0.8)' : 'rgba(13,12,11,0.6)',
+                outline: isSelectedDay ? '0.5px solid rgba(196,82,42,0.4)' : 'none',
+              }}>
+              <span style={{
+                fontFamily: '"DM Mono", monospace',
+                fontSize: '0.7rem',
+                display: isToday(day) ? 'flex' : 'inline',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: isToday(day) ? 20 : 'auto',
+                height: isToday(day) ? 20 : 'auto',
+                borderRadius: isToday(day) ? '50%' : 0,
+                background: isToday(day) ? '#C4522A' : 'none',
+                color: isToday(day) ? '#fff' : isCurrentMonth ? '#C8BFB5' : '#4A4540',
+                boxShadow: isToday(day) ? '0 0 8px rgba(196,82,42,0.7)' : 'none',
+              }}>
                 {format(day, 'd')}
               </span>
               <div className="flex gap-0.5 flex-wrap mt-1 items-center">

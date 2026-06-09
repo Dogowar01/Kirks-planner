@@ -49,10 +49,12 @@
   /* Cards pick up the section accent for their border and a faint tint */
   .card {
     @apply rounded-card p-4;
-    background: color-mix(in srgb, var(--section-card-tint, #1a1714) 60%, rgba(11,10,9,0.97));
+    background: color-mix(in srgb, var(--section-card-tint, #1a1714) 55%, rgba(11,10,9,0.98));
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
-    border: 0.5px solid var(--section-card-border, rgba(255,255,255,0.12));
+    border: 0.5px solid var(--section-card-border, rgba(255,255,255,0.10));
+    /* Subtle inner top-edge highlight — gives depth on dark bg */
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.04), 0 2px 12px rgba(0,0,0,0.35);
     position: relative;
     overflow: hidden;
     transition: border-color 0.2s, box-shadow 0.2s;
@@ -62,15 +64,17 @@
     position: absolute;
     inset: 0;
     pointer-events: none;
-    opacity: 0.025;
+    opacity: 0.03;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
   }
-  /* Glowing top-edge accent on hover */
+  /* Glowing accent on hover */
   .card:hover {
-    border-color: color-mix(in srgb, var(--section-accent, rgba(255,255,255,0.2)) 60%, rgba(255,255,255,0.12));
+    border-color: color-mix(in srgb, var(--section-accent, rgba(255,255,255,0.2)) 55%, rgba(255,255,255,0.10));
     box-shadow:
-      0 0 0 1px color-mix(in srgb, var(--section-accent, transparent) 10%, transparent),
-      0 -1px 12px -2px color-mix(in srgb, var(--section-accent, transparent) 30%, transparent);
+      inset 0 1px 0 rgba(255,255,255,0.05),
+      0 0 0 1px color-mix(in srgb, var(--section-accent, transparent) 8%, transparent),
+      0 2px 16px rgba(0,0,0,0.4),
+      0 0 20px -4px color-mix(in srgb, var(--section-accent, transparent) 25%, transparent);
   }
 
   .card-elevated {
