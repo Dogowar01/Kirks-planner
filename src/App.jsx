@@ -9,6 +9,7 @@ import Notes from './sections/notes/Notes'
 import Finance from './sections/finance/Finance'
 import Settings from './sections/settings/Settings'
 import Tools from './sections/tools/Tools'
+import Vault from './sections/vault/Vault'
 import { useNotifications } from './hooks/useNotifications'
 
 // Mounted inside StoreProvider — starts the notification polling loop
@@ -32,6 +33,7 @@ export default function App() {
           <Route path="notes"      element={<Notes />} />
           <Route path="finance"    element={<Finance />} />
           <Route path="tools"      element={<Tools />} />
+          <Route path="vault"      element={<Vault />} />
           <Route path="settings"   element={<Settings />} />
         </Route>
       </Routes>

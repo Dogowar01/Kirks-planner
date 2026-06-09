@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 import { Outlet } from 'react-router-dom'
-import { LayoutDashboard, CalendarDays, CheckSquare, Briefcase, Users, BookOpen, DollarSign, Settings, MoreHorizontal, X, Wrench } from 'lucide-react'
+import { LayoutDashboard, CalendarDays, CheckSquare, Briefcase, Users, BookOpen, DollarSign, Settings, MoreHorizontal, X, Wrench, ShieldCheck } from 'lucide-react'
 
 const NAV = [
   { to: '/dashboard',  label: 'Dashboard',  Icon: LayoutDashboard },
@@ -10,6 +10,7 @@ const NAV = [
   { to: '/notes',      label: 'Notes',      Icon: BookOpen },
   { to: '/tools',      label: 'Tools',      Icon: Wrench },
   { to: '/calendar',   label: 'Calendar',   Icon: CalendarDays },
+  { to: '/vault',      label: 'Vault',      Icon: ShieldCheck },
   { to: '/businesses', label: 'Businesses', Icon: Briefcase },
   { to: '/contacts',   label: 'Contacts',   Icon: Users },
 ]
@@ -63,6 +64,7 @@ function SideNav() {
 }
 
 const OVERFLOW = [
+  { to: '/vault',      label: 'Vault',      Icon: ShieldCheck },
   { to: '/businesses', label: 'Businesses', Icon: Briefcase },
   { to: '/contacts',   label: 'Contacts',   Icon: Users },
   { to: '/settings',   label: 'Settings',   Icon: Settings },
