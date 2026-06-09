@@ -368,8 +368,8 @@ function EntryForm({ entry = {}, onSave, onDelete, onClose, title }) {
   const labelStyle = { fontSize: 10, fontFamily: '"DM Mono", monospace', letterSpacing: '0.12em', color: '#B8B0A8', display: 'block', marginBottom: 6 }
 
   return (
-    // Outer wrapper: full column so header + scroll + footer stack correctly
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+    // Single scrollable container — sticky footer always at visible bottom
+    <div style={{ overflowY: 'auto', WebkitOverflowScrolling: 'touch', height: '100%' }}>
       {confirm && (
         <ConfirmDialog
           message={`Delete "${entry.label}"? This cannot be undone.`}
@@ -378,16 +378,16 @@ function EntryForm({ entry = {}, onSave, onDelete, onClose, title }) {
         />
       )}
 
-      {/* Sticky modal header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 20px 14px', flexShrink: 0, borderBottom: '0.5px solid rgba(255,255,255,0.07)' }}>
+      {/* Header */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 20px 14px', borderBottom: '0.5px solid rgba(255,255,255,0.07)' }}>
         <h3 style={{ fontFamily: '"DM Mono", monospace', fontSize: 13, letterSpacing: '0.12em', color: PLUM, margin: 0 }}>
           {title || (entry.id ? 'EDIT ENTRY' : 'ADD TO VAULT')}
         </h3>
         <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#B8B0A8', cursor: 'pointer', padding: 4 }}><X size={18} /></button>
       </div>
 
-      {/* Scrollable fields */}
-      <div style={{ flex: 1, overflowY: 'auto', padding: '16px 20px', WebkitOverflowScrolling: 'touch' }}>
+      {/* Fields */}
+      <div style={{ padding: '16px 20px 0' }}>
         <div style={{ marginBottom: 14 }}>
           <label style={labelStyle}>LABEL *</label>
           <input style={inputStyle} value={label} onChange={e => setLabel(e.target.value)} placeholder="e.g. Netflix, Gate code, Bank PIN" maxLength={60} />
@@ -424,7 +424,7 @@ function EntryForm({ entry = {}, onSave, onDelete, onClose, title }) {
           </div>
         </div>
 
-        <div style={{ marginBottom: 8 }}>
+        <div style={{ marginBottom: 14 }}>
           <label style={labelStyle}>NOTES</label>
           <textarea
             style={{ ...inputStyle, minHeight: 72, resize: 'none' }}
@@ -436,8 +436,14 @@ function EntryForm({ entry = {}, onSave, onDelete, onClose, title }) {
         </div>
       </div>
 
-      {/* Sticky action footer — always visible above keyboard */}
-      <div style={{ flexShrink: 0, padding: '12px 20px calc(env(safe-area-inset-bottom) + 12px)', borderTop: '0.5px solid rgba(255,255,255,0.07)', display: 'flex', gap: 10, justifyContent: 'flex-end', background: '#111009' }}>
+      {/* Action buttons — sticky within scroll container so keyboard can't cover them */}
+      <div style={{
+        position: 'sticky', bottom: 0,
+        padding: '12px 20px calc(env(safe-area-inset-bottom) + 12px)',
+        borderTop: '0.5px solid rgba(255,255,255,0.07)',
+        background: '#111009',
+        display: 'flex', gap: 10, justifyContent: 'flex-end',
+      }}>
         {entry.id && (
           <button
             onClick={() => setConfirm(true)}
@@ -665,10 +671,10 @@ function VaultScreen({ vault }) {
       {/* Modals */}
       {(modal === 'add' || (modal && modal.id)) && (
         <div
-          style={{ position: 'fixed', inset: 0, zIndex: 100, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}
+          style={{ position: 'fixed', inset: 0, zIndex: 100, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'flex-end', justifyContent: 'center', paddingBottom: 'calc(env(safe-area-inset-bottom) + 56px)' }}
           onClick={() => setModal(null)}>
           <div
-            style={{ background: '#111009', borderRadius: '20px 20px 0 0', width: '100%', maxWidth: 500, height: '80vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}
+            style={{ background: '#111009', borderRadius: '20px 20px 0 0', width: '100%', maxWidth: 500, height: '80dvh', overflow: 'hidden' }}
             onClick={e => e.stopPropagation()}>
             <EntryForm
               entry={modal === 'add' ? {} : modal}
