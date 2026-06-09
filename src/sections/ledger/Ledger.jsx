@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import ARTWORK_IMG from '../../assets/ledger-artwork.jpg';
 
 // ─── DATA HELPERS ────────────────────────────────────────────────────────────
@@ -211,6 +212,7 @@ const Btn = ({t, onClick, children, style={}}) => (
 // ─── MAIN APP ─────────────────────────────────────────────────────────────────
 
 export default function Ledger() {
+  const navigate = useNavigate();
   const saved = loadData();
   const [transactions, setTransactions] = useState(saved?.transactions || {"Signal9":[],"App Sales":[]});
   const [categories, setCategories] = useState(saved?.categories || DEFAULT_CATEGORIES);
@@ -306,6 +308,20 @@ export default function Ledger() {
         <div style={{flex:1,position:"relative",overflow:"hidden"}}><APBackground/></div>
       </div>
       <div style={{position:"fixed",left:"50%",top:0,bottom:0,width:"1px",background:"linear-gradient(to bottom,transparent 5%,rgba(160,80,160,0.5) 30%,rgba(180,100,180,0.3) 50%,rgba(0,229,255,0.4) 70%,transparent 95%)",zIndex:1}}/>
+
+      {/* Back button */}
+      <div style={{position:"fixed",top:`calc(env(safe-area-inset-top) + 0.75rem)`,left:"1rem",zIndex:10}}>
+        <button onClick={() => navigate(-1)} style={{
+          display:"flex",alignItems:"center",gap:"0.35rem",
+          background:"rgba(0,0,0,0.45)",backdropFilter:"blur(10px)",
+          border:"0.5px solid rgba(255,255,255,0.12)",borderRadius:8,
+          padding:"0.4rem 0.75rem",cursor:"pointer",
+          color:"rgba(220,200,180,0.8)",fontSize:"0.7rem",
+          letterSpacing:"0.1em",textTransform:"uppercase",fontFamily:"Georgia,serif",
+        }}>
+          ← Back
+        </button>
+      </div>
 
       <div style={{position:"relative",zIndex:2,minHeight:"100vh",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:`calc(env(safe-area-inset-top) + 2rem) 1.25rem calc(env(safe-area-inset-bottom) + 2rem)`}}>
         <div style={{textAlign:"center",marginBottom:"2.5rem"}}>
