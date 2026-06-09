@@ -23,6 +23,11 @@ export default function App() {
     <HashRouter>
       <NotificationEngine />
       <Routes>
+        {/* Full-screen standalone routes — no Layout wrapper */}
+        <Route path="/ledger" element={<Ledger />} />
+        <Route path="/fuel"   element={<FuelTracker />} />
+
+        {/* Standard app routes inside the Layout (nav + sidebar) */}
         <Route path="/" element={<Layout />}>
           <Route index element={<Navigate to="/dashboard" replace />} />
           <Route path="dashboard" element={<Dashboard />} />
@@ -30,9 +35,7 @@ export default function App() {
           <Route path="tasks"     element={<Tasks />} />
           <Route path="contacts"  element={<Contacts />} />
           <Route path="notes"     element={<Notes />} />
-          <Route path="ledger"    element={<Ledger />} />
           <Route path="tools"     element={<Tools />} />
-          <Route path="fuel"      element={<FuelTracker />} />
           <Route path="vault"     element={<Vault />} />
           <Route path="settings"  element={<Settings />} />
         </Route>
