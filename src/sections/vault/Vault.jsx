@@ -34,7 +34,7 @@ function PinPad({ onKey, disabled }) {
   return (
     <div style={{
       display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)',
-      gap: 10, maxWidth: 240, margin: '0 auto',
+      gap: 12, maxWidth: 300, margin: '0 auto', width: '100%',
     }}>
       {KEYS.map(k => (
         <button
@@ -42,17 +42,19 @@ function PinPad({ onKey, disabled }) {
           disabled={disabled}
           onClick={() => onKey(String(k))}
           style={{
-            height: 56, borderRadius: 10,
-            background: k === '✓' ? PLUM : 'rgba(255,255,255,0.06)',
-            border: k === '✓' ? 'none' : '0.5px solid rgba(255,255,255,0.1)',
+            height: 68, borderRadius: 14,
+            background: k === '✓' ? PLUM : 'rgba(255,255,255,0.07)',
+            border: k === '✓' ? 'none' : '0.5px solid rgba(255,255,255,0.12)',
             color: k === '✓' ? '#000' : '#EDE8E0',
             fontFamily: '"Share Tech Mono", monospace',
-            fontSize: k === '⌫' ? 20 : 22,
+            fontSize: k === '⌫' ? 22 : 26,
             fontWeight: k === '✓' ? 700 : 400,
             cursor: disabled ? 'not-allowed' : 'pointer',
             opacity: disabled ? 0.5 : 1,
             transition: 'all 0.1s ease',
-            boxShadow: k === '✓' ? `0 0 16px rgba(192,132,252,0.5)` : 'none',
+            boxShadow: k === '✓' ? `0 0 20px rgba(192,132,252,0.55)` : 'none',
+            WebkitTapHighlightColor: 'transparent',
+            touchAction: 'manipulation',
           }}>
           {k}
         </button>
@@ -201,13 +203,14 @@ function LockScreen({ vault, onReset }) {
           onClick={handleBio}
           disabled={busy}
           style={{
-            marginTop: 20, display: 'flex', alignItems: 'center', gap: 8,
+            marginTop: 20, display: 'flex', alignItems: 'center', gap: 10,
             background: PLUM_DIM, border: `1px solid ${PLUM_BORDER}`,
-            color: PLUM, borderRadius: 10, padding: '10px 20px',
-            fontFamily: '"DM Mono", monospace', fontSize: 12, letterSpacing: '0.1em',
-            cursor: 'pointer',
+            color: PLUM, borderRadius: 14, padding: '14px 28px',
+            fontFamily: '"DM Mono", monospace', fontSize: 13, letterSpacing: '0.1em',
+            cursor: 'pointer', minHeight: 52, touchAction: 'manipulation',
+            WebkitTapHighlightColor: 'transparent',
           }}>
-          <Fingerprint size={16} />
+          <Fingerprint size={18} />
           USE FACE / FINGERPRINT
         </button>
       )}
@@ -215,9 +218,10 @@ function LockScreen({ vault, onReset }) {
       <button
         onClick={onReset}
         style={{
-          marginTop: 16, background: 'none', border: 'none',
-          color: '#666', fontSize: 11, cursor: 'pointer',
+          marginTop: 20, background: 'none', border: 'none',
+          color: '#666', fontSize: 12, cursor: 'pointer',
           fontFamily: '"DM Mono", monospace', textDecoration: 'underline',
+          padding: '12px 20px', minHeight: 44, touchAction: 'manipulation',
         }}>
         Forgot PIN / Reset Vault
       </button>
@@ -287,16 +291,16 @@ function EntryCard({ entry, onEdit }) {
         }}>
           {revealed ? entry.secret : '••••••••'}
         </span>
-        <div style={{ display: 'flex', gap: 6, marginLeft: 8, flexShrink: 0 }} onClick={e => e.stopPropagation()}>
+        <div style={{ display: 'flex', gap: 8, marginLeft: 8, flexShrink: 0 }} onClick={e => e.stopPropagation()}>
           <button
             onClick={() => setRevealed(r => !r)}
-            style={{ background: 'rgba(255,255,255,0.06)', border: '0.5px solid rgba(255,255,255,0.1)', borderRadius: 6, padding: '4px 8px', color: '#B8B0A8', cursor: 'pointer', fontSize: 10, fontFamily: '"DM Mono", monospace', letterSpacing: '0.08em' }}>
-            {revealed ? <EyeOff size={12} /> : <Eye size={12} />}
+            style={{ background: 'rgba(255,255,255,0.08)', border: '0.5px solid rgba(255,255,255,0.14)', borderRadius: 10, padding: '10px 14px', color: '#B8B0A8', cursor: 'pointer', minWidth: 44, minHeight: 44, display: 'flex', alignItems: 'center', justifyContent: 'center', touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent' }}>
+            {revealed ? <EyeOff size={15} /> : <Eye size={15} />}
           </button>
           <button
             onClick={handleCopy}
-            style={{ background: copied ? 'rgba(74,222,128,0.15)' : 'rgba(255,255,255,0.06)', border: `0.5px solid ${copied ? 'rgba(74,222,128,0.4)' : 'rgba(255,255,255,0.1)'}`, borderRadius: 6, padding: '4px 8px', color: copied ? '#4ADE80' : '#B8B0A8', cursor: 'pointer', fontSize: 10, fontFamily: '"DM Mono", monospace', letterSpacing: '0.08em' }}>
-            {copied ? <Check size={12} /> : <Copy size={12} />}
+            style={{ background: copied ? 'rgba(74,222,128,0.15)' : 'rgba(255,255,255,0.08)', border: `0.5px solid ${copied ? 'rgba(74,222,128,0.4)' : 'rgba(255,255,255,0.14)'}`, borderRadius: 10, padding: '10px 14px', color: copied ? '#4ADE80' : '#B8B0A8', cursor: 'pointer', minWidth: 44, minHeight: 44, display: 'flex', alignItems: 'center', justifyContent: 'center', touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent' }}>
+            {copied ? <Check size={15} /> : <Copy size={15} />}
           </button>
         </div>
       </div>
@@ -375,8 +379,8 @@ function EntryForm({ entry = {}, onSave, onDelete, onClose }) {
           />
           <button
             onClick={() => setShowSec(s => !s)}
-            style={{ background: 'rgba(255,255,255,0.06)', border: '0.5px solid rgba(255,255,255,0.12)', borderRadius: 8, padding: '0 12px', color: '#B8B0A8', cursor: 'pointer', flexShrink: 0 }}>
-            {showSec ? <EyeOff size={14} /> : <Eye size={14} />}
+            style={{ background: 'rgba(255,255,255,0.07)', border: '0.5px solid rgba(255,255,255,0.14)', borderRadius: 10, padding: '0 16px', color: '#B8B0A8', cursor: 'pointer', flexShrink: 0, minWidth: 50, minHeight: 44, display: 'flex', alignItems: 'center', justifyContent: 'center', touchAction: 'manipulation' }}>
+            {showSec ? <EyeOff size={16} /> : <Eye size={16} />}
           </button>
         </div>
       </div>
@@ -396,18 +400,18 @@ function EntryForm({ entry = {}, onSave, onDelete, onClose }) {
         {entry.id && (
           <button
             onClick={() => setConfirm(true)}
-            style={{ background: 'rgba(239,68,68,0.12)', border: '0.5px solid rgba(239,68,68,0.3)', color: '#EF4444', borderRadius: 8, padding: '8px 14px', fontFamily: '"DM Mono", monospace', fontSize: 11, cursor: 'pointer', letterSpacing: '0.08em' }}>
-            <Trash2 size={13} />
+            style={{ background: 'rgba(239,68,68,0.12)', border: '0.5px solid rgba(239,68,68,0.3)', color: '#EF4444', borderRadius: 12, padding: '13px 18px', fontFamily: '"DM Mono", monospace', fontSize: 12, cursor: 'pointer', letterSpacing: '0.08em', minHeight: 50, display: 'flex', alignItems: 'center', justifyContent: 'center', touchAction: 'manipulation' }}>
+            <Trash2 size={15} />
           </button>
         )}
         <button
           onClick={onClose}
-          style={{ background: 'rgba(255,255,255,0.06)', border: '0.5px solid rgba(255,255,255,0.12)', color: '#B8B0A8', borderRadius: 8, padding: '8px 16px', fontFamily: '"DM Mono", monospace', fontSize: 11, cursor: 'pointer', letterSpacing: '0.08em' }}>
+          style={{ background: 'rgba(255,255,255,0.07)', border: '0.5px solid rgba(255,255,255,0.14)', color: '#B8B0A8', borderRadius: 12, padding: '13px 20px', fontFamily: '"DM Mono", monospace', fontSize: 13, cursor: 'pointer', letterSpacing: '0.08em', minHeight: 50, touchAction: 'manipulation' }}>
           CANCEL
         </button>
         <button
           onClick={handleSave}
-          style={{ background: PLUM, border: 'none', color: '#000', borderRadius: 8, padding: '8px 18px', fontFamily: '"DM Mono", monospace', fontSize: 11, fontWeight: 700, cursor: 'pointer', letterSpacing: '0.08em', boxShadow: `0 0 12px rgba(192,132,252,0.4)` }}>
+          style={{ background: PLUM, border: 'none', color: '#000', borderRadius: 12, padding: '13px 24px', fontFamily: '"DM Mono", monospace', fontSize: 13, fontWeight: 700, cursor: 'pointer', letterSpacing: '0.08em', boxShadow: `0 0 14px rgba(192,132,252,0.45)`, minHeight: 50, touchAction: 'manipulation' }}>
           SAVE
         </button>
       </div>
@@ -530,23 +534,23 @@ function VaultScreen({ vault }) {
       </div>
 
       {/* Actions */}
-      <div style={{ padding: '12px 16px', display: 'flex', gap: 8 }}>
+      <div style={{ padding: '12px 16px', display: 'flex', gap: 10 }}>
         <button
           onClick={() => setModal('add')}
-          style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, background: PLUM, border: 'none', borderRadius: 10, padding: '10px 16px', color: '#000', fontFamily: '"DM Mono", monospace', fontSize: 12, fontWeight: 700, cursor: 'pointer', letterSpacing: '0.1em', boxShadow: `0 0 14px rgba(192,132,252,0.35)` }}>
-          <Plus size={14} /> ADD ENTRY
+          style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, background: PLUM, border: 'none', borderRadius: 14, padding: '14px 16px', color: '#000', fontFamily: '"DM Mono", monospace', fontSize: 13, fontWeight: 700, cursor: 'pointer', letterSpacing: '0.1em', boxShadow: `0 0 16px rgba(192,132,252,0.4)`, minHeight: 52, touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent' }}>
+          <Plus size={16} /> ADD ENTRY
         </button>
         <button
           onClick={() => setModal('changePin')}
           title="Change PIN"
-          style={{ background: 'rgba(255,255,255,0.06)', border: '0.5px solid rgba(255,255,255,0.12)', borderRadius: 10, padding: '10px 14px', color: '#B8B0A8', cursor: 'pointer' }}>
-          <KeyRound size={16} />
+          style={{ background: 'rgba(255,255,255,0.07)', border: '0.5px solid rgba(255,255,255,0.14)', borderRadius: 14, padding: '14px 18px', color: '#B8B0A8', cursor: 'pointer', minWidth: 52, minHeight: 52, display: 'flex', alignItems: 'center', justifyContent: 'center', touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent' }}>
+          <KeyRound size={18} />
         </button>
         <button
           onClick={lock}
           title="Lock Vault"
-          style={{ background: 'rgba(255,255,255,0.06)', border: '0.5px solid rgba(255,255,255,0.12)', borderRadius: 10, padding: '10px 14px', color: '#B8B0A8', cursor: 'pointer' }}>
-          <Lock size={16} />
+          style={{ background: 'rgba(255,255,255,0.07)', border: '0.5px solid rgba(255,255,255,0.14)', borderRadius: 14, padding: '14px 18px', color: '#B8B0A8', cursor: 'pointer', minWidth: 52, minHeight: 52, display: 'flex', alignItems: 'center', justifyContent: 'center', touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent' }}>
+          <Lock size={18} />
         </button>
       </div>
 
@@ -566,14 +570,14 @@ function VaultScreen({ vault }) {
               </span>
             </div>
             {enrolled ? (
-              <button onClick={() => removeBio()} style={{ background: 'rgba(239,68,68,0.12)', border: '0.5px solid rgba(239,68,68,0.3)', color: '#EF4444', borderRadius: 6, padding: '4px 10px', fontFamily: '"DM Mono", monospace', fontSize: 10, cursor: 'pointer', letterSpacing: '0.08em' }}>
+              <button onClick={() => removeBio()} style={{ background: 'rgba(239,68,68,0.12)', border: '0.5px solid rgba(239,68,68,0.3)', color: '#EF4444', borderRadius: 10, padding: '10px 16px', fontFamily: '"DM Mono", monospace', fontSize: 12, cursor: 'pointer', letterSpacing: '0.08em', minHeight: 44, touchAction: 'manipulation' }}>
                 REMOVE
               </button>
             ) : (
               <button
                 onClick={handleEnrolBio}
                 disabled={bioStatus === 'loading'}
-                style={{ background: PLUM_DIM, border: `0.5px solid ${PLUM_BORDER}`, color: PLUM, borderRadius: 6, padding: '4px 10px', fontFamily: '"DM Mono", monospace', fontSize: 10, cursor: 'pointer', letterSpacing: '0.08em' }}>
+                style={{ background: PLUM_DIM, border: `0.5px solid ${PLUM_BORDER}`, color: PLUM, borderRadius: 10, padding: '10px 16px', fontFamily: '"DM Mono", monospace', fontSize: 12, cursor: 'pointer', letterSpacing: '0.08em', minHeight: 44, touchAction: 'manipulation' }}>
                 {bioStatus === 'loading' ? '…' : bioStatus === 'ok' ? '✓' : bioStatus === 'fail' ? '✕' : 'ENROL'}
               </button>
             )}
