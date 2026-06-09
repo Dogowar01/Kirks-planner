@@ -773,11 +773,27 @@ function QuickAdd({ onAdd }) {
   )
 }
 
-function SectionLabel({ children }) {
+function SectionLabel({ children, color }) {
   return (
-    <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', color: '#A09890', letterSpacing: '0.18em', textTransform: 'uppercase', marginBottom: 10 }}>
+    <p style={{
+      fontFamily: '"DM Mono", monospace', fontSize: '0.6rem',
+      color: color || '#A09890',
+      letterSpacing: '0.18em', textTransform: 'uppercase', marginBottom: 10,
+    }}>
       {children}
     </p>
+  )
+}
+
+function SectionShell({ color, children, style }) {
+  return (
+    <div style={{
+      borderLeft: `3px solid ${color}`,
+      paddingLeft: 14,
+      ...style,
+    }}>
+      {children}
+    </div>
   )
 }
 
@@ -1055,7 +1071,7 @@ function MissionsWidget({ onNavigateToTasks }) {
       {/* Header */}
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
-          <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', color: '#A09890', letterSpacing: '0.18em', textTransform: 'uppercase' }}>
+          <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', color: '#F59E0B', letterSpacing: '0.18em', textTransform: 'uppercase' }}>
             Active Missions
           </p>
           {active.length > 0 && (
@@ -1282,49 +1298,60 @@ export default function Dashboard() {
       <div className="p-5 md:p-6 max-w-3xl space-y-7">
 
         {/* Stats */}
-        <div className="grid grid-cols-3 gap-3">
-          <StatCard icon={CheckSquare} label="Open Tasks"      value={openTasks.length}       color="#C4522A" onClick={() => navigate('/tasks')} />
-          <StatCard icon={Calendar}    label="Events (7d)"     value={upcomingEvents.length}   color="#3B82F6" onClick={() => navigate('/calendar')} />
-          <StatCard icon={Briefcase}   label="Active Projects" value={activeProjects.length}   color="#7C3AED" onClick={() => navigate('/businesses')} />
-        </div>
+        <SectionShell color="#C4522A">
+          <SectionLabel color="#C4522A">Overview</SectionLabel>
+          <div className="grid grid-cols-3 gap-3">
+            <StatCard icon={CheckSquare} label="Open Tasks"      value={openTasks.length}       color="#C4522A" onClick={() => navigate('/tasks')} />
+            <StatCard icon={Calendar}    label="Events (7d)"     value={upcomingEvents.length}   color="#3B82F6" onClick={() => navigate('/calendar')} />
+            <StatCard icon={Briefcase}   label="Active Projects" value={activeProjects.length}   color="#7C3AED" onClick={() => navigate('/tasks')} />
+          </div>
+        </SectionShell>
 
-        {/* Quick Add */}
-        <QuickAdd onAdd={(data) => addTask(data)} />
-
-        {/* Focus Moment */}
-        <FocusMomentButton />
+        {/* Quick Add + Focus Moment */}
+        <SectionShell color="#C084FC">
+          <SectionLabel color="#C084FC">Actions</SectionLabel>
+          <div className="space-y-3">
+            <QuickAdd onAdd={(data) => addTask(data)} />
+            <FocusMomentButton />
+          </div>
+        </SectionShell>
 
         {/* Missions */}
-        <MissionsWidget onNavigateToTasks={(missionId) => {
-          setMissionFilter(missionId)
-          navigate('/tasks')
-        }} />
+        <SectionShell color="#F59E0B">
+          <MissionsWidget onNavigateToTasks={(missionId) => {
+            setMissionFilter(missionId)
+            navigate('/tasks')
+          }} />
+        </SectionShell>
 
         {/* Today */}
         {todayEvents.length > 0 && (
-          <section>
-            <SectionLabel>Today</SectionLabel>
-            <div className="space-y-2">
-              {todayEvents.map(ev => (
-                <button key={ev.id} onClick={() => navigate('/calendar')}
-                  className="card w-full text-left flex items-center gap-3 hover:border-white/10 transition-colors">
-                  <div className="w-0.5 h-8 rounded-full shrink-0" style={{ background: CAT_COLORS[ev.category] }} />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm truncate" style={{ color: '#EDE8E0' }}>{ev.title}</p>
-                    {ev.time && <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.65rem', color: '#A09890' }}>{ev.time}{ev.endTime ? ` — ${ev.endTime}` : ''}</p>}
-                  </div>
-                  {ev.reminder && <Bell size={11} style={{ color: '#A09890' }} />}
-                  <CategoryBadge category={ev.category} size="xs" />
-                </button>
-              ))}
-            </div>
-          </section>
+          <SectionShell color="#38BDF8">
+            <section>
+              <SectionLabel color="#38BDF8">Today</SectionLabel>
+              <div className="space-y-2">
+                {todayEvents.map(ev => (
+                  <button key={ev.id} onClick={() => navigate('/calendar')}
+                    className="card w-full text-left flex items-center gap-3 hover:border-white/10 transition-colors">
+                    <div className="w-0.5 h-8 rounded-full shrink-0" style={{ background: CAT_COLORS[ev.category] }} />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm truncate" style={{ color: '#EDE8E0' }}>{ev.title}</p>
+                      {ev.time && <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.65rem', color: '#A09890' }}>{ev.time}{ev.endTime ? ` — ${ev.endTime}` : ''}</p>}
+                    </div>
+                    {ev.reminder && <Bell size={11} style={{ color: '#A09890' }} />}
+                    <CategoryBadge category={ev.category} size="xs" />
+                  </button>
+                ))}
+              </div>
+            </section>
+          </SectionShell>
         )}
 
         {/* Top tasks */}
+        <SectionShell color="#F97316">
         <section>
           <div className="flex items-center justify-between mb-2.5">
-            <SectionLabel>Active Tasks</SectionLabel>
+            <SectionLabel color="#F97316">Active Tasks</SectionLabel>
             <button onClick={() => navigate('/tasks')} style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', color: '#A09890', letterSpacing: '0.1em' }}>
               ALL →
             </button>
@@ -1344,68 +1371,43 @@ export default function Dashboard() {
               </div>
           }
         </section>
-
-        {/* Business pulse */}
-        <section>
-          <SectionLabel>Business Pulse</SectionLabel>
-          <div className="space-y-2">
-            {Object.entries(BUSINESSES).map(([id, biz]) => {
-              const bizProjects = projects.filter(p => p.businessId === id && p.status === 'active')
-              const latestNote = notes.filter(n => n.category === id).sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))[0]
-              const color = CAT_COLORS[id] || biz.color
-              return (
-                <button key={id} onClick={() => navigate('/businesses')}
-                  className="card w-full text-left flex items-center gap-3 hover:border-white/10 transition-colors group">
-                  <div className="w-0.5 h-10 rounded-full shrink-0" style={{ background: color }} />
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <p className="text-sm font-medium" style={{ color: '#EDE8E0' }}>{biz.label}</p>
-                      <span style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', color: '#A09890' }}>{bizProjects.length} active</span>
-                    </div>
-                    {latestNote && <p className="text-xs truncate mt-0.5" style={{ color: '#A09890' }}>{latestNote.title}</p>}
-                  </div>
-                  <span style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', color: '#A09890' }}>→</span>
-                </button>
-              )
-            })}
-          </div>
-        </section>
-
-        {/* Finance Pulse */}
-        <FinancePulse onNavigate={() => navigate('/finance')} />
+        </SectionShell>
 
         {/* Upcoming */}
-        <section>
-          <div className="flex items-center justify-between mb-2.5">
-            <SectionLabel>Upcoming</SectionLabel>
-            <button onClick={() => navigate('/calendar')} style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', color: '#A09890', letterSpacing: '0.1em' }}>
-              CALENDAR →
-            </button>
-          </div>
-          {next5Events.length === 0
-            ? <p style={{ color: '#A09890', fontSize: '0.875rem' }}>No upcoming events.</p>
-            : <div className="space-y-2">
-                {next5Events.map(ev => (
-                  <button key={ev.id} onClick={() => navigate('/calendar')}
-                    className="card w-full text-left flex items-center gap-3 hover:border-white/10 transition-colors">
-                    <div className="shrink-0 text-center w-9">
-                      <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.55rem', color: '#A09890', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-                        {format(parseISO(ev.date), 'MMM')}
-                      </p>
-                      <p style={{ fontFamily: '"Playfair Display", serif', fontWeight: 600, fontSize: '1.3rem', color: '#EDE8E0', lineHeight: 1 }}>
-                        {format(parseISO(ev.date), 'd')}
-                      </p>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm truncate" style={{ color: '#C8BFB5' }}>{ev.title}</p>
-                      {ev.time && <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.65rem', color: '#A09890' }}>{ev.time}</p>}
-                    </div>
-                    <CategoryBadge category={ev.category} size="xs" />
-                  </button>
-                ))}
-              </div>
-          }
-        </section>
+        <SectionShell color="#A78BFA">
+          <section>
+            <div className="flex items-center justify-between mb-2.5">
+              <SectionLabel color="#A78BFA">Upcoming</SectionLabel>
+              <button onClick={() => navigate('/calendar')} style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', color: '#A09890', letterSpacing: '0.1em' }}>
+                CALENDAR →
+              </button>
+            </div>
+            {next5Events.length === 0
+              ? <p style={{ color: '#A09890', fontSize: '0.875rem' }}>No upcoming events.</p>
+              : <div className="space-y-2">
+                  {next5Events.map(ev => (
+                    <button key={ev.id} onClick={() => navigate('/calendar')}
+                      className="card w-full text-left flex items-center gap-3 hover:border-white/10 transition-colors">
+                      <div className="shrink-0 text-center w-9">
+                        <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.55rem', color: '#A09890', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                          {format(parseISO(ev.date), 'MMM')}
+                        </p>
+                        <p style={{ fontFamily: '"Playfair Display", serif', fontWeight: 600, fontSize: '1.3rem', color: '#EDE8E0', lineHeight: 1 }}>
+                          {format(parseISO(ev.date), 'd')}
+                        </p>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm truncate" style={{ color: '#C8BFB5' }}>{ev.title}</p>
+                        {ev.time && <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.65rem', color: '#A09890' }}>{ev.time}</p>}
+                      </div>
+                      <CategoryBadge category={ev.category} size="xs" />
+                    </button>
+                  ))}
+                </div>
+            }
+          </section>
+        </SectionShell>
+
       </div>
     </div>
   )
