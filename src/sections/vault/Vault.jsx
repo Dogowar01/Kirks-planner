@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { Lock, Unlock, Plus, Eye, EyeOff, Copy, Check, Trash2, Pencil, X, ShieldCheck, Fingerprint, KeyRound, RefreshCw } from 'lucide-react'
 import { useVault, VAULT_TYPES } from '../../hooks/useVault'
 import SectionShell from '../../components/SectionShell'
@@ -65,52 +65,69 @@ function PinPad({ onKey, disabled }) {
 
 // ─── Setup Screen ────────────────────────────────────────────
 function SetupScreen({ vault }) {
-  const [pinA, setPinA] = useState('')
-  const [pinB, setPinB] = useState('')
-  const [step, setStep]   = useState('first') // 'first' | 'confirm'
+  // Use refs as the source of truth so auto-submit always reads current values
+  const pinARef = useRef('')
+  const pinBRef = useRef('')
+  const stepRef = useRef('first')
+  const busyRef = useRef(false)
+
+  // Display state (just for rendering dots)
+  const [display, setDisplay] = useState({ pinA: '', pinB: '', step: 'first' })
   const [error, setError] = useState('')
-  const [busy, setBusy]   = useState(false)
 
   const showError = (msg) => {
     setError(msg)
     setTimeout(() => setError(''), 2500)
   }
 
-  async function handleKey(k) {
-    if (busy) return
-    const current = step === 'confirm' ? pinB : pinA
-    const setter  = step === 'confirm' ? setPinB : setPinA
-
-    if (k === '⌫') { setter(current.slice(0, -1)); return }
-
-    if (k === '✓') {
-      if (current.length < 4) { showError('Enter at least 4 digits'); return }
-      if (step === 'first') {
-        setStep('confirm'); setPinB(''); return
-      }
-      // Confirm step
-      if (pinA !== pinB) {
+  async function submit() {
+    if (busyRef.current) return
+    if (stepRef.current === 'first') {
+      if (pinARef.current.length < 4) { showError('Enter at least 4 digits'); return }
+      stepRef.current = 'confirm'
+      pinBRef.current = ''
+      setDisplay(d => ({ ...d, step: 'confirm', pinB: '' }))
+    } else {
+      if (pinBRef.current.length < 4) { showError('Enter at least 4 digits'); return }
+      if (pinARef.current !== pinBRef.current) {
         showError("PINs didn't match — try again")
-        setTimeout(() => { setStep('first'); setPinA(''); setPinB('') }, 1800)
+        setTimeout(() => {
+          stepRef.current = 'first'
+          pinARef.current = ''
+          pinBRef.current = ''
+          setDisplay({ pinA: '', pinB: '', step: 'first' })
+        }, 1800)
         return
       }
-      setBusy(true)
-      await vault.setupPin(pinA)
-      setBusy(false)
-      return
-    }
-
-    if (current.length < 6) {
-      const next = current + k
-      setter(next)
-      // Auto-submit at 6 digits
-      if (next.length === 6) {
-        setTimeout(() => handleKey('✓'), 80)
-      }
+      busyRef.current = true
+      await vault.setupPin(pinARef.current)
+      busyRef.current = false
     }
   }
 
-  const currentVal = step === 'confirm' ? pinB : pinA
+  async function handleKey(k) {
+    if (busyRef.current) return
+    const isConfirm = stepRef.current === 'confirm'
+    const current   = isConfirm ? pinBRef.current : pinARef.current
+
+    if (k === '⌫') {
+      const next = current.slice(0, -1)
+      if (isConfirm) { pinBRef.current = next; setDisplay(d => ({ ...d, pinB: next })) }
+      else           { pinARef.current = next; setDisplay(d => ({ ...d, pinA: next })) }
+      return
+    }
+
+    if (k === '✓') { await submit(); return }
+
+    if (current.length < 6) {
+      const next = current + k
+      if (isConfirm) { pinBRef.current = next; setDisplay(d => ({ ...d, pinB: next })) }
+      else           { pinARef.current = next; setDisplay(d => ({ ...d, pinA: next })) }
+      if (next.length === 6) setTimeout(submit, 80)
+    }
+  }
+
+  const currentVal = display.step === 'confirm' ? display.pinB : display.pinA
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '40px 24px', textAlign: 'center' }}>
@@ -124,7 +141,7 @@ function SetupScreen({ vault }) {
       </p>
 
       <p style={{ fontSize: 11, color: PLUM, fontFamily: '"DM Mono", monospace', letterSpacing: '0.1em', margin: '16px 0 4px' }}>
-        {step === 'first' ? 'ENTER NEW PIN' : 'CONFIRM PIN'}
+        {display.step === 'first' ? 'ENTER NEW PIN' : 'CONFIRM PIN'}
       </p>
 
       <PinDots value={currentVal} />
@@ -140,10 +157,11 @@ function SetupScreen({ vault }) {
 
 // ─── Lock Screen ─────────────────────────────────────────────
 function LockScreen({ vault, onReset }) {
-  const [pin, setPin]         = useState('')
-  const [error, setError]     = useState('')
-  const [busy, setBusy]       = useState(false)
-  const [bioAvail, setBioAvail] = useState(false)
+  const pinRef  = useRef('')
+  const busyRef = useRef(false)
+  const [pinDisplay, setPinDisplay] = useState('')
+  const [error,    setError]     = useState('')
+  const [bioAvail, setBioAvail]  = useState(false)
   const bioEnrolled = vault.isBioEnrolled()
 
   useEffect(() => {
@@ -155,21 +173,31 @@ function LockScreen({ vault, onReset }) {
     setTimeout(() => setError(''), 2500)
   }
 
+  async function submit() {
+    if (busyRef.current) return
+    if (pinRef.current.length < 4) { showError('Enter at least 4 digits'); return }
+    busyRef.current = true
+    const ok = await vault.unlockPin(pinRef.current)
+    busyRef.current = false
+    if (!ok) {
+      pinRef.current = ''
+      setPinDisplay('')
+      showError('Incorrect PIN — try again')
+    }
+  }
+
   async function handleKey(k) {
-    if (busy) return
-    if (k === '⌫') { setPin(p => p.slice(0, -1)); return }
-    if (k === '✓') {
-      if (pin.length < 4) { showError('Enter at least 4 digits'); return }
-      setBusy(true)
-      const ok = await vault.unlockPin(pin)
-      setBusy(false)
-      if (!ok) { setPin(''); showError('Incorrect PIN — try again') }
+    if (busyRef.current) return
+    if (k === '⌫') {
+      pinRef.current = pinRef.current.slice(0, -1)
+      setPinDisplay(pinRef.current)
       return
     }
-    if (pin.length < 6) {
-      const next = pin + k
-      setPin(next)
-      if (next.length === 6) setTimeout(() => handleKey('✓'), 80)
+    if (k === '✓') { await submit(); return }
+    if (pinRef.current.length < 6) {
+      pinRef.current = pinRef.current + k
+      setPinDisplay(pinRef.current)
+      if (pinRef.current.length === 6) setTimeout(submit, 80)
     }
   }
 
@@ -190,7 +218,7 @@ function LockScreen({ vault, onReset }) {
       </h2>
       <p style={{ fontSize: 12, color: '#B8B0A8', marginBottom: 4 }}>Enter your PIN then press ✓</p>
 
-      <PinDots value={pin} />
+      <PinDots value={pinDisplay} />
 
       {error && (
         <p style={{ fontSize: 12, color: '#E53E3E', margin: '0 0 12px', fontFamily: '"DM Mono", monospace' }}>{error}</p>
@@ -421,43 +449,63 @@ function EntryForm({ entry = {}, onSave, onDelete, onClose }) {
 
 // ─── Change PIN Modal ─────────────────────────────────────────
 function ChangePinModal({ vault, onClose }) {
-  const [pinA, setPinA]   = useState('')
-  const [pinB, setPinB]   = useState('')
-  const [step, setStep]   = useState('first')
+  const pinARef  = useRef('')
+  const pinBRef  = useRef('')
+  const stepRef  = useRef('first')
+  const busyRef  = useRef(false)
+  const [display, setDisplay] = useState({ pinA: '', pinB: '', step: 'first' })
   const [error, setError] = useState('')
-  const [busy, setBusy]   = useState(false)
   const [done, setDone]   = useState(false)
 
   const showError = (msg) => { setError(msg); setTimeout(() => setError(''), 2500) }
 
-  async function handleKey(k) {
-    if (busy) return
-    const current = step === 'confirm' ? pinB : pinA
-    const setter  = step === 'confirm' ? setPinB : setPinA
-    if (k === '⌫') { setter(current.slice(0, -1)); return }
-    if (k === '✓') {
-      if (current.length < 4) { showError('Enter at least 4 digits'); return }
-      if (step === 'first') { setStep('confirm'); setPinB(''); return }
-      if (pinA !== pinB) {
+  async function submit() {
+    if (busyRef.current) return
+    if (stepRef.current === 'first') {
+      if (pinARef.current.length < 4) { showError('Enter at least 4 digits'); return }
+      stepRef.current = 'confirm'
+      pinBRef.current = ''
+      setDisplay(d => ({ ...d, step: 'confirm', pinB: '' }))
+    } else {
+      if (pinBRef.current.length < 4) { showError('Enter at least 4 digits'); return }
+      if (pinARef.current !== pinBRef.current) {
         showError("PINs didn't match")
-        setTimeout(() => { setStep('first'); setPinA(''); setPinB('') }, 1800)
+        setTimeout(() => {
+          stepRef.current = 'first'
+          pinARef.current = ''
+          pinBRef.current = ''
+          setDisplay({ pinA: '', pinB: '', step: 'first' })
+        }, 1800)
         return
       }
-      setBusy(true)
-      await vault.changePin(pinA)
-      setBusy(false)
+      busyRef.current = true
+      await vault.changePin(pinARef.current)
+      busyRef.current = false
       setDone(true)
       setTimeout(onClose, 1200)
-      return
-    }
-    if (current.length < 6) {
-      const next = current + k
-      setter(next)
-      if (next.length === 6) setTimeout(() => handleKey('✓'), 80)
     }
   }
 
-  const currentVal = step === 'confirm' ? pinB : pinA
+  async function handleKey(k) {
+    if (busyRef.current) return
+    const isConfirm = stepRef.current === 'confirm'
+    const current   = isConfirm ? pinBRef.current : pinARef.current
+    if (k === '⌫') {
+      const next = current.slice(0, -1)
+      if (isConfirm) { pinBRef.current = next; setDisplay(d => ({ ...d, pinB: next })) }
+      else           { pinARef.current = next; setDisplay(d => ({ ...d, pinA: next })) }
+      return
+    }
+    if (k === '✓') { await submit(); return }
+    if (current.length < 6) {
+      const next = current + k
+      if (isConfirm) { pinBRef.current = next; setDisplay(d => ({ ...d, pinB: next })) }
+      else           { pinARef.current = next; setDisplay(d => ({ ...d, pinA: next })) }
+      if (next.length === 6) setTimeout(submit, 80)
+    }
+  }
+
+  const currentVal = display.step === 'confirm' ? display.pinB : display.pinA
 
   return (
     <div style={{ textAlign: 'center', padding: '8px 0' }}>
@@ -466,11 +514,11 @@ function ChangePinModal({ vault, onClose }) {
       ) : (
         <>
           <p style={{ fontSize: 11, color: PLUM, fontFamily: '"DM Mono", monospace', letterSpacing: '0.1em', marginBottom: 4 }}>
-            {step === 'first' ? 'ENTER NEW PIN' : 'CONFIRM PIN'}
+            {display.step === 'first' ? 'ENTER NEW PIN' : 'CONFIRM PIN'}
           </p>
           <PinDots value={currentVal} />
           {error && <p style={{ fontSize: 12, color: '#E53E3E', marginBottom: 12 }}>{error}</p>}
-          <PinPad onKey={handleKey} disabled={busy} />
+          <PinPad onKey={handleKey} disabled={busyRef.current} />
         </>
       )}
     </div>
