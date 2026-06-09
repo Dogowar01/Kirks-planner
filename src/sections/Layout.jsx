@@ -1,18 +1,17 @@
 import { useState } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 import { Outlet } from 'react-router-dom'
-import { LayoutDashboard, CalendarDays, CheckSquare, Briefcase, Users, BookOpen, DollarSign, Settings, MoreHorizontal, X, Wrench, ShieldCheck } from 'lucide-react'
+import { LayoutDashboard, CalendarDays, CheckSquare, Users, BookOpen, Settings, MoreHorizontal, X, Wrench, ShieldCheck, BookMarked } from 'lucide-react'
 
 const NAV = [
-  { to: '/dashboard',  label: 'Dashboard',  Icon: LayoutDashboard },
-  { to: '/tasks',      label: 'Tasks',      Icon: CheckSquare },
-  { to: '/finance',    label: 'Finance',    Icon: DollarSign },
-  { to: '/notes',      label: 'Notes',      Icon: BookOpen },
-  { to: '/tools',      label: 'Tools',      Icon: Wrench },
-  { to: '/calendar',   label: 'Calendar',   Icon: CalendarDays },
-  { to: '/vault',      label: 'Vault',      Icon: ShieldCheck },
-  { to: '/businesses', label: 'Businesses', Icon: Briefcase },
-  { to: '/contacts',   label: 'Contacts',   Icon: Users },
+  { to: '/dashboard', label: 'Dashboard', Icon: LayoutDashboard },
+  { to: '/tasks',     label: 'Tasks',     Icon: CheckSquare },
+  { to: '/ledger',    label: 'Ledger',    Icon: BookMarked },
+  { to: '/notes',     label: 'Notes',     Icon: BookOpen },
+  { to: '/tools',     label: 'Tools',     Icon: Wrench },
+  { to: '/calendar',  label: 'Calendar',  Icon: CalendarDays },
+  { to: '/vault',     label: 'Vault',     Icon: ShieldCheck },
+  { to: '/contacts',  label: 'Contacts',  Icon: Users },
 ]
 
 function SideNav() {
@@ -64,10 +63,9 @@ function SideNav() {
 }
 
 const OVERFLOW = [
-  { to: '/vault',      label: 'Vault',      Icon: ShieldCheck },
-  { to: '/businesses', label: 'Businesses', Icon: Briefcase },
-  { to: '/contacts',   label: 'Contacts',   Icon: Users },
-  { to: '/settings',   label: 'Settings',   Icon: Settings },
+  { to: '/vault',    label: 'Vault',    Icon: ShieldCheck },
+  { to: '/contacts', label: 'Contacts', Icon: Users },
+  { to: '/settings', label: 'Settings', Icon: Settings },
 ]
 
 function BottomNav() {
