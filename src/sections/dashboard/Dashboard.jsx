@@ -17,31 +17,76 @@ const CAT_COLORS = {
 }
 
 const WMO_CODES = {
-  0: 'Clear sky', 1: 'Mainly clear', 2: 'Partly cloudy', 3: 'Overcast',
-  45: 'Foggy', 48: 'Icy fog',
-  51: 'Light drizzle', 53: 'Drizzle', 55: 'Heavy drizzle',
-  61: 'Light rain', 63: 'Rain', 65: 'Heavy rain',
-  71: 'Light snow', 73: 'Snow', 75: 'Heavy snow',
-  80: 'Showers', 81: 'Heavy showers', 82: 'Violent showers',
-  95: 'Thunderstorm', 96: 'Hail storm', 99: 'Heavy hail storm',
+  0:  { label: 'Clear',         icon: '☀️' },
+  1:  { label: 'Mostly Clear',  icon: '🌤️' },
+  2:  { label: 'Partly Cloudy', icon: '⛅' },
+  3:  { label: 'Overcast',      icon: '☁️' },
+  45: { label: 'Fog',           icon: '🌫️' },
+  48: { label: 'Fog',           icon: '🌫️' },
+  51: { label: 'Light Drizzle', icon: '🌦️' },
+  53: { label: 'Drizzle',       icon: '🌦️' },
+  55: { label: 'Heavy Drizzle', icon: '🌧️' },
+  61: { label: 'Light Rain',    icon: '🌧️' },
+  63: { label: 'Rain',          icon: '🌧️' },
+  65: { label: 'Heavy Rain',    icon: '🌧️' },
+  71: { label: 'Light Snow',    icon: '🌨️' },
+  73: { label: 'Snow',          icon: '❄️' },
+  75: { label: 'Heavy Snow',    icon: '❄️' },
+  80: { label: 'Showers',       icon: '🌦️' },
+  81: { label: 'Showers',       icon: '🌧️' },
+  82: { label: 'Heavy Showers', icon: '⛈️' },
+  95: { label: 'Thunderstorm',  icon: '⛈️' },
+  96: { label: 'Thunderstorm',  icon: '⛈️' },
+  99: { label: 'Thunderstorm',  icon: '⛈️' },
 }
+function wmo(code) { return WMO_CODES[code] || { label: 'Unknown', icon: '—' } }
+
+const WEATHER_CACHE_KEY = 's9_weather_cache'
+const WEATHER_TTL = 30 * 60 * 1000 // 30 min
 
 function useWeather() {
-  const [data, setData] = useState(null)
+  const [data, setData] = useState(() => {
+    try {
+      const c = JSON.parse(localStorage.getItem(WEATHER_CACHE_KEY) || 'null')
+      if (c && Date.now() - c.ts < WEATHER_TTL) return c.data
+    } catch {}
+    return null
+  })
 
   useEffect(() => {
+    // Still fresh from cache — skip fetch
+    try {
+      const c = JSON.parse(localStorage.getItem(WEATHER_CACHE_KEY) || 'null')
+      if (c && Date.now() - c.ts < WEATHER_TTL) return
+    } catch {}
+
     if (!navigator.geolocation) return
     navigator.geolocation.getCurrentPosition(async ({ coords }) => {
       try {
+        const { latitude: lat, longitude: lon } = coords
         const res = await fetch(
-          `https://api.open-meteo.com/v1/forecast?latitude=${coords.latitude}&longitude=${coords.longitude}&current=temperature_2m,weathercode,windspeed_10m&timezone=auto`
+          `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}` +
+          `&current=temperature_2m,weathercode,windspeed_10m,apparent_temperature` +
+          `&daily=temperature_2m_max,temperature_2m_min,weathercode,precipitation_probability_max` +
+          `&timezone=auto&forecast_days=3`
         )
         const json = await res.json()
-        setData({
-          temp: Math.round(json.current.temperature_2m),
-          code: json.current.weathercode,
-          wind: Math.round(json.current.windspeed_10m),
-        })
+        const c = json.current
+        const d = json.daily
+        const result = {
+          temp:      Math.round(c.temperature_2m),
+          feelsLike: Math.round(c.apparent_temperature),
+          wind:      Math.round(c.windspeed_10m),
+          code:      c.weathercode,
+          days: [0, 1, 2].map(i => ({
+            maxTemp: Math.round(d.temperature_2m_max[i]),
+            minTemp: Math.round(d.temperature_2m_min[i]),
+            rain:    d.precipitation_probability_max[i],
+            code:    d.weathercode[i],
+          })),
+        }
+        localStorage.setItem(WEATHER_CACHE_KEY, JSON.stringify({ ts: Date.now(), data: result }))
+        setData(result)
       } catch {}
     }, () => {})
   }, [])
@@ -165,26 +210,8 @@ function LiveClock() {
           {format(now, "HH:mm")}
         </p>
 
-        {/* Live data strip */}
+        {/* Exchange rates strip */}
         <div className="flex gap-4 flex-wrap" style={{ marginTop: 4 }}>
-          {/* Weather */}
-          {weather && (
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
-              <span style={{ fontFamily: '"Playfair Display", serif', fontWeight: 600, fontSize: '1.4rem', color: '#EDE8E0' }}>
-                {weather.temp}°
-              </span>
-              <span style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', color: '#A09890', letterSpacing: '0.08em' }}>
-                {WMO_CODES[weather.code] || 'Unknown'} · {weather.wind} km/h
-              </span>
-            </div>
-          )}
-
-          {/* Divider */}
-          {weather && (rates || ratesError) && (
-            <div style={{ width: 1, height: 24, background: 'rgba(255,255,255,0.1)', alignSelf: 'center' }} />
-          )}
-
-          {/* Exchange rates */}
           {(rates || ratesError) && (
             <>
               {[['USD', 4], ['JPY', 2]].map(([ccy, dp]) => {
@@ -208,15 +235,62 @@ function LiveClock() {
               <span style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.5rem', color: '#7A7470', alignSelf: 'center' }}>1 AUD</span>
             </>
           )}
-
-          {/* Loading states */}
-          {!weather && (
-            <span style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', color: '#7A7470' }}>loading weather…</span>
-          )}
           {!rates && !ratesError && (
             <span style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', color: '#7A7470' }}>loading rates…</span>
           )}
         </div>
+
+        {/* 3-day weather strip */}
+        {weather ? (
+          <div style={{
+            marginTop: 14,
+            display: 'flex', alignItems: 'stretch', gap: 0,
+            background: 'rgba(0,0,0,0.25)',
+            borderRadius: 12,
+            border: '0.5px solid rgba(255,255,255,0.08)',
+            overflow: 'hidden',
+          }}>
+            {/* Current conditions */}
+            <div style={{ flex: '0 0 auto', padding: '10px 14px', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 2, borderRight: '0.5px solid rgba(255,255,255,0.07)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span style={{ fontSize: 22 }}>{wmo(weather.code).icon}</span>
+                <span style={{ fontFamily: '"Playfair Display", serif', fontWeight: 600, fontSize: '1.5rem', color: '#EDE8E0', lineHeight: 1 }}>{weather.temp}°</span>
+              </div>
+              <div style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.55rem', color: '#A09890', letterSpacing: '0.08em' }}>
+                {wmo(weather.code).label.toUpperCase()}
+              </div>
+              <div style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.52rem', color: '#7A7470', letterSpacing: '0.06em', marginTop: 1 }}>
+                FEELS {weather.feelsLike}° · WIND {weather.wind}km/h
+              </div>
+            </div>
+
+            {/* 3-day forecast */}
+            <div style={{ flex: 1, display: 'flex' }}>
+              {weather.days.map((day, i) => {
+                const cond = wmo(day.code)
+                const label = ['TODAY', 'TMW', 'D+2'][i]
+                return (
+                  <div key={i} style={{
+                    flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                    padding: '8px 4px', gap: 3,
+                    borderRight: i < 2 ? '0.5px solid rgba(255,255,255,0.07)' : 'none',
+                  }}>
+                    <div style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.5rem', color: '#7A7470', letterSpacing: '0.1em' }}>{label}</div>
+                    <div style={{ fontSize: 18 }}>{cond.icon}</div>
+                    <div style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.65rem', color: '#EDE8E0', fontWeight: 700 }}>
+                      {day.maxTemp}°<span style={{ color: '#7A7470', fontWeight: 400 }}>/{day.minTemp}°</span>
+                    </div>
+                    {day.rain > 20 && (
+                      <div style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.48rem', color: '#60a5fa', letterSpacing: '0.05em' }}>{day.rain}% 💧</div>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        ) : (
+          <div style={{ marginTop: 10, fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', color: '#7A7470' }}>loading weather…</div>
+        )}
 
         {/* Pinned countdown */}
         {pinned && (
