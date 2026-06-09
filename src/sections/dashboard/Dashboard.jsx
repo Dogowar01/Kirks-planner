@@ -94,27 +94,91 @@ function useWeather() {
   return data
 }
 
+const RATES_CACHE_KEY = 's9_rates_cache'
+const RATES_TTL = 60 * 60 * 1000 // 1 hour
+
 function useRates() {
-  const [rates, setRates] = useState(null)
-  const [prev, setPrev] = useState(null)
+  const [history, setHistory] = useState(() => {
+    try {
+      const c = JSON.parse(localStorage.getItem(RATES_CACHE_KEY) || 'null')
+      if (c && Date.now() - c.ts < RATES_TTL) return c.data
+    } catch {}
+    return null
+  })
   const [error, setError] = useState(false)
 
   useEffect(() => {
-    const opts = { cache: 'no-store' }
+    try {
+      const c = JSON.parse(localStorage.getItem(RATES_CACHE_KEY) || 'null')
+      if (c && Date.now() - c.ts < RATES_TTL) return
+    } catch {}
+
     const base = 'https://api.frankfurter.dev/v1'
-    const yesterday = new Date(Date.now() - 86400000 * 2).toISOString().slice(0, 10)
+    // Ask for 10 days back so we always get 5 business days after weekends
+    const from = new Date(Date.now() - 86400000 * 10).toISOString().slice(0, 10)
+    const to   = new Date().toISOString().slice(0, 10)
+
     Promise.all([
-      fetch(`${base}/latest?from=AUD&to=USD,JPY`, opts).then(r => r.json()),
-      fetch(`${base}/${yesterday}?from=AUD&to=USD,JPY`, opts).then(r => r.json()),
+      fetch(`${base}/${from}..${to}?from=AUD&to=USD,JPY`).then(r => r.json()),
+      fetch(`${base}/latest?from=AUD&to=USD,JPY`).then(r => r.json()),
     ])
-      .then(([today, prior]) => {
-        if (today.rates?.USD) { setRates(today.rates); setPrev(prior.rates) }
-        else setError(true)
+      .then(([range, latest]) => {
+        if (!range.rates) { setError(true); return }
+
+        // Sorted dates ascending, take last 5
+        const dates = Object.keys(range.rates).sort().slice(-5)
+        const result = {
+          USD: dates.map(d => range.rates[d].USD),
+          JPY: dates.map(d => range.rates[d].JPY),
+          latest: latest.rates,
+        }
+        localStorage.setItem(RATES_CACHE_KEY, JSON.stringify({ ts: Date.now(), data: result }))
+        setHistory(result)
       })
       .catch(() => setError(true))
   }, [])
 
-  return { rates, prev, error }
+  return { history, error }
+}
+
+function Sparkline({ values, width = 80, height = 32, color }) {
+  if (!values || values.length < 2) return null
+  const min = Math.min(...values)
+  const max = Math.max(...values)
+  const range = max - min || 1
+  const pad = 2
+  const w = width - pad * 2
+  const h = height - pad * 2
+
+  const points = values.map((v, i) => {
+    const x = pad + (i / (values.length - 1)) * w
+    const y = pad + h - ((v - min) / range) * h
+    return `${x},${y}`
+  }).join(' ')
+
+  const up = values[values.length - 1] >= values[0]
+  const lineColor = color || (up ? '#4ade80' : '#f87171')
+  // Filled area under the line
+  const first = points.split(' ')[0]
+  const last  = points.split(' ').at(-1)
+  const [lx] = last.split(',')
+  const [fx] = first.split(',')
+  const area = `${fx},${pad + h} ${points} ${lx},${pad + h}`
+
+  return (
+    <svg width={width} height={height} style={{ display: 'block', overflow: 'visible' }}>
+      <defs>
+        <linearGradient id={`sg-${color?.replace('#','')}`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={lineColor} stopOpacity="0.25" />
+          <stop offset="100%" stopColor={lineColor} stopOpacity="0" />
+        </linearGradient>
+      </defs>
+      <polygon points={area} fill={`url(#sg-${color?.replace('#','')})`} />
+      <polyline points={points} fill="none" stroke={lineColor} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+      {/* End dot */}
+      <circle cx={lx} cy={last.split(',')[1]} r="2.5" fill={lineColor} />
+    </svg>
+  )
 }
 
 const PLUM       = '#C084FC'
@@ -148,7 +212,7 @@ function usePinnedCountdown(settings) {
 function LiveClock() {
   const [now, setNow] = useState(new Date())
   const weather = useWeather()
-  const { rates, prev, error: ratesError } = useRates()
+  const { history: ratesHistory, error: ratesError } = useRates()
   const { settings } = useStore()
   const pinned = usePinnedCountdown(settings)
 
@@ -210,35 +274,38 @@ function LiveClock() {
           {format(now, "HH:mm")}
         </p>
 
-        {/* Exchange rates strip */}
-        <div className="flex gap-4 flex-wrap" style={{ marginTop: 4 }}>
-          {(rates || ratesError) && (
-            <>
-              {[['USD', 4], ['JPY', 2]].map(([ccy, dp]) => {
-                const val = rates?.[ccy]
-                const pval = prev?.[ccy]
-                const up = val && pval ? val > pval : null
-                return (
-                  <div key={ccy} style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
-                    <span style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.55rem', color: '#A09890', letterSpacing: '0.1em', textTransform: 'uppercase' }}>{ccy}</span>
-                    <span style={{ fontFamily: '"Playfair Display", serif', fontWeight: 600, fontSize: '1.1rem', color: '#C8BFB5' }}>
-                      {val ? val.toFixed(dp) : '—'}
-                    </span>
-                    {up !== null && (
-                      <span style={{ fontSize: '0.65rem', lineHeight: 1, alignSelf: 'center', color: up ? '#4ade80' : '#f87171' }}>
-                        {up ? '▲' : '▼'}
-                      </span>
-                    )}
+        {/* Exchange rate sparklines */}
+        {(ratesHistory || ratesError) ? (
+          <div style={{ display: 'flex', gap: 8, marginTop: 4, flexWrap: 'wrap' }}>
+            {[['USD', 4], ['JPY', 0]].map(([ccy, dp]) => {
+              const vals = ratesHistory?.[ccy]
+              const latest = ratesHistory?.latest?.[ccy]
+              const up = vals ? vals[vals.length - 1] >= vals[0] : null
+              const trendColor = up === null ? '#A09890' : up ? '#4ade80' : '#f87171'
+              return (
+                <div key={ccy} style={{
+                  display: 'flex', alignItems: 'center', gap: 8,
+                  background: 'rgba(0,0,0,0.2)',
+                  border: '0.5px solid rgba(255,255,255,0.07)',
+                  borderRadius: 10, padding: '6px 10px',
+                }}>
+                  <div>
+                    <div style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.5rem', color: '#7A7470', letterSpacing: '0.1em' }}>AUD/{ccy}</div>
+                    <div style={{ fontFamily: '"Playfair Display", serif', fontWeight: 600, fontSize: '1rem', color: '#EDE8E0', lineHeight: 1.2 }}>
+                      {latest ? latest.toFixed(dp) : '—'}
+                    </div>
+                    <div style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.48rem', color: trendColor, letterSpacing: '0.06em', marginTop: 1 }}>
+                      {up === null ? '' : up ? '▲ UP 5D' : '▼ DOWN 5D'}
+                    </div>
                   </div>
-                )
-              })}
-              <span style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.5rem', color: '#7A7470', alignSelf: 'center' }}>1 AUD</span>
-            </>
-          )}
-          {!rates && !ratesError && (
-            <span style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', color: '#7A7470' }}>loading rates…</span>
-          )}
-        </div>
+                  <Sparkline values={vals} width={72} height={30} color={trendColor} />
+                </div>
+              )
+            })}
+          </div>
+        ) : (
+          <div style={{ marginTop: 4, fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', color: '#7A7470' }}>loading rates…</div>
+        )}
 
         {/* 3-day weather strip */}
         {weather ? (
