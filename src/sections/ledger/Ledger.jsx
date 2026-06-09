@@ -213,6 +213,13 @@ const Btn = ({t, onClick, children, style={}}) => (
 
 export default function Ledger() {
   const navigate = useNavigate();
+  const [leaving, setLeaving] = useState(false);
+
+  function goBack() {
+    setLeaving(true);
+    setTimeout(() => navigate(-1), 280);
+  }
+
   const saved = loadData();
   const [transactions, setTransactions] = useState(saved?.transactions || {"Signal9":[],"App Sales":[]});
   const [categories, setCategories] = useState(saved?.categories || DEFAULT_CATEGORIES);
@@ -301,7 +308,7 @@ export default function Ledger() {
   // ── LANDING ───────────────────────────────────────────────────────────────
 
   if (view === "landing") return (
-    <div style={{minHeight:"100vh",background:"#0d0b08",fontFamily:"Georgia,serif",color:"#e8e4dc",position:"relative",overflow:"hidden"}}>
+    <div className={leaving ? "ledger-leave" : "ledger-enter"} style={{minHeight:"100vh",background:"#0d0b08",fontFamily:"Georgia,serif",color:"#e8e4dc",position:"relative",overflow:"hidden"}}>
       <style>{globalCSS}</style>
       <div style={{position:"fixed",inset:0,display:"flex",zIndex:0}}>
         <div style={{flex:1,position:"relative"}}><S9LandingBg/></div>
@@ -311,7 +318,7 @@ export default function Ledger() {
 
       {/* Back button */}
       <div style={{position:"fixed",top:`calc(env(safe-area-inset-top) + 0.75rem)`,left:"1rem",zIndex:10}}>
-        <button onClick={() => navigate(-1)} style={{
+        <button onClick={goBack} style={{
           display:"flex",alignItems:"center",gap:"0.35rem",
           background:"rgba(0,0,0,0.45)",backdropFilter:"blur(10px)",
           border:"0.5px solid rgba(255,255,255,0.12)",borderRadius:8,
@@ -385,7 +392,7 @@ export default function Ledger() {
   const Bg = isAP ? APBackground : S9Background;
 
   return (
-    <div style={{minHeight:"100vh",background:t.bg,fontFamily:t.font,color:t.textPrimary,display:"flex",flexDirection:"column",position:"relative"}}>
+    <div className={leaving ? "ledger-leave" : "ledger-enter"} style={{minHeight:"100vh",background:t.bg,fontFamily:t.font,color:t.textPrimary,display:"flex",flexDirection:"column",position:"relative"}}>
       <style>{globalCSS}</style>
       <Bg/>
 
@@ -560,4 +567,15 @@ const globalCSS = `
   ::-webkit-scrollbar { width: 4px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: rgba(196,90,26,0.3); border-radius: 2px; }
+
+  @keyframes ledgerFadeIn {
+    from { opacity: 0; transform: translateY(14px) scale(0.985); }
+    to   { opacity: 1; transform: translateY(0)    scale(1); }
+  }
+  @keyframes ledgerFadeOut {
+    from { opacity: 1; transform: translateY(0)     scale(1); }
+    to   { opacity: 0; transform: translateY(-10px) scale(0.99); }
+  }
+  .ledger-enter  { animation: ledgerFadeIn  0.38s cubic-bezier(0.22,0.8,0.36,1) both; }
+  .ledger-leave  { animation: ledgerFadeOut 0.28s cubic-bezier(0.4,0,1,1) both; }
 `;
