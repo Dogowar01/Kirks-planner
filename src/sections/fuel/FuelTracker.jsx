@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ChevronLeft, Plus } from 'lucide-react'
+import { ChevronLeft, Plus, Download, Upload } from 'lucide-react'
 
 // ── Storage ───────────────────────────────────────────────────────────────────
 
@@ -300,8 +300,15 @@ export default function FuelTracker() {
   const [fuel, setFuel] = useState(() => load(FUEL_KEY, []))
   const [showForm, setShowForm] = useState(false)
   const [editFuel, setEditFuel] = useState(null)
+  const [toast, setToast] = useState(null)
+  const importRef = useRef(null)
 
   useEffect(() => { save(FUEL_KEY, fuel) }, [fuel])
+
+  function showToast(msg) {
+    setToast(msg)
+    setTimeout(() => setToast(null), 2800)
+  }
 
   function saveFuel(data) {
     if (editFuel) {
@@ -314,8 +321,49 @@ export default function FuelTracker() {
 
   function deleteFuel(id) { setFuel(prev => prev.filter(x => x.id !== id)) }
 
+  function handleExport() {
+    const blob = new Blob([JSON.stringify(fuel, null, 2)], { type: 'application/json' })
+    const a = document.createElement('a')
+    a.href = URL.createObjectURL(blob)
+    a.download = `fuel-entries-${todayStr()}.json`
+    a.click()
+    showToast('Exported ✓')
+  }
+
+  function handleImport(e) {
+    const file = e.target.files?.[0]; if (!file) return
+    const reader = new FileReader()
+    reader.onload = ev => {
+      try {
+        const parsed = JSON.parse(ev.target.result)
+        // Accept either a raw array or an object with a fuel key (Agenda backup format)
+        const entries = Array.isArray(parsed) ? parsed : (parsed.fuel || [])
+        if (!entries.length) { showToast('No entries found in file'); return }
+        // Merge: keep existing, add any new by id
+        setFuel(prev => {
+          const existingIds = new Set(prev.map(e => e.id))
+          const newEntries = entries.filter(e => !existingIds.has(e.id))
+          return [...prev, ...newEntries].sort((a, b) => b.date.localeCompare(a.date))
+        })
+        showToast(`Imported ${entries.length} entries ✓`)
+      } catch { showToast('Invalid file') }
+    }
+    reader.readAsText(file)
+    e.target.value = ''
+  }
+
   return (
     <div style={{ minHeight: '100vh', background: '#141414', color: '#F5F0E8', fontFamily: "'Outfit','Helvetica Neue',Arial,sans-serif" }}>
+      {/* Toast */}
+      {toast && (
+        <div style={{ position: 'fixed', bottom: 'calc(env(safe-area-inset-bottom) + 24px)', left: '50%', transform: 'translateX(-50%)', background: '#2A2A2A', color: '#F5F0E8', borderRadius: 12, padding: '12px 20px', fontSize: 15, fontWeight: 700, zIndex: 300, whiteSpace: 'nowrap', boxShadow: '0 4px 24px rgba(0,0,0,0.5)' }}>
+          {toast}
+        </div>
+      )}
+
+      {/* Hidden file input */}
+      <input ref={importRef} type="file" accept=".json" style={{ display: 'none' }} onChange={handleImport} />
+
       {/* Header */}
       <div style={{
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
@@ -331,11 +379,21 @@ export default function FuelTracker() {
           <ChevronLeft size={20} strokeWidth={2.5} /> Back
         </button>
         <span style={{ fontSize: 17, fontWeight: 800, letterSpacing: .5 }}>⛽ Fuel Tracker</span>
-        <button
-          onClick={() => { setEditFuel(null); setShowForm(true) }}
-          style={{ background: '#F0D06020', border: '2px solid #F0D060', color: '#F0D060', borderRadius: 12, width: 42, height: 42, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
-          <Plus size={20} strokeWidth={2.5} />
-        </button>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button onClick={() => importRef.current?.click()} title="Import from Agenda backup"
+            style={{ background: '#2A2A2A', border: '2px solid #333', color: '#888', borderRadius: 12, width: 42, height: 42, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+            <Upload size={17} strokeWidth={2.5} />
+          </button>
+          <button onClick={handleExport} title="Export entries"
+            style={{ background: '#2A2A2A', border: '2px solid #333', color: '#888', borderRadius: 12, width: 42, height: 42, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+            <Download size={17} strokeWidth={2.5} />
+          </button>
+          <button
+            onClick={() => { setEditFuel(null); setShowForm(true) }}
+            style={{ background: '#F0D06020', border: '2px solid #F0D060', color: '#F0D060', borderRadius: 12, width: 42, height: 42, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+            <Plus size={20} strokeWidth={2.5} />
+          </button>
+        </div>
       </div>
 
       {/* Content */}
