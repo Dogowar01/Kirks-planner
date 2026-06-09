@@ -361,7 +361,7 @@ function EntryForm({ entry = {}, onSave, onDelete, onClose, title }) {
     width: '100%', background: 'rgba(255,255,255,0.05)',
     border: '0.5px solid rgba(255,255,255,0.12)',
     borderRadius: 8, padding: '10px 12px',
-    color: '#EDE8E0', fontSize: 13,
+    color: '#EDE8E0', fontSize: 16, /* 16px = iOS won't zoom on focus */
     fontFamily: '"DM Mono", monospace',
     outline: 'none', boxSizing: 'border-box',
   }
@@ -671,10 +671,10 @@ function VaultScreen({ vault }) {
       {/* Modals */}
       {(modal === 'add' || (modal && modal.id)) && (
         <div
-          style={{ position: 'fixed', inset: 0, zIndex: 100, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'flex-end', justifyContent: 'center', paddingBottom: 'calc(env(safe-area-inset-bottom) + 56px)' }}
+          style={{ position: 'fixed', inset: 0, zIndex: 100, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}
           onClick={() => setModal(null)}>
           <div
-            style={{ background: '#111009', borderRadius: '20px 20px 0 0', width: '100%', maxWidth: 500, height: '80dvh', overflow: 'hidden' }}
+            style={{ background: '#111009', borderRadius: '20px 20px 0 0', width: '100%', maxWidth: 500, height: '80dvh', overflow: 'hidden', marginBottom: 56 }}
             onClick={e => e.stopPropagation()}>
             <EntryForm
               entry={modal === 'add' ? {} : modal}
