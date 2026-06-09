@@ -265,7 +265,7 @@ function LiveClock() {
       {/* Content */}
       <div className="relative px-6 pt-10 pb-6">
         <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.65rem', color: '#A09890', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: 8 }}>
-          {format(now, "EEEE · d MMMM yyyy")}
+          {format(now, "EEEE · d MMMM yyyy")} · <span style={{ color: '#C4522A' }}>WK {format(now, "w")}</span>
         </p>
         <h1 style={{ fontFamily: '"Playfair Display", serif', fontStyle: 'italic', fontWeight: 600, fontSize: 'clamp(1.6rem, 5vw, 2.4rem)', color: '#EDE8E0', lineHeight: 1.15, letterSpacing: '-0.02em' }}>
           {greeting} Kirk.
