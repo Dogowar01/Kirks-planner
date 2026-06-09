@@ -343,7 +343,7 @@ function EntryCard({ entry, onEdit }) {
 }
 
 // ─── Entry Form (Add / Edit) ─────────────────────────────────
-function EntryForm({ entry = {}, onSave, onDelete, onClose }) {
+function EntryForm({ entry = {}, onSave, onDelete, onClose, title }) {
   const [label,    setLabel]    = useState(entry.label    || '')
   const [type,     setType]     = useState(entry.type     || 'PASSWORD')
   const [username, setUsername] = useState(entry.username || '')
@@ -368,7 +368,8 @@ function EntryForm({ entry = {}, onSave, onDelete, onClose }) {
   const labelStyle = { fontSize: 10, fontFamily: '"DM Mono", monospace', letterSpacing: '0.12em', color: '#B8B0A8', display: 'block', marginBottom: 6 }
 
   return (
-    <div>
+    // Outer wrapper: full column so header + scroll + footer stack correctly
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       {confirm && (
         <ConfirmDialog
           message={`Delete "${entry.label}"? This cannot be undone.`}
@@ -377,54 +378,66 @@ function EntryForm({ entry = {}, onSave, onDelete, onClose }) {
         />
       )}
 
-      <div style={{ marginBottom: 14 }}>
-        <label style={labelStyle}>LABEL *</label>
-        <input style={inputStyle} value={label} onChange={e => setLabel(e.target.value)} placeholder="e.g. Netflix, Gate code, Bank PIN" maxLength={60} />
+      {/* Sticky modal header */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 20px 14px', flexShrink: 0, borderBottom: '0.5px solid rgba(255,255,255,0.07)' }}>
+        <h3 style={{ fontFamily: '"DM Mono", monospace', fontSize: 13, letterSpacing: '0.12em', color: PLUM, margin: 0 }}>
+          {title || (entry.id ? 'EDIT ENTRY' : 'ADD TO VAULT')}
+        </h3>
+        <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#B8B0A8', cursor: 'pointer', padding: 4 }}><X size={18} /></button>
       </div>
 
-      <div style={{ marginBottom: 14 }}>
-        <label style={labelStyle}>TYPE</label>
-        <select style={{ ...inputStyle, cursor: 'pointer' }} value={type} onChange={e => setType(e.target.value)}>
-          {VAULT_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
-        </select>
-      </div>
+      {/* Scrollable fields */}
+      <div style={{ flex: 1, overflowY: 'auto', padding: '16px 20px', WebkitOverflowScrolling: 'touch' }}>
+        <div style={{ marginBottom: 14 }}>
+          <label style={labelStyle}>LABEL *</label>
+          <input style={inputStyle} value={label} onChange={e => setLabel(e.target.value)} placeholder="e.g. Netflix, Gate code, Bank PIN" maxLength={60} />
+        </div>
 
-      <div style={{ marginBottom: 14 }}>
-        <label style={labelStyle}>USERNAME / EMAIL</label>
-        <input style={inputStyle} value={username} onChange={e => setUsername(e.target.value)} placeholder="Optional" maxLength={80} />
-      </div>
+        <div style={{ marginBottom: 14 }}>
+          <label style={labelStyle}>TYPE</label>
+          <select style={{ ...inputStyle, cursor: 'pointer' }} value={type} onChange={e => setType(e.target.value)}>
+            {VAULT_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+          </select>
+        </div>
 
-      <div style={{ marginBottom: 14 }}>
-        <label style={labelStyle}>PASSWORD / PIN / CODE *</label>
-        <div style={{ display: 'flex', gap: 8 }}>
-          <input
-            style={{ ...inputStyle, flex: 1 }}
-            type={showSec ? 'text' : 'password'}
-            value={secret}
-            onChange={e => setSecret(e.target.value)}
-            placeholder="The thing you're storing"
-            maxLength={200}
+        <div style={{ marginBottom: 14 }}>
+          <label style={labelStyle}>USERNAME / EMAIL</label>
+          <input style={inputStyle} value={username} onChange={e => setUsername(e.target.value)} placeholder="Optional" maxLength={80} />
+        </div>
+
+        <div style={{ marginBottom: 14 }}>
+          <label style={labelStyle}>PASSWORD / PIN / CODE *</label>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <input
+              style={{ ...inputStyle, flex: 1 }}
+              type={showSec ? 'text' : 'password'}
+              value={secret}
+              onChange={e => setSecret(e.target.value)}
+              placeholder="The thing you're storing"
+              maxLength={200}
+            />
+            <button
+              onClick={() => setShowSec(s => !s)}
+              style={{ background: 'rgba(255,255,255,0.07)', border: '0.5px solid rgba(255,255,255,0.14)', borderRadius: 10, padding: '0 16px', color: '#B8B0A8', cursor: 'pointer', flexShrink: 0, minWidth: 50, minHeight: 44, display: 'flex', alignItems: 'center', justifyContent: 'center', touchAction: 'manipulation' }}>
+              {showSec ? <EyeOff size={16} /> : <Eye size={16} />}
+            </button>
+          </div>
+        </div>
+
+        <div style={{ marginBottom: 8 }}>
+          <label style={labelStyle}>NOTES</label>
+          <textarea
+            style={{ ...inputStyle, minHeight: 72, resize: 'none' }}
+            value={notes}
+            onChange={e => setNotes(e.target.value)}
+            placeholder="URL, hints, anything else…"
+            maxLength={300}
           />
-          <button
-            onClick={() => setShowSec(s => !s)}
-            style={{ background: 'rgba(255,255,255,0.07)', border: '0.5px solid rgba(255,255,255,0.14)', borderRadius: 10, padding: '0 16px', color: '#B8B0A8', cursor: 'pointer', flexShrink: 0, minWidth: 50, minHeight: 44, display: 'flex', alignItems: 'center', justifyContent: 'center', touchAction: 'manipulation' }}>
-            {showSec ? <EyeOff size={16} /> : <Eye size={16} />}
-          </button>
         </div>
       </div>
 
-      <div style={{ marginBottom: 20 }}>
-        <label style={labelStyle}>NOTES</label>
-        <textarea
-          style={{ ...inputStyle, minHeight: 72, resize: 'vertical' }}
-          value={notes}
-          onChange={e => setNotes(e.target.value)}
-          placeholder="URL, hints, anything else…"
-          maxLength={300}
-        />
-      </div>
-
-      <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
+      {/* Sticky action footer — always visible above keyboard */}
+      <div style={{ flexShrink: 0, padding: '12px 20px calc(env(safe-area-inset-bottom) + 12px)', borderTop: '0.5px solid rgba(255,255,255,0.07)', display: 'flex', gap: 10, justifyContent: 'flex-end', background: '#111009' }}>
         {entry.id && (
           <button
             onClick={() => setConfirm(true)}
@@ -655,14 +668,8 @@ function VaultScreen({ vault }) {
           style={{ position: 'fixed', inset: 0, zIndex: 100, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}
           onClick={() => setModal(null)}>
           <div
-            style={{ background: '#111009', borderRadius: '20px 20px 0 0', width: '100%', maxWidth: 500, maxHeight: '90vh', overflowY: 'auto', padding: '20px 20px calc(env(safe-area-inset-bottom) + 20px)' }}
+            style={{ background: '#111009', borderRadius: '20px 20px 0 0', width: '100%', maxWidth: 500, height: '80vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}
             onClick={e => e.stopPropagation()}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-              <h3 style={{ fontFamily: '"DM Mono", monospace', fontSize: 13, letterSpacing: '0.12em', color: PLUM }}>
-                {modal === 'add' ? 'ADD TO VAULT' : 'EDIT ENTRY'}
-              </h3>
-              <button onClick={() => setModal(null)} style={{ background: 'none', border: 'none', color: '#B8B0A8', cursor: 'pointer' }}><X size={18} /></button>
-            </div>
             <EntryForm
               entry={modal === 'add' ? {} : modal}
               onSave={handleSave}
