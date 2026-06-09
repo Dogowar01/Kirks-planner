@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, eachDayOfInterval, isSameMonth, isToday, parseISO, isSameDay, addMonths, subMonths, addDays } from 'date-fns'
-import { ChevronLeft, ChevronRight, Plus, Bell, Trash2, Search, MapPin, ExternalLink } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Plus, Bell, Trash2, Search, MapPin, ExternalLink, Trash } from 'lucide-react'
 import { useStore } from '../../hooks/useStore'
 import { CATEGORIES } from '../../lib/constants'
 import SectionShell from '../../components/SectionShell'
@@ -156,6 +156,7 @@ function EventForm({ initial = {}, onSave, onClose }) {
         <select className="input" value={form.recurring} onChange={f('recurring')}>
           <option value="none">One-time</option>
           <option value="weekly">Weekly</option>
+          <option value="fortnightly">Fortnightly</option>
           <option value="monthly">Monthly</option>
         </select>
       </div>
@@ -190,13 +191,41 @@ function expandRecurring(events, viewStart, viewEnd) {
     if (ev.recurring === 'none') continue
     const base = parseISO(ev.date)
     for (let i = 1; i <= 52; i++) {
-      const d = ev.recurring === 'weekly' ? addDays(base, 7 * i) : addMonths(base, i)
+      const d = ev.recurring === 'weekly' ? addDays(base, 7 * i)
+              : ev.recurring === 'fortnightly' ? addDays(base, 14 * i)
+              : addMonths(base, i)
       if (d > viewEnd) break
       if (d >= viewStart) result.push({ ...ev, id: `${ev.id}_r${i}`, date: format(d, 'yyyy-MM-dd'), _recurring: true })
     }
   }
   return result
 }
+
+// Two base events — expandRecurring handles all fortnightly occurrences
+const BIN_SEEDS = [
+  {
+    title: '🟢 FOGO Bin Night',
+    date: '2025-08-07',
+    time: '20:00',
+    endTime: '',
+    category: 'personal',
+    note: 'Legana — food/organic green bin. Put out by 6am Thursday.',
+    reminder: true,
+    reminderMinutes: 720, // 12h before
+    recurring: 'fortnightly',
+  },
+  {
+    title: '🗑️ Waste & Recycling Bin Night',
+    date: '2025-08-14',
+    time: '20:00',
+    endTime: '',
+    category: 'personal',
+    note: 'Legana — general waste (red lid) + recycling (yellow lid). Put out by 6am Thursday.',
+    reminder: true,
+    reminderMinutes: 720,
+    recurring: 'fortnightly',
+  },
+]
 
 export default function Calendar() {
   const { events, addEvent, updateEvent, deleteEvent } = useStore()
@@ -207,6 +236,18 @@ export default function Calendar() {
   const [showSearch, setShowSearch] = useState(false)
   const [editEvent, setEditEvent] = useState(null)
   const [deleteId, setDeleteId] = useState(null)
+
+  const hasBinNights = events.some(e => e.title?.startsWith('🟢 FOGO Bin Night') || e.title?.startsWith('🗑️ Waste & Recycling Bin Night'))
+
+  function addBinNights() {
+    BIN_SEEDS.forEach(seed => addEvent(seed))
+  }
+
+  function removeBinNights() {
+    events
+      .filter(e => e.title?.startsWith('🟢 FOGO Bin Night') || e.title?.startsWith('🗑️ Waste & Recycling Bin Night'))
+      .forEach(e => deleteEvent(e.id))
+  }
 
   const monthStart = startOfMonth(month)
   const monthEnd = endOfMonth(month)
@@ -231,7 +272,16 @@ export default function Calendar() {
     <div className="p-4 md:p-6 max-w-3xl">
       <div className="flex items-center justify-between mb-6">
         <h1 className="section-title">Calendar</h1>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap justify-end">
+          {hasBinNights ? (
+            <button onClick={removeBinNights} className="btn-ghost text-xs" title="Remove bin night events">
+              <Trash size={13} /> Bin Nights
+            </button>
+          ) : (
+            <button onClick={addBinNights} className="btn-ghost text-xs" title="Add Legana fortnightly bin nights">
+              🗑️ Bin Nights
+            </button>
+          )}
           <button onClick={() => setShowSearch(true)} className="btn-ghost text-xs">
             <Search size={14} /> Find Events
           </button>
