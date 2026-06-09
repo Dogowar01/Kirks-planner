@@ -9,6 +9,7 @@ import Settings from './sections/settings/Settings'
 import Tools from './sections/tools/Tools'
 import Vault from './sections/vault/Vault'
 import Ledger from './sections/ledger/Ledger'
+import FuelTracker from './sections/fuel/FuelTracker'
 import { useNotifications } from './hooks/useNotifications'
 
 // Mounted inside StoreProvider — starts the notification polling loop
@@ -31,6 +32,7 @@ export default function App() {
           <Route path="notes"     element={<Notes />} />
           <Route path="ledger"    element={<Ledger />} />
           <Route path="tools"     element={<Tools />} />
+          <Route path="fuel"      element={<FuelTracker />} />
           <Route path="vault"     element={<Vault />} />
           <Route path="settings"  element={<Settings />} />
         </Route>
