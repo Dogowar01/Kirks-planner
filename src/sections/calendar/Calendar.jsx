@@ -202,6 +202,8 @@ function expandRecurring(events, viewStart, viewEnd) {
 }
 
 // Two base events — expandRecurring handles all fortnightly occurrences
+// Grindelwald = Week A Thursday for everything (general waste, recycling AND FOGO)
+// Both collections happen fortnightly on the same Week A Thursday, starting Aug 7 2025
 const BIN_SEEDS = [
   {
     title: '🟢 FOGO Bin Night',
@@ -209,18 +211,18 @@ const BIN_SEEDS = [
     time: '20:00',
     endTime: '',
     category: 'personal',
-    note: 'Legana — food/organic green bin. Put out by 6am Thursday.',
+    note: 'Grindelwald — food/organic green bin (FOGO). Week A Thursday. Put out by 6am.',
     reminder: true,
-    reminderMinutes: 720, // 12h before
+    reminderMinutes: 720,
     recurring: 'fortnightly',
   },
   {
     title: '🗑️ Waste & Recycling Bin Night',
-    date: '2025-08-14',
+    date: '2025-08-07',
     time: '20:00',
     endTime: '',
     category: 'personal',
-    note: 'Legana — general waste (red lid) + recycling (yellow lid). Put out by 6am Thursday.',
+    note: 'Grindelwald — general waste (red lid) + recycling (yellow lid). Week A Thursday. Put out by 6am.',
     reminder: true,
     reminderMinutes: 720,
     recurring: 'fortnightly',
