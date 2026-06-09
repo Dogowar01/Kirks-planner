@@ -263,7 +263,7 @@ function LiveClock() {
       }} />
 
       {/* Content */}
-      <div className="relative px-6 pt-10 pb-6">
+      <div className="relative px-6 pb-6" style={{ paddingTop: 'calc(env(safe-area-inset-top) + 40px)' }}>
         <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.65rem', color: '#A09890', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: 8 }}>
           {format(now, "EEEE · d MMMM yyyy")} · <span style={{ color: '#C4522A' }}>WK {format(now, "w")}</span>
         </p>
@@ -787,11 +787,13 @@ function SectionLabel({ children, color }) {
 
 function SectionShell({ color, children, style }) {
   return (
-    <div style={{
-      borderLeft: `3px solid ${color}`,
-      paddingLeft: 14,
-      ...style,
-    }}>
+    <div style={{ ...style }}>
+      <div style={{
+        height: 2,
+        borderRadius: 1,
+        marginBottom: 14,
+        background: `linear-gradient(to right, ${color} 0%, ${color}55 40%, transparent 100%)`,
+      }} />
       {children}
     </div>
   )
