@@ -1073,7 +1073,7 @@ function MissionsWidget({ onNavigateToTasks }) {
       {/* Header */}
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
-          <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', color: '#A09890', letterSpacing: '0.18em', textTransform: 'uppercase' }}>
+          <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', color: '#5BB8A8', letterSpacing: '0.18em', textTransform: 'uppercase' }}>
             Active Missions
           </p>
           {active.length > 0 && (
@@ -1300,18 +1300,18 @@ export default function Dashboard() {
       <div className="p-5 md:p-6 max-w-3xl space-y-7">
 
         {/* Stats */}
-        <SectionShell color="#6B6460">
-          <SectionLabel color="#A09890">Overview</SectionLabel>
+        <SectionShell color="#4E7FA5">
+          <SectionLabel color="#6FA3C8">Overview</SectionLabel>
           <div className="grid grid-cols-3 gap-3">
-            <StatCard icon={CheckSquare} label="Open Tasks"      value={openTasks.length}       color="#A09890" onClick={() => navigate('/tasks')} />
-            <StatCard icon={Calendar}    label="Events (7d)"     value={upcomingEvents.length}   color="#A09890" onClick={() => navigate('/calendar')} />
-            <StatCard icon={Briefcase}   label="Active Projects" value={activeProjects.length}   color="#A09890" onClick={() => navigate('/tasks')} />
+            <StatCard icon={CheckSquare} label="Open Tasks"      value={openTasks.length}       color="#6FA3C8" onClick={() => navigate('/tasks')} />
+            <StatCard icon={Calendar}    label="Events (7d)"     value={upcomingEvents.length}   color="#6FA3C8" onClick={() => navigate('/calendar')} />
+            <StatCard icon={Briefcase}   label="Active Projects" value={activeProjects.length}   color="#6FA3C8" onClick={() => navigate('/tasks')} />
           </div>
         </SectionShell>
 
         {/* Quick Add + Focus Moment */}
-        <SectionShell color="#C084FC">
-          <SectionLabel color="#C084FC">Actions</SectionLabel>
+        <SectionShell color="#7B65C0">
+          <SectionLabel color="#9D88D8">Actions</SectionLabel>
           <div className="space-y-3">
             <QuickAdd onAdd={(data) => addTask(data)} />
             <FocusMomentButton />
@@ -1319,7 +1319,7 @@ export default function Dashboard() {
         </SectionShell>
 
         {/* Missions */}
-        <SectionShell color="#6B6460">
+        <SectionShell color="#3D8878">
           <MissionsWidget onNavigateToTasks={(missionId) => {
             setMissionFilter(missionId)
             navigate('/tasks')
@@ -1328,9 +1328,9 @@ export default function Dashboard() {
 
         {/* Today */}
         {todayEvents.length > 0 && (
-          <SectionShell color="#6B6460">
+          <SectionShell color="#3A6E9A">
             <section>
-              <SectionLabel color="#A09890">Today</SectionLabel>
+              <SectionLabel color="#5B9BC4">Today</SectionLabel>
               <div className="space-y-2">
                 {todayEvents.map(ev => (
                   <button key={ev.id} onClick={() => navigate('/calendar')}
@@ -1350,10 +1350,10 @@ export default function Dashboard() {
         )}
 
         {/* Top tasks */}
-        <SectionShell color="#6B6460">
+        <SectionShell color="#556880">
         <section>
           <div className="flex items-center justify-between mb-2.5">
-            <SectionLabel color="#A09890">Active Tasks</SectionLabel>
+            <SectionLabel color="#7A9AB8">Active Tasks</SectionLabel>
             <button onClick={() => navigate('/tasks')} style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', color: '#A09890', letterSpacing: '0.1em' }}>
               ALL →
             </button>
@@ -1376,10 +1376,10 @@ export default function Dashboard() {
         </SectionShell>
 
         {/* Upcoming */}
-        <SectionShell color="#6B6460">
+        <SectionShell color="#6858A8">
           <section>
             <div className="flex items-center justify-between mb-2.5">
-              <SectionLabel color="#A09890">Upcoming</SectionLabel>
+              <SectionLabel color="#9080CC">Upcoming</SectionLabel>
               <button onClick={() => navigate('/calendar')} style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', color: '#A09890', letterSpacing: '0.1em' }}>
                 CALENDAR →
               </button>
