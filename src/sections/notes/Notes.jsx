@@ -201,8 +201,8 @@ export default function Notes() {
               {filtered.map((n, i) => {
                 const accent = CATEGORIES[n.category]?.color || '#C9B49A'
                 const anim = i % 2 === 0
-                  ? `phase-in-left 0.7s cubic-bezier(0.22,1,0.36,1) ${0.1 + i * 0.06}s both`
-                  : `phase-in-right 0.7s cubic-bezier(0.22,1,0.36,1) ${0.1 + i * 0.06}s both`
+                  ? `phase-in-left 1.1s cubic-bezier(0.22,1,0.36,1) ${0.2 + i * 0.08}s both`
+                  : `phase-in-right 1.1s cubic-bezier(0.22,1,0.36,1) ${0.2 + i * 0.08}s both`
                 return (
                   <button key={n.id}
                     onClick={() => setActiveNote(n)}

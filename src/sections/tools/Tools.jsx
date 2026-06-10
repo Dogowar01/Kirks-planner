@@ -1128,8 +1128,8 @@ export default function Tools() {
               {TOOLS.map((t, i) => {
                 const col = '#00C8FF'
                 const anim = i % 2 === 0
-                  ? `phase-in-left 0.65s cubic-bezier(0.22,1,0.36,1) ${0.1 + i * 0.05}s both`
-                  : `phase-in-right 0.65s cubic-bezier(0.22,1,0.36,1) ${0.1 + i * 0.05}s both`
+                  ? `phase-in-left 1.0s cubic-bezier(0.22,1,0.36,1) ${0.1 + i * 0.05}s both`
+                  : `phase-in-right 1.0s cubic-bezier(0.22,1,0.36,1) ${0.1 + i * 0.05}s both`
                 return (
                 <button key={t.id} onClick={() => setActive(t.id)}
                   className="card text-left flex flex-col gap-2 hover:border-white/10 transition-all"

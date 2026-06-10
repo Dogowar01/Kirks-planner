@@ -416,8 +416,8 @@ export default function Calendar() {
             {eventsOnDay(selected).map((ev, i) => {
               const col = CATEGORIES[ev.category]?.color || '#3EC88A'
               const anim = i % 2 === 0
-                ? `phase-in-left 0.65s cubic-bezier(0.22,1,0.36,1) ${i * 0.06}s both`
-                : `phase-in-right 0.65s cubic-bezier(0.22,1,0.36,1) ${i * 0.06}s both`
+                ? `phase-in-left 1.0s cubic-bezier(0.22,1,0.36,1) ${i * 0.06}s both`
+                : `phase-in-right 1.0s cubic-bezier(0.22,1,0.36,1) ${i * 0.06}s both`
               return (
               <div key={ev.id} className="card" style={{ padding: 0, overflow: 'hidden', animation: anim }}>
                 <div style={{ display: 'flex', alignItems: 'stretch' }}>
@@ -454,8 +454,8 @@ export default function Calendar() {
               {upcoming.map((ev, i) => {
                 const col = CATEGORIES[ev.category]?.color || '#3EC88A'
                 const anim = i % 2 === 0
-                  ? `phase-in-left 0.65s cubic-bezier(0.22,1,0.36,1) ${0.1 + i * 0.055}s both`
-                  : `phase-in-right 0.65s cubic-bezier(0.22,1,0.36,1) ${0.1 + i * 0.055}s both`
+                  ? `phase-in-left 1.0s cubic-bezier(0.22,1,0.36,1) ${0.1 + i * 0.055}s both`
+                  : `phase-in-right 1.0s cubic-bezier(0.22,1,0.36,1) ${0.1 + i * 0.055}s both`
                 return (
                 <div key={ev.id} className="card" style={{ padding: 0, overflow: 'hidden', animation: anim }}>
                   <div style={{ display: 'flex', alignItems: 'stretch' }}>

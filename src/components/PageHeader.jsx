@@ -8,12 +8,14 @@
  *  accent    — hex colour for the title glow + border tint
  *  children  — optional right-side action buttons
  */
+import MatrixReveal from './MatrixReveal'
+
 export default function PageHeader({ subtitle, title, accent = '#C4522A', children }) {
   return (
     <div style={{
       position: 'sticky', top: 0, zIndex: 10,
       padding: '12px 20px 14px',
-      animation: 'phase-in 0.9s cubic-bezier(0.22,1,0.36,1) both',
+      animation: 'phase-in 1.1s cubic-bezier(0.22,1,0.36,1) both',
       background: 'linear-gradient(to bottom, rgba(8,7,6,0.99) 0%, rgba(13,12,11,0.95) 100%)',
       backdropFilter: 'blur(24px)',
       WebkitBackdropFilter: 'blur(24px)',
@@ -43,7 +45,7 @@ export default function PageHeader({ subtitle, title, accent = '#C4522A', childr
           color: `${accent}70`, letterSpacing: '0.22em',
           textTransform: 'uppercase', marginBottom: 2,
         }}>
-          ■ {subtitle}
+          ■ <MatrixReveal text={subtitle} delay={0.1} duration={900} color={`${accent}70`} />
         </div>
         <h1 style={{
           fontFamily: '"Playfair Display", serif', fontStyle: 'italic',
@@ -52,7 +54,7 @@ export default function PageHeader({ subtitle, title, accent = '#C4522A', childr
           textShadow: `0 0 20px ${accent}40`,
           letterSpacing: '-0.01em',
         }}>
-          {title}
+          <MatrixReveal text={title} delay={0.35} duration={1100} color={accent} />
         </h1>
       </div>
       {children && (

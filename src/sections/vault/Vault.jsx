@@ -278,8 +278,8 @@ function EntryCard({ entry, onEdit, index = 0 }) {
   }
   const typeColor = TYPE_COLORS[entry.type] || PLUM
   const anim = index % 2 === 0
-    ? `phase-in-left 0.7s cubic-bezier(0.22,1,0.36,1) ${0.1 + index * 0.055}s both`
-    : `phase-in-right 0.7s cubic-bezier(0.22,1,0.36,1) ${0.1 + index * 0.055}s both`
+    ? `phase-in-left 1.1s cubic-bezier(0.22,1,0.36,1) ${0.2 + index * 0.08}s both`
+    : `phase-in-right 1.1s cubic-bezier(0.22,1,0.36,1) ${0.2 + index * 0.08}s both`
 
   return (
     <div

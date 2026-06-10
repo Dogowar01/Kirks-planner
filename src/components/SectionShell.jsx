@@ -151,7 +151,7 @@ export default function SectionShell({ accent, bgImage, children, className = ''
       <div style={{
         position: 'relative', zIndex: 2,
         paddingTop: 'max(env(safe-area-inset-top), 12px)',
-        animation: `phase-in 0.85s cubic-bezier(0.22,1,0.36,1) ${0.1 + index * 0.25}s both`,
+        animation: `phase-in 1.3s cubic-bezier(0.22,1,0.36,1) ${0.15 + index * 0.3}s both`,
       }}>
         {children}
       </div>

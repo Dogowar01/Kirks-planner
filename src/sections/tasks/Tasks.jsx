@@ -104,8 +104,8 @@ function TaskItem({ task, onToggle, onDelete, onEdit, projects, missions, index 
   const priorityColor = task.priority === 'high' ? '#D85A30' : task.priority === 'low' ? '#A09890' : undefined
   const catColor = CATEGORIES[task.category]?.color || '#F09030'
   const anim = index % 2 === 0
-    ? `phase-in-left 0.7s cubic-bezier(0.22,1,0.36,1) ${0.15 + index * 0.06}s both`
-    : `phase-in-right 0.7s cubic-bezier(0.22,1,0.36,1) ${0.15 + index * 0.06}s both`
+    ? `phase-in-left 1.1s cubic-bezier(0.22,1,0.36,1) ${0.2 + index * 0.08}s both`
+    : `phase-in-right 1.1s cubic-bezier(0.22,1,0.36,1) ${0.2 + index * 0.08}s both`
 
   return (
     <div className="card" style={{ padding: 0, overflow: 'hidden', animation: anim }}>
