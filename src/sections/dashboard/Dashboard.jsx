@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { format, isToday, isPast, parseISO, startOfDay, addDays, addMonths, isWithinInterval, startOfMonth, endOfMonth, differenceInDays } from 'date-fns'
-import { Bell, Plus, Calendar, CheckSquare, Briefcase, TrendingUp, Target, Pencil, Trash2, X, ChevronRight, Zap, ArrowRight, RotateCcw, Flame, Phone, Mail, Globe } from 'lucide-react'
+import { Bell, Plus, Calendar, CheckSquare, Briefcase, TrendingUp, Target, Pencil, Trash2, X, ChevronRight, Zap, ArrowRight, RotateCcw, Flame, Phone, Mail, Globe, MessageSquare } from 'lucide-react'
 import { useStore } from '../../hooks/useStore'
 import { BUSINESSES } from '../../lib/constants'
 import CategoryBadge from '../../components/CategoryBadge'
@@ -1813,19 +1813,27 @@ function QuickContacts({ onNavigate }) {
               {/* Action buttons */}
               <div style={{ display: 'flex', gap: 4 }}>
                 {c.phone && (
-                  <a href={`tel:${c.phone}`} style={{
-                    width: 24, height: 24, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  <a href={`tel:${c.phone}`} title="Call" style={{
+                    width: 26, height: 26, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
                     background: 'rgba(62,200,138,0.15)', border: '0.5px solid rgba(62,200,138,0.4)',
                   }}>
-                    <Phone size={10} color="#3EC88A" />
+                    <Phone size={11} color="#3EC88A" />
+                  </a>
+                )}
+                {c.phone && (
+                  <a href={`sms:${c.phone}`} title="Text" style={{
+                    width: 26, height: 26, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    background: 'rgba(0,200,255,0.1)', border: '0.5px solid rgba(0,200,255,0.35)',
+                  }}>
+                    <MessageSquare size={11} color="#00C8FF" />
                   </a>
                 )}
                 {c.email && (
-                  <a href={`mailto:${c.email}`} style={{
-                    width: 24, height: 24, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    background: 'rgba(0,200,255,0.12)', border: '0.5px solid rgba(0,200,255,0.35)',
+                  <a href={`mailto:${c.email}`} title="Email" style={{
+                    width: 26, height: 26, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    background: 'rgba(160,64,224,0.1)', border: '0.5px solid rgba(160,64,224,0.3)',
                   }}>
-                    <Mail size={10} color="#00C8FF" />
+                    <Mail size={11} color="#A040E0" />
                   </a>
                 )}
               </div>

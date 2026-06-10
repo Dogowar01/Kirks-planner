@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react'
-import { Mail, Phone, Globe, Trash2, Plus, Search, Camera, Loader2, ScanLine, X } from 'lucide-react'
+import { Mail, Phone, Globe, Trash2, Plus, Search, Camera, Loader2, ScanLine, X, Pin, PinOff, MessageSquare } from 'lucide-react'
 import { useStore } from '../../hooks/useStore'
 import { CATEGORIES } from '../../lib/constants'
 import CategoryBadge from '../../components/CategoryBadge'
@@ -311,6 +311,7 @@ function ContactCard({ contact, onEdit, onDelete, onPin, index = 0 }) {
       <div style={{ display: 'flex', alignItems: 'stretch' }}>
         <div style={{ width: 3, flexShrink: 0, background: color, boxShadow: `0 0 8px ${color}80` }} />
         <div style={{ flex: 1, padding: '12px 14px' }}>
+      {/* Header row */}
       <div className="flex items-center gap-3">
         <button onClick={() => setOpen(s=>!s)}
           className="w-9 h-9 rounded-full flex items-center justify-center text-white text-xs font-semibold shrink-0"
@@ -321,29 +322,53 @@ function ContactCard({ contact, onEdit, onDelete, onPin, index = 0 }) {
           <p className="text-text-primary text-sm font-medium">{contact.name}</p>
           {contact.role && <p className="text-text-tertiary text-xs truncate">{contact.role}</p>}
         </div>
-        <CategoryBadge category={contact.category} size="xs" />
-        <button onClick={() => onPin(contact)} title={contact.pinned ? 'Unpin' : 'Pin to dashboard'}
-          style={{ color: contact.pinned ? '#00C8FF' : '#4A4540', background: 'none', border: 'none', cursor: 'pointer', padding: 4, fontSize: '0.75rem' }}>
-          📌
-        </button>
         <button onClick={() => onEdit(contact)} className="p-1 text-text-tertiary hover:text-text-secondary text-xs">Edit</button>
         <button onClick={() => onDelete(contact.id)} className="p-1 text-text-tertiary hover:text-red-400">
           <Trash2 size={14}/>
         </button>
       </div>
 
+      {/* Quick action row — always visible */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 10 }}>
+        {contact.phone && (
+          <a href={`tel:${contact.phone}`}
+            style={{ display: 'flex', alignItems: 'center', gap: 4, fontFamily: '"DM Mono", monospace', fontSize: '0.48rem', letterSpacing: '0.08em', color: '#3EC88A', background: 'rgba(62,200,138,0.1)', border: '0.5px solid rgba(62,200,138,0.35)', borderRadius: 6, padding: '5px 9px', textDecoration: 'none' }}>
+            <Phone size={11} /> CALL
+          </a>
+        )}
+        {contact.phone && (
+          <a href={`sms:${contact.phone}`}
+            style={{ display: 'flex', alignItems: 'center', gap: 4, fontFamily: '"DM Mono", monospace', fontSize: '0.48rem', letterSpacing: '0.08em', color: '#00C8FF', background: 'rgba(0,200,255,0.08)', border: '0.5px solid rgba(0,200,255,0.3)', borderRadius: 6, padding: '5px 9px', textDecoration: 'none' }}>
+            <MessageSquare size={11} /> TEXT
+          </a>
+        )}
+        {contact.email && (
+          <a href={`mailto:${contact.email}`}
+            style={{ display: 'flex', alignItems: 'center', gap: 4, fontFamily: '"DM Mono", monospace', fontSize: '0.48rem', letterSpacing: '0.08em', color: '#A09890', background: 'rgba(255,255,255,0.05)', border: '0.5px solid rgba(255,255,255,0.1)', borderRadius: 6, padding: '5px 9px', textDecoration: 'none' }}>
+            <Mail size={11} /> EMAIL
+          </a>
+        )}
+        <div style={{ flex: 1 }} />
+        {/* Pin button — prominent */}
+        <button onClick={() => onPin(contact)}
+          style={{
+            display: 'flex', alignItems: 'center', gap: 5,
+            fontFamily: '"DM Mono", monospace', fontSize: '0.46rem', letterSpacing: '0.1em',
+            color: contact.pinned ? '#00C8FF' : '#4A4540',
+            background: contact.pinned ? 'rgba(0,200,255,0.1)' : 'rgba(255,255,255,0.03)',
+            border: `0.5px solid ${contact.pinned ? 'rgba(0,200,255,0.45)' : 'rgba(255,255,255,0.08)'}`,
+            borderRadius: 6, padding: '5px 10px', cursor: 'pointer', transition: 'all 0.2s',
+          }}>
+          {contact.pinned ? <PinOff size={11} /> : <Pin size={11} />}
+          {contact.pinned ? 'PINNED' : 'PIN'}
+        </button>
+      </div>
+
+      {/* Expanded detail */}
       {open && (
         <div className="mt-3 pt-3 border-t space-y-2" style={{ borderColor: `${color}25` }}>
-          {contact.email && (
-            <a href={`mailto:${contact.email}`} className="flex items-center gap-2 text-xs hover:underline" style={{ color }}>
-              <Mail size={12}/> {contact.email}
-            </a>
-          )}
-          {contact.phone && (
-            <a href={`tel:${contact.phone}`} className="flex items-center gap-2 text-xs hover:underline" style={{ color: '#00C8FF' }}>
-              <Phone size={12}/> {contact.phone}
-            </a>
-          )}
+          {contact.phone && <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.58rem', color: '#6A6258' }}>{contact.phone}</p>}
+          {contact.email && <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.58rem', color: '#6A6258' }}>{contact.email}</p>}
           {contact.website && (
             <a href={contact.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-xs hover:underline" style={{ color: '#00FF9D' }}>
               <Globe size={12}/> {contact.website}
