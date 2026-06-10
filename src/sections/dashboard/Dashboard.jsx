@@ -307,7 +307,32 @@ function LiveClock({ taskCount = 0, eventCount = 0 }) {
         animation: 'orb-drift 15s ease-in-out 5s infinite reverse',
       }} />
 
-      {/* ── GHOST TYPOGRAPHY — massive italic "SIGNAL9" behind everything ── */}
+      {/* ── HOLOGRAPHIC PRISMATIC SCAN — full hero width ── */}
+      <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', overflow: 'hidden', zIndex: 3 }}>
+        <div style={{
+          position: 'absolute', left: 0, right: 0, height: 2,
+          background: 'linear-gradient(90deg, transparent 0%, rgba(255,30,160,0.6) 15%, rgba(100,60,255,0.85) 30%, rgba(0,180,255,1) 45%, rgba(0,255,160,0.85) 60%, rgba(255,200,0,0.6) 75%, transparent 100%)',
+          filter: 'blur(1px)',
+          boxShadow: '0 0 12px rgba(100,160,255,0.5)',
+          animation: 'prismatic-scan 5s ease-in-out infinite',
+        }} />
+        <div style={{
+          position: 'absolute', left: 0, right: 0, height: 1,
+          background: 'linear-gradient(90deg, transparent 0%, rgba(0,255,160,0.4) 25%, rgba(255,30,160,0.6) 50%, rgba(0,180,255,0.5) 75%, transparent 100%)',
+          animation: 'prismatic-scan 5s ease-in-out infinite 2.5s',
+          opacity: 0.7,
+        }} />
+      </div>
+
+      {/* ── HOLOGRAPHIC FOIL OVERLAY — iridescent sheen on hero ── */}
+      <div style={{
+        position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 2,
+        background: 'linear-gradient(135deg, rgba(255,30,160,0.04) 0%, rgba(100,60,255,0.05) 25%, rgba(0,180,255,0.04) 50%, rgba(0,255,160,0.03) 75%, rgba(255,200,0,0.04) 100%)',
+        backgroundSize: '400% 400%',
+        animation: 'holo-border 10s ease infinite',
+      }} />
+
+      {/* ── GHOST TYPOGRAPHY — massive italic "SIGNAL9" — holographic stroke ── */}
       <div style={{
         position: 'absolute', inset: 0, display: 'flex', alignItems: 'center',
         justifyContent: 'center', pointerEvents: 'none', overflow: 'hidden',
@@ -317,7 +342,7 @@ function LiveClock({ taskCount = 0, eventCount = 0 }) {
           fontFamily: '"Playfair Display", serif', fontStyle: 'italic', fontWeight: 900,
           fontSize: 'clamp(90px, 32vw, 200px)',
           color: 'transparent',
-          WebkitTextStroke: '1px rgba(196,82,42,0.07)',
+          WebkitTextStroke: '1px rgba(140,100,255,0.09)',
           letterSpacing: '-0.06em', userSelect: 'none',
           whiteSpace: 'nowrap',
           animation: 'ghost-drift 22s ease-in-out infinite',
@@ -395,10 +420,14 @@ function LiveClock({ taskCount = 0, eventCount = 0 }) {
       }}>
         <div style={{
           fontFamily: '"DM Mono", monospace', fontSize: '0.5rem',
-          color: 'rgba(0,200,255,0.7)', letterSpacing: '0.2em', textTransform: 'uppercase',
-          paddingBottom: 6, borderBottom: '0.5px solid rgba(0,200,255,0.2)', marginBottom: 1,
+          background: 'linear-gradient(90deg, #ff1ea0, #643cff, #00b4ff, #00ffa0, #ffd000, #ff1ea0)',
+          backgroundSize: '300% 100%',
+          WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+          backgroundClip: 'text',
+          animation: 'holo-border 3s linear infinite',
+          letterSpacing: '0.2em', textTransform: 'uppercase',
+          paddingBottom: 6, borderBottom: '0.5px solid rgba(100,60,255,0.25)', marginBottom: 1,
           width: '100%', textAlign: 'right',
-          textShadow: '0 0 10px rgba(0,200,255,0.5)',
         }}>
           ■ SIG9 LIVE
         </div>
@@ -434,7 +463,7 @@ function LiveClock({ taskCount = 0, eventCount = 0 }) {
           fontFamily: '"Playfair Display", serif', fontStyle: 'italic', fontWeight: 600,
           fontSize: 'clamp(1.65rem, 5.5vw, 2.6rem)', color: '#EDE8E0', lineHeight: 1.1,
           letterSpacing: '-0.02em', position: 'relative',
-          animation: 'title-ghost 16s ease-in-out infinite',
+          animation: 'title-ghost 16s ease-in-out infinite, chromatic-pulse 12s ease-in-out infinite 4s',
         }}>
           {greeting} Kirk.
           {/* Blinking cyan cursor */}

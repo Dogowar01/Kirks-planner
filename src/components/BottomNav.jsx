@@ -71,8 +71,9 @@ export default function BottomNav() {
         }}>
           <div style={{
             position: 'absolute', top: 0, height: '100%', width: '40%',
-            background: 'linear-gradient(90deg, transparent 0%, rgba(196,82,42,0.5) 20%, rgba(255,140,80,1) 50%, rgba(196,82,42,0.5) 80%, transparent 100%)',
-            animation: 'nav-energy-flow 4s linear infinite',
+            background: 'linear-gradient(90deg, transparent 0%, rgba(255,30,160,0.7) 15%, rgba(100,60,255,0.9) 30%, rgba(0,180,255,1) 45%, rgba(0,255,160,0.9) 60%, rgba(255,200,0,0.8) 75%, rgba(255,60,60,0.7) 90%, transparent 100%)',
+            backgroundSize: '200% 100%',
+            animation: 'nav-energy-flow 3s linear infinite',
           }} />
         </div>
         {PRIMARY.map(({ to, label, Icon }) => (
@@ -86,9 +87,12 @@ export default function BottomNav() {
                     {/* Pulsing indicator line */}
                     <span style={{
                       position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)',
-                      width: 30, height: 1.5,
-                      background: 'linear-gradient(to right, transparent 0%, #E06840 18%, #FF9060 50%, #E06840 82%, transparent 100%)',
-                      animation: 'nav-active-pulse 2.2s ease-in-out infinite',
+                      width: 36, height: 2,
+                      background: 'linear-gradient(90deg, rgba(255,30,160,0.9), rgba(100,60,255,1), rgba(0,180,255,1), rgba(0,255,160,0.9), rgba(255,200,0,0.9))',
+                      backgroundSize: '200% 100%',
+                      animation: 'holo-border 2s linear infinite',
+                      filter: 'blur(0.5px)',
+                      boxShadow: '0 0 8px rgba(100,180,255,0.8)',
                     }} />
                     {/* End cap ticks */}
                     <span style={{ position: 'absolute', top: 0, left: 'calc(50% - 15px)', width: 1.5, height: 5, background: 'linear-gradient(to bottom, #E06840cc, transparent)', }} />

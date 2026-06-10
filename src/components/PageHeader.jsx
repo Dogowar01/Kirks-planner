@@ -16,10 +16,26 @@ export default function PageHeader({ subtitle, title, accent = '#C4522A', childr
       background: 'linear-gradient(to bottom, rgba(8,7,6,0.99) 0%, rgba(13,12,11,0.95) 100%)',
       backdropFilter: 'blur(24px)',
       WebkitBackdropFilter: 'blur(24px)',
-      borderBottom: `0.5px solid ${accent}22`,
+      borderBottom: 'none',
       display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       boxShadow: '0 4px 32px rgba(0,0,0,0.55)',
+      overflow: 'hidden',
     }}>
+      {/* Holographic bottom edge */}
+      <div style={{
+        position: 'absolute', bottom: 0, left: 0, right: 0, height: 1.5,
+        background: 'linear-gradient(90deg, rgba(255,30,160,0.8) 0%, rgba(100,60,255,0.85) 20%, rgba(0,180,255,0.9) 40%, rgba(0,255,160,0.8) 60%, rgba(255,200,0,0.75) 80%, rgba(255,60,60,0.7) 100%)',
+        backgroundSize: '300% 100%',
+        animation: 'holo-border 4s linear infinite',
+        filter: 'blur(0.5px)',
+      }} />
+      {/* Holographic shimmer streak across header */}
+      <div style={{
+        position: 'absolute', inset: 0, pointerEvents: 'none',
+        background: 'linear-gradient(105deg, transparent 0%, rgba(255,30,160,0.04) 20%, rgba(0,180,255,0.06) 50%, rgba(0,255,160,0.04) 80%, transparent 100%)',
+        backgroundSize: '200% 100%',
+        animation: 'holo-sweep 6s ease-in-out infinite',
+      }} />
       <div>
         <div style={{
           fontFamily: '"DM Mono", monospace', fontSize: '0.38rem',

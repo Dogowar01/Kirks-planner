@@ -110,6 +110,31 @@ export default function SectionShell({ accent, bgImage, children, className = ''
         </div>
       ))}
 
+      {/* Holographic prismatic scan line — drifts full page height */}
+      <div style={{ position: 'fixed', inset: 0, zIndex: 3, pointerEvents: 'none', overflow: 'hidden' }}>
+        <div style={{
+          position: 'absolute', left: 0, right: 0, height: 2,
+          background: 'linear-gradient(90deg, transparent 0%, rgba(255,30,160,0.5) 15%, rgba(100,60,255,0.7) 30%, rgba(0,180,255,0.8) 45%, rgba(0,255,160,0.7) 60%, rgba(255,200,0,0.5) 75%, transparent 100%)',
+          filter: 'blur(1px)',
+          animation: 'prismatic-scan 7s ease-in-out infinite',
+        }} />
+        {/* Second offset scan line */}
+        <div style={{
+          position: 'absolute', left: 0, right: 0, height: 1,
+          background: 'linear-gradient(90deg, transparent 0%, rgba(0,255,160,0.4) 20%, rgba(0,180,255,0.6) 40%, rgba(255,30,160,0.5) 60%, rgba(140,60,255,0.4) 80%, transparent 100%)',
+          animation: 'prismatic-scan 7s ease-in-out infinite 3.5s',
+          opacity: 0.6,
+        }} />
+      </div>
+
+      {/* Holographic foil overlay — iridescent sheen across entire page */}
+      <div style={{
+        position: 'fixed', inset: 0, zIndex: 1, pointerEvents: 'none',
+        background: 'linear-gradient(135deg, rgba(255,30,160,0.025) 0%, rgba(100,60,255,0.03) 25%, rgba(0,180,255,0.025) 50%, rgba(0,255,160,0.02) 75%, rgba(255,200,0,0.025) 100%)',
+        backgroundSize: '400% 400%',
+        animation: 'holo-border 12s ease infinite',
+      }} />
+
       {/* Content */}
       <div style={{ position: 'relative', zIndex: 2, paddingTop: 'max(env(safe-area-inset-top), 12px)' }}>
         {children}

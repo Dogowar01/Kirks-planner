@@ -137,6 +137,47 @@
   100% { top: 100%; opacity: 0; }
 }
 
+/* ─── Holographic keyframes ──────────────────────────────────────────────── */
+
+/* Full-spectrum rainbow sweep across a surface */
+@keyframes holo-sweep {
+  0%   { background-position: -200% center; opacity: 0; }
+  6%   { opacity: 1; }
+  50%  { background-position: 200% center; }
+  94%  { opacity: 1; }
+  100% { background-position: 200% center; opacity: 0; }
+}
+
+/* Animated rainbow border gradient */
+@keyframes holo-border {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Prismatic scan line — drifts top to bottom then resets */
+@keyframes prismatic-scan {
+  0%   { top: -3px; opacity: 0; }
+  4%   { opacity: 0.9; }
+  96%  { opacity: 0.9; }
+  100% { top: 100%; opacity: 0; }
+}
+
+/* Iridescent hue rotation — for foil surfaces */
+@keyframes holo-hue {
+  0%   { filter: hue-rotate(0deg) brightness(1); }
+  50%  { filter: hue-rotate(180deg) brightness(1.15); }
+  100% { filter: hue-rotate(360deg) brightness(1); }
+}
+
+/* Chromatic aberration pulse — text splits into r/b channels */
+@keyframes chromatic-pulse {
+  0%, 88%, 100% { text-shadow: none; }
+  90% { text-shadow: -2px 0 rgba(255,0,180,0.7), 2px 0 rgba(0,220,255,0.7); }
+  92% { text-shadow: 2px 0 rgba(255,0,80,0.5), -2px 0 rgba(0,100,255,0.5); }
+  94% { text-shadow: none; }
+}
+
 @layer base {
   html { font-family: 'DM Sans', sans-serif; }
 
@@ -201,7 +242,7 @@
     overflow: hidden;
     transition: border-color 0.18s, box-shadow 0.18s, transform 0.18s;
   }
-  /* Top-edge precision accent line — brighter */
+  /* Top-edge: accent anchor + rainbow holographic overlay */
   .card::before {
     content: '';
     position: absolute;
@@ -209,32 +250,37 @@
     height: 1.5px;
     background: linear-gradient(
       90deg,
-      color-mix(in srgb, var(--section-accent, rgba(255,255,255,0.12)) 90%, white) 0px,
-      color-mix(in srgb, var(--section-accent, rgba(255,255,255,0.12)) 60%, transparent) 120px,
-      transparent 260px
+      rgba(255, 30, 160, 0.85)  0%,
+      rgba(140, 60, 255, 0.80) 20%,
+      rgba(0,  160, 255, 0.85) 40%,
+      rgba(0,  255, 160, 0.75) 60%,
+      rgba(255, 200, 0,  0.70) 80%,
+      rgba(255, 60,  60, 0.60) 100%
     );
-    opacity: 0.9;
+    opacity: 0.55;
     pointer-events: none;
     z-index: 1;
   }
-  /* Periodic holographic shimmer */
+  /* Full-spectrum holographic shimmer sweep */
   .card::after {
     content: '';
     position: absolute;
-    top: 0; bottom: 0;
-    left: 0;
-    width: 40%;
+    top: 0; bottom: 0; left: 0;
+    width: 50%;
     background: linear-gradient(
       105deg,
       transparent 0%,
-      rgba(255,255,255,0.04) 38%,
-      rgba(200,180,255,0.08) 50%,
-      rgba(255,255,255,0.04) 62%,
+      rgba(255, 30, 160, 0.07) 15%,
+      rgba(140, 60, 255, 0.10) 28%,
+      rgba(0, 180, 255, 0.12) 42%,
+      rgba(0, 255, 160, 0.09) 56%,
+      rgba(255, 220, 0,  0.08) 70%,
+      rgba(255, 60,  60, 0.05) 84%,
       transparent 100%
     );
     pointer-events: none;
     z-index: 2;
-    animation: card-shimmer 9s ease-in-out infinite;
+    animation: card-shimmer 8s ease-in-out infinite;
     will-change: transform;
   }
   /* Hover — bigger glow spread, slight lift */
@@ -360,15 +406,82 @@
     /* Subtle glow behind the title */
     text-shadow: 0 0 40px color-mix(in srgb, var(--section-accent, transparent) 35%, transparent);
   }
-  /* Architectural underline rule after section titles */
+  /* Architectural underline rule after section titles — holographic rainbow */
   .section-title::after {
     content: '';
     display: block;
-    width: 48px;
+    width: 72px;
     height: 1.5px;
     margin-top: 7px;
-    background: linear-gradient(to right, var(--section-accent, #C4522A), transparent);
-    box-shadow: 0 0 8px color-mix(in srgb, var(--section-accent, #C4522A) 55%, transparent);
+    background: linear-gradient(
+      90deg,
+      rgba(255,30,160,0.9) 0%,
+      rgba(100,60,255,0.85) 25%,
+      rgba(0,180,255,0.9) 50%,
+      rgba(0,255,160,0.75) 75%,
+      transparent 100%
+    );
+    animation: holo-border 4s linear infinite;
+    background-size: 200% 100%;
+  }
+
+  /* ── Holographic utility classes ─────────────────────────────────── */
+
+  /* Animated rainbow border ring — wrap any element */
+  .holo-ring {
+    position: relative;
+  }
+  .holo-ring::before {
+    content: '';
+    position: absolute;
+    inset: -1.5px;
+    border-radius: inherit;
+    background: linear-gradient(
+      90deg,
+      #ff1ea0, #8c3cff, #00b4ff, #00ffa0, #ffd000, #ff3c3c, #ff1ea0
+    );
+    background-size: 300% 100%;
+    animation: holo-border 3s linear infinite;
+    z-index: -1;
+    filter: blur(2px);
+    opacity: 0.75;
+  }
+
+  /* Iridescent foil text */
+  .holo-text {
+    background: linear-gradient(
+      90deg,
+      #ff1ea0, #c03cff, #00b4ff, #00ffa0, #ffd000, #ff1ea0
+    );
+    background-size: 300% 100%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: holo-border 4s linear infinite;
+  }
+
+  /* Prismatic scan line — add to container with position:relative */
+  .holo-scan {
+    overflow: hidden;
+  }
+  .holo-scan::after {
+    content: '';
+    position: absolute;
+    left: 0; right: 0; height: 2px;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255,30,160,0.6) 15%,
+      rgba(100,60,255,0.8) 30%,
+      rgba(0,180,255,0.9) 45%,
+      rgba(0,255,160,0.8) 60%,
+      rgba(255,200,0,0.6) 75%,
+      transparent 100%
+    );
+    filter: blur(1px);
+    animation: prismatic-scan 5s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 10;
   }
 
   /* Side nav */
