@@ -185,7 +185,9 @@ export default function Shopping() {
         )}
       </div>
 
-      <ConfirmDialog open={!!deleteId} message="Delete this list and all its items?" onConfirm={() => { deleteShoppingList(deleteId); setDeleteId(null) }} onCancel={() => setDeleteId(null)} accent={ACCENT} />
+      {deleteId && (
+        <ConfirmDialog message="Delete this list and all its items?" onConfirm={() => { deleteShoppingList(deleteId); setDeleteId(null) }} onCancel={() => setDeleteId(null)} />
+      )}
     </SectionShell>
   )
 }

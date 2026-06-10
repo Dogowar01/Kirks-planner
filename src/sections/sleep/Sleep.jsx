@@ -216,13 +216,13 @@ export default function Sleep() {
         </Modal>
       )}
 
-      <ConfirmDialog
-        open={!!deleteId}
-        message="Delete this sleep log?"
-        onConfirm={() => { deleteSleepLog(deleteId); setDeleteId(null) }}
-        onCancel={() => setDeleteId(null)}
-        accent={ACCENT}
-      />
+      {deleteId && (
+        <ConfirmDialog
+          message="Delete this sleep log?"
+          onConfirm={() => { deleteSleepLog(deleteId); setDeleteId(null) }}
+          onCancel={() => setDeleteId(null)}
+        />
+      )}
     </SectionShell>
   )
 }

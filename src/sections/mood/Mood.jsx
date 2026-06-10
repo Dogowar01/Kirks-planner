@@ -225,7 +225,9 @@ export default function Mood() {
         </Modal>
       )}
 
-      <ConfirmDialog open={!!deleteId} message="Delete this mood log?" onConfirm={() => { deleteMoodLog(deleteId); setDeleteId(null) }} onCancel={() => setDeleteId(null)} accent={ACCENT} />
+      {deleteId && (
+        <ConfirmDialog message="Delete this mood log?" onConfirm={() => { deleteMoodLog(deleteId); setDeleteId(null) }} onCancel={() => setDeleteId(null)} />
+      )}
     </SectionShell>
   )
 }
