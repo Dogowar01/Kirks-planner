@@ -7,26 +7,26 @@ import { useStore } from '../../hooks/useStore'
 
 // ─── World Clocks ────────────────────────────────────────────────────────────
 const CITY_OPTIONS = [
-  { name: 'Orlando',       tz: 'America/New_York',       lat: 28.54,   lon: -81.38  },
-  { name: 'New York',      tz: 'America/New_York',       lat: 40.71,   lon: -74.01  },
-  { name: 'Los Angeles',   tz: 'America/Los_Angeles',    lat: 34.05,   lon: -118.24 },
-  { name: 'Chicago',       tz: 'America/Chicago',        lat: 41.88,   lon: -87.63  },
-  { name: 'Denver',        tz: 'America/Denver',         lat: 39.74,   lon: -104.98 },
-  { name: 'London',        tz: 'Europe/London',          lat: 51.51,   lon: -0.13   },
-  { name: 'Paris',         tz: 'Europe/Paris',           lat: 48.85,   lon: 2.35    },
-  { name: 'Berlin',        tz: 'Europe/Berlin',          lat: 52.52,   lon: 13.40   },
-  { name: 'Amsterdam',     tz: 'Europe/Amsterdam',       lat: 52.37,   lon: 4.90    },
-  { name: 'Dubai',         tz: 'Asia/Dubai',             lat: 25.20,   lon: 55.27   },
-  { name: 'Mumbai',        tz: 'Asia/Kolkata',           lat: 19.08,   lon: 72.88   },
-  { name: 'Singapore',     tz: 'Asia/Singapore',         lat: 1.35,    lon: 103.82  },
-  { name: 'Tokyo',         tz: 'Asia/Tokyo',             lat: 35.68,   lon: 139.69  },
-  { name: 'Seoul',         tz: 'Asia/Seoul',             lat: 37.57,   lon: 126.98  },
-  { name: 'Sydney',        tz: 'Australia/Sydney',       lat: -33.87,  lon: 151.21  },
-  { name: 'Melbourne',     tz: 'Australia/Melbourne',    lat: -37.81,  lon: 144.96  },
-  { name: 'Auckland',      tz: 'Pacific/Auckland',       lat: -36.85,  lon: 174.76  },
-  { name: 'São Paulo',     tz: 'America/Sao_Paulo',      lat: -23.55,  lon: -46.63  },
-  { name: 'Toronto',       tz: 'America/Toronto',        lat: 43.65,   lon: -79.38  },
-  { name: 'Cape Town',     tz: 'Africa/Johannesburg',    lat: -33.93,  lon: 18.42   },
+  { name: 'Orlando',       tz: 'America/New_York',       lat: 28.54,   lon: -81.38,  flag: '🇺🇸' },
+  { name: 'New York',      tz: 'America/New_York',       lat: 40.71,   lon: -74.01,  flag: '🇺🇸' },
+  { name: 'Los Angeles',   tz: 'America/Los_Angeles',    lat: 34.05,   lon: -118.24, flag: '🇺🇸' },
+  { name: 'Chicago',       tz: 'America/Chicago',        lat: 41.88,   lon: -87.63,  flag: '🇺🇸' },
+  { name: 'Denver',        tz: 'America/Denver',         lat: 39.74,   lon: -104.98, flag: '🇺🇸' },
+  { name: 'London',        tz: 'Europe/London',          lat: 51.51,   lon: -0.13,   flag: '🇬🇧' },
+  { name: 'Paris',         tz: 'Europe/Paris',           lat: 48.85,   lon: 2.35,    flag: '🇫🇷' },
+  { name: 'Berlin',        tz: 'Europe/Berlin',          lat: 52.52,   lon: 13.40,   flag: '🇩🇪' },
+  { name: 'Amsterdam',     tz: 'Europe/Amsterdam',       lat: 52.37,   lon: 4.90,    flag: '🇳🇱' },
+  { name: 'Dubai',         tz: 'Asia/Dubai',             lat: 25.20,   lon: 55.27,   flag: '🇦🇪' },
+  { name: 'Mumbai',        tz: 'Asia/Kolkata',           lat: 19.08,   lon: 72.88,   flag: '🇮🇳' },
+  { name: 'Singapore',     tz: 'Asia/Singapore',         lat: 1.35,    lon: 103.82,  flag: '🇸🇬' },
+  { name: 'Tokyo',         tz: 'Asia/Tokyo',             lat: 35.68,   lon: 139.69,  flag: '🇯🇵' },
+  { name: 'Seoul',         tz: 'Asia/Seoul',             lat: 37.57,   lon: 126.98,  flag: '🇰🇷' },
+  { name: 'Sydney',        tz: 'Australia/Sydney',       lat: -33.87,  lon: 151.21,  flag: '🇦🇺' },
+  { name: 'Melbourne',     tz: 'Australia/Melbourne',    lat: -37.81,  lon: 144.96,  flag: '🇦🇺' },
+  { name: 'Auckland',      tz: 'Pacific/Auckland',       lat: -36.85,  lon: 174.76,  flag: '🇳🇿' },
+  { name: 'São Paulo',     tz: 'America/Sao_Paulo',      lat: -23.55,  lon: -46.63,  flag: '🇧🇷' },
+  { name: 'Toronto',       tz: 'America/Toronto',        lat: 43.65,   lon: -79.38,  flag: '🇨🇦' },
+  { name: 'Cape Town',     tz: 'Africa/Johannesburg',    lat: -33.93,  lon: 18.42,   flag: '🇿🇦' },
 ]
 const DEFAULT_CITIES = ['Orlando', 'Tokyo', 'Los Angeles']
 const CLOCKS_KEY = 's9_world_clocks'
@@ -128,7 +128,7 @@ function NixieTube({ char, colon, bootColor }) {
   )
 }
 
-function NixieClock({ time, day, temp, city, bootDelay = 0 }) {
+function NixieClock({ time, day, temp, city, flag, bootDelay = 0 }) {
   const [bootChars, setBootChars] = useState(['–', '–', ':', '–', '–'])
   const [resolvedMask, setResolvedMask] = useState([false, false, false, false, false]) // which positions are resolved
   const [booting, setBooting] = useState(true)
@@ -185,14 +185,29 @@ function NixieClock({ time, day, temp, city, bootDelay = 0 }) {
       {/* City label */}
       <p style={{ fontFamily: '"DM Mono",monospace', fontSize: '0.58rem', color: '#A09890', letterSpacing: '0.2em', textTransform: 'uppercase' }}>{city}</p>
 
-      {/* Tube row */}
+      {/* Tube row — flag watermark behind digits */}
       <div style={{
+        position: 'relative', overflow: 'hidden',
         background: 'linear-gradient(180deg,#111008 0%,#0a0805 100%)',
         borderRadius: 8, padding: '8px 10px 10px',
         border: '1px solid #2a1f00',
         boxShadow: '0 4px 20px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,150,0,0.08)',
         display: 'flex', alignItems: 'flex-end', gap: 3,
       }}>
+        {/* Flag watermark */}
+        {flag && (
+          <div style={{
+            position: 'absolute', inset: 0,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            pointerEvents: 'none', zIndex: 0,
+            fontSize: '3.8rem',
+            opacity: 0.13,
+            filter: 'blur(1px) saturate(0.55) contrast(0.9)',
+            userSelect: 'none',
+          }}>
+            {flag}
+          </div>
+        )}
         {displayChars.map((ch, i) => (
           <NixieTube
             key={i}
@@ -268,7 +283,7 @@ function WorldClocks() {
         {activeCities.map((c, i) => {
           const { time = '', day = '' } = times[c.name] || {}
           return (
-            <NixieClock key={c.name} city={c.name} time={time} day={day} temp={temps[c.name]} bootDelay={i * 0.4} />
+            <NixieClock key={c.name} city={c.name} time={time} day={day} temp={temps[c.name]} flag={c.flag} bootDelay={i * 0.4} />
           )
         })}
       </div>

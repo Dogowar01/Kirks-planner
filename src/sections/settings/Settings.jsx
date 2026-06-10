@@ -43,7 +43,7 @@ export default function Settings() {
 
   return (
     <SectionShell accent="#8B9FCC" bgImage={bgImg}>
-      <PageHeader subtitle="CONFIGURATION" title="Settings" accent="#8B9FCC" />
+      <PageHeader subtitle="CONFIGURATION" title="Settings" accent="#8B9FCC" showBack />
     <div className="p-4 md:p-6 max-w-xl">
 
       <div className="space-y-6">

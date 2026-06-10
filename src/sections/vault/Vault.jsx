@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { Lock, Unlock, Plus, Eye, EyeOff, Copy, Check, Trash2, Pencil, X, ShieldCheck, Fingerprint, KeyRound, RefreshCw } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { Lock, Unlock, Plus, Eye, EyeOff, Copy, Check, Trash2, Pencil, X, ShieldCheck, Fingerprint, KeyRound, RefreshCw, LayoutGrid } from 'lucide-react'
 import { useVault, VAULT_TYPES } from '../../hooks/useVault'
 import SectionShell from '../../components/SectionShell'
 import ConfirmDialog from '../../components/ConfirmDialog'
@@ -720,6 +721,7 @@ function VaultScreen({ vault }) {
 // ─── Main Vault Section ───────────────────────────────────────
 export default function Vault() {
   const vault = useVault()
+  const navigate = useNavigate()
   const [confirmReset, setConfirmReset] = useState(false)
 
   // Re-render when tick changes (setup/bio state changes)
@@ -743,11 +745,29 @@ export default function Vault() {
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         boxShadow: '0 4px 32px rgba(0,0,0,0.55)',
       }}>
-        <div>
-          <div style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.38rem', color: 'rgba(192,132,252,0.5)', letterSpacing: '0.22em', textTransform: 'uppercase', marginBottom: 2 }}>
-            ■ SECURE VAULT
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <button
+            onClick={() => navigate('/hub')}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 5,
+              fontFamily: '"DM Mono", monospace', fontSize: '0.44rem', letterSpacing: '0.14em',
+              color: 'rgba(192,132,252,0.6)', background: 'rgba(192,132,252,0.08)',
+              border: '0.5px solid rgba(192,132,252,0.28)', borderRadius: 6,
+              padding: '5px 9px', cursor: 'pointer', textTransform: 'uppercase', flexShrink: 0,
+              transition: 'all 0.2s',
+            }}
+            onMouseEnter={e => { e.currentTarget.style.color = '#C084FC'; e.currentTarget.style.borderColor = 'rgba(192,132,252,0.6)' }}
+            onMouseLeave={e => { e.currentTarget.style.color = 'rgba(192,132,252,0.6)'; e.currentTarget.style.borderColor = 'rgba(192,132,252,0.28)' }}
+          >
+            <LayoutGrid size={11} strokeWidth={1.5} />
+            HUB
+          </button>
+          <div>
+            <div style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.38rem', color: 'rgba(192,132,252,0.5)', letterSpacing: '0.22em', textTransform: 'uppercase', marginBottom: 2 }}>
+              ■ SECURE VAULT
+            </div>
+            <h1 style={{ fontFamily: '"Playfair Display", serif', fontStyle: 'italic', fontWeight: 600, fontSize: '1.1rem', color: '#C084FC', margin: 0, textShadow: '0 0 20px rgba(192,132,252,0.4)', letterSpacing: '-0.01em' }}>Vault</h1>
           </div>
-          <h1 style={{ fontFamily: '"Playfair Display", serif', fontStyle: 'italic', fontWeight: 600, fontSize: '1.1rem', color: '#C084FC', margin: 0, textShadow: '0 0 20px rgba(192,132,252,0.4)', letterSpacing: '-0.01em' }}>Vault</h1>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <span style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.48rem', letterSpacing: '0.12em', textTransform: 'uppercase' }}>
