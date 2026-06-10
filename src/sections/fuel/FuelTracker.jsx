@@ -658,7 +658,7 @@ export default function FuelTracker() {
 
   return (
     <div style={{
-      minHeight: '100vh',
+      minHeight: '100dvh',
       background: '#0D0C0B',
       color: '#EDE8E0',
       fontFamily: '"DM Sans", sans-serif',

@@ -62,7 +62,6 @@ export default function BottomNav() {
           borderTop: '0.5px solid rgba(196,82,42,0.15)',
           paddingBottom: 'env(safe-area-inset-bottom)',
           boxShadow: '0 -8px 48px rgba(0,0,0,0.8), 0 -1px 0 rgba(196,82,42,0.06)',
-          position: 'relative',
         }}>
 
         {/* Energy flow — animated light streak across the top edge */}
