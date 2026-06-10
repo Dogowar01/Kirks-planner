@@ -275,6 +275,7 @@ function usePinnedCountdown(settings) {
 }
 
 function LiveClock({ taskCount = 0, eventCount = 0 }) {
+  const navigate = useNavigate()
   const [now, setNow] = useState(new Date())
   const weather = useWeather()
   const { history: ratesHistory, error: ratesError } = useRates()
