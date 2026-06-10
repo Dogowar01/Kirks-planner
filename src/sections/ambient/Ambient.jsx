@@ -77,28 +77,34 @@ export default function Ambient() {
         opacity: show ? 1 : 0, transition: 'opacity 1s ease',
       }}>
 
-      {/* Architectural grid */}
+      {/* Architectural grid — brighter */}
       <div style={{
         position: 'absolute', inset: 0, pointerEvents: 'none',
-        backgroundImage: `linear-gradient(rgba(196,82,42,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(196,82,42,0.025) 1px, transparent 1px)`,
+        backgroundImage: `linear-gradient(rgba(196,82,42,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(196,82,42,0.06) 1px, transparent 1px)`,
         backgroundSize: '48px 48px',
       }} />
 
-      {/* HoloRings — large ambient layers */}
+      {/* HoloRings — brighter */}
       <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
-        <HoloRings color="#C4522A" size={Math.min(window.innerWidth * 0.9, 600)} style={{ opacity: 0.15, position: 'absolute' }} />
-        <HoloRings color="#00C8FF" size={Math.min(window.innerWidth * 0.6, 400)} style={{ opacity: 0.10, position: 'absolute' }} />
-        <HoloRings color="#8B5CF6" size={Math.min(window.innerWidth * 0.35, 240)} style={{ opacity: 0.08, position: 'absolute' }} />
+        <HoloRings color="#C4522A" size={Math.min(window.innerWidth * 0.9, 600)} style={{ opacity: 0.38, position: 'absolute' }} />
+        <HoloRings color="#00C8FF" size={Math.min(window.innerWidth * 0.6, 400)} style={{ opacity: 0.24, position: 'absolute' }} />
+        <HoloRings color="#8B5CF6" size={Math.min(window.innerWidth * 0.35, 240)} style={{ opacity: 0.20, position: 'absolute' }} />
       </div>
 
-      {/* Vignette edges */}
-      <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', background: 'radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.7) 100%)' }} />
+      {/* Soft radial glow behind the clock */}
+      <div style={{
+        position: 'absolute', inset: 0, pointerEvents: 'none',
+        background: 'radial-gradient(ellipse 70% 50% at 50% 50%, rgba(196,82,42,0.12) 0%, transparent 70%)',
+      }} />
+
+      {/* Vignette edges — softer */}
+      <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', background: 'radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.5) 100%)' }} />
 
       {/* Centre content */}
       <div style={{ textAlign: 'center', position: 'relative', zIndex: 2, animation: 'phase-in 1.5s ease both' }}>
 
         {/* Greeting */}
-        <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.7rem', color: 'rgba(196,82,42,0.5)', letterSpacing: '0.3em', textTransform: 'uppercase', marginBottom: 16 }}>
+        <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.7rem', color: 'rgba(196,82,42,0.75)', letterSpacing: '0.3em', textTransform: 'uppercase', marginBottom: 16 }}>
           {greeting(now)} Kirk
         </p>
 
@@ -107,21 +113,22 @@ export default function Ambient() {
           <span style={{
             fontFamily: '"Playfair Display", serif', fontStyle: 'italic', fontWeight: 600,
             fontSize: 'clamp(5rem, 22vw, 11rem)',
-            color: '#EDE8E0',
-            textShadow: '0 0 60px rgba(196,82,42,0.2)',
+            color: '#F5F0E8',
+            textShadow: '0 0 80px rgba(196,82,42,0.5), 0 0 160px rgba(196,82,42,0.2)',
             lineHeight: 0.9,
             letterSpacing: '-0.03em',
           }}>{timeStr}</span>
           <span style={{
             fontFamily: '"DM Mono", monospace', fontWeight: 400,
             fontSize: 'clamp(1.2rem, 4vw, 2.5rem)',
-            color: 'rgba(196,82,42,0.6)',
+            color: 'rgba(196,82,42,0.9)',
             alignSelf: 'flex-end', paddingBottom: '0.15em',
+            textShadow: '0 0 20px rgba(196,82,42,0.6)',
           }}>{secStr}</span>
         </div>
 
         {/* Date */}
-        <p style={{ fontFamily: '"DM Mono", monospace', fontSize: 'clamp(0.55rem, 1.8vw, 0.8rem)', color: '#5C5650', letterSpacing: '0.22em', textTransform: 'uppercase', marginTop: 18 }}>
+        <p style={{ fontFamily: '"DM Mono", monospace', fontSize: 'clamp(0.55rem, 1.8vw, 0.8rem)', color: '#8A8078', letterSpacing: '0.22em', textTransform: 'uppercase', marginTop: 18 }}>
           {dateStr}
         </p>
 
@@ -131,26 +138,26 @@ export default function Ambient() {
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, animation: 'phase-in 1s ease 0.4s both' }}>
               <span style={{ fontSize: 'clamp(1.2rem, 3vw, 1.8rem)' }}>{wIcon}</span>
               <div style={{ textAlign: 'left' }}>
-                <p style={{ fontFamily: '"Playfair Display", serif', fontWeight: 600, fontSize: 'clamp(1.4rem, 4vw, 2rem)', color: '#C8BFB5', lineHeight: 1 }}>{weather.temp}°</p>
-                <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.48rem', color: '#4A4540', letterSpacing: '0.12em' }}>FEELS {weather.feelsLike}°</p>
+                <p style={{ fontFamily: '"Playfair Display", serif', fontWeight: 600, fontSize: 'clamp(1.4rem, 4vw, 2rem)', color: '#EDE8E0', lineHeight: 1, textShadow: '0 0 20px rgba(196,82,42,0.3)' }}>{weather.temp}°</p>
+                <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.48rem', color: '#7A7068', letterSpacing: '0.12em' }}>FEELS {weather.feelsLike}°</p>
               </div>
             </div>
           )}
           {pinned && (
             <div style={{ animation: 'phase-in 1s ease 0.6s both', textAlign: 'center' }}>
-              <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.42rem', color: 'rgba(192,132,252,0.5)', letterSpacing: '0.2em', marginBottom: 4 }}>{pinned.label.toUpperCase()}</p>
-              <p style={{ fontFamily: '"Playfair Display", serif', fontStyle: 'italic', fontWeight: 600, fontSize: 'clamp(1.3rem, 4vw, 2rem)', color: '#C084FC', lineHeight: 1 }}>
-                {pinned.d}<span style={{ fontSize: '0.5em', opacity: 0.6 }}>d</span> {pinned.h}<span style={{ fontSize: '0.5em', opacity: 0.6 }}>h</span>
+              <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.42rem', color: 'rgba(192,132,252,0.75)', letterSpacing: '0.2em', marginBottom: 4 }}>{pinned.label.toUpperCase()}</p>
+              <p style={{ fontFamily: '"Playfair Display", serif', fontStyle: 'italic', fontWeight: 600, fontSize: 'clamp(1.3rem, 4vw, 2rem)', color: '#D8A8FF', lineHeight: 1, textShadow: '0 0 20px rgba(192,132,252,0.5)' }}>
+                {pinned.d}<span style={{ fontSize: '0.5em', opacity: 0.7 }}>d</span> {pinned.h}<span style={{ fontSize: '0.5em', opacity: 0.7 }}>h</span>
               </p>
             </div>
           )}
         </div>
       </div>
 
-      {/* Tap to exit hint */}
+      {/* Tap to exit hint — brighter */}
       <p style={{
         position: 'absolute', bottom: 28, fontFamily: '"DM Mono", monospace',
-        fontSize: '0.38rem', color: 'rgba(196,82,42,0.2)', letterSpacing: '0.2em',
+        fontSize: '0.38rem', color: 'rgba(196,82,42,0.4)', letterSpacing: '0.2em',
         animation: 'phase-in 1s ease 2s both',
       }}>TAP ANYWHERE TO EXIT</p>
 
