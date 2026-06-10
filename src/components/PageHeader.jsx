@@ -13,6 +13,7 @@ export default function PageHeader({ subtitle, title, accent = '#C4522A', childr
     <div style={{
       position: 'sticky', top: 0, zIndex: 10,
       padding: '12px 20px 14px',
+      animation: 'phase-in 0.9s cubic-bezier(0.22,1,0.36,1) both',
       background: 'linear-gradient(to bottom, rgba(8,7,6,0.99) 0%, rgba(13,12,11,0.95) 100%)',
       backdropFilter: 'blur(24px)',
       WebkitBackdropFilter: 'blur(24px)',

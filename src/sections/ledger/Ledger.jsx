@@ -2,8 +2,9 @@ import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ARTWORK_IMG from '../../assets/ledger-artwork.jpg';
 import BottomNav from '../../components/BottomNav';
+import HoloRings from '../../components/HoloRings';
 
-// ─── DATA HELPERS ────────────────────────────────────────────────────────────
+// ─── DATA HELPERS ─────────────────────────────────────────────────────────────
 
 const DEFAULT_CATEGORIES = {
   Signal9: ["Print Sale", "Market Stall", "Commission", "Materials", "Printing", "Market Fees", "Packaging", "Marketing", "Other"],
@@ -31,555 +32,589 @@ function exportCSV(txns, biz) {
   a.download = `${biz.replace(/\s+/g,"_")}_${today()}.csv`; a.click();
 }
 
-// ─── THEMES ──────────────────────────────────────────────────────────────────
+// ─── ACCENT COLOURS ───────────────────────────────────────────────────────────
 
-const THEMES = {
-  Signal9: {
-    id: "s9",
-    font: "'Palatino Linotype', 'Book Antiqua', Palatino, Georgia, serif",
-    bg: "#0e0b08",
-    surface: "rgba(14,11,8,0.72)",
-    surfaceStrong: "rgba(10,8,6,0.82)",
-    border: "rgba(196,90,26,0.28)",
-    borderHover: "rgba(224,112,32,0.65)",
-    accent: "#e07020",
-    accentDim: "rgba(224,112,32,0.1)",
-    textPrimary: "#f0ede8",
-    textSec: "#9a8070",
-    textDim: "#4a3a28",
-    income: "#7ab8d0",
-    incomeText: "#a8d8ee",
-    expense: "#c45a1a",
-    expenseText: "#e08040",
-    incomeActive: { background:"rgba(122,184,208,0.12)", border:"1px solid #7ab8d0", color:"#a8d8ee" },
-    expenseActive: { background:"rgba(196,90,26,0.14)", border:"1px solid #c45a1a", color:"#e08040" },
-  },
-  "App Sales": {
-    id: "ap",
-    font: "'Courier New', 'Courier', monospace",
-    bg: "#020810",
-    surface: "rgba(4,16,32,0.9)",
-    surfaceStrong: "rgba(2,8,20,0.96)",
-    border: "rgba(0,180,255,0.2)",
-    borderHover: "rgba(0,255,200,0.6)",
-    accent: "#00e5ff",
-    accentDim: "rgba(0,229,255,0.08)",
-    textPrimary: "#c8f0ff",
-    textSec: "#4a8aaa",
-    textDim: "#1a3a50",
-    income: "#00ff9d",
-    incomeText: "#00ff9d",
-    expense: "#ff4d6a",
-    expenseText: "#ff4d6a",
-    incomeActive: { background:"rgba(0,255,157,0.08)", border:"1px solid #00ff9d", color:"#00ff9d" },
-    expenseActive: { background:"rgba(255,77,106,0.08)", border:"1px solid #ff4d6a", color:"#ff4d6a" },
-  },
+const BIZ_ACCENT = {
+  Signal9:   '#C4522A',   // rust
+  'App Sales': '#00C8FF', // cyan
+};
+const BIZ_SECONDARY = {
+  Signal9:   '#FFB700',
+  'App Sales': '#00FF9D',
 };
 
-// ─── SIGNAL9 BACKGROUND ──────────────────────────────────────────────────────
+// ─── SHARED ANIMATION HELPER ─────────────────────────────────────────────────
 
-const S9Background = () => (
-  <div style={{position:"fixed",inset:0,zIndex:0,pointerEvents:"none",overflow:"hidden"}}>
-    <div style={{
-      position:"absolute",inset:0,
-      backgroundImage:`url(${ARTWORK_IMG})`,
-      backgroundSize:"cover",
-      backgroundPosition:"55% center",
-      backgroundRepeat:"no-repeat",
-      filter:"brightness(0.42) saturate(0.85)",
-    }}/>
-    <svg style={{position:"absolute",inset:0,width:"100%",height:"100%"}} viewBox="0 0 800 900" preserveAspectRatio="xMidYMid slice">
-      <defs>
-        <radialGradient id="s9vig" cx="52%" cy="42%" r="62%">
-          <stop offset="45%" stopColor="transparent"/>
-          <stop offset="100%" stopColor="#090705" stopOpacity="0.78"/>
-        </radialGradient>
-        <linearGradient id="s9vtop" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#090705" stopOpacity="0.65"/>
-          <stop offset="18%" stopColor="#090705" stopOpacity="0"/>
-        </linearGradient>
-        <linearGradient id="s9vbot" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="72%" stopColor="#090705" stopOpacity="0"/>
-          <stop offset="100%" stopColor="#090705" stopOpacity="0.88"/>
-        </linearGradient>
-      </defs>
-      <rect width="800" height="900" fill="url(#s9vig)"/>
-      <rect width="800" height="900" fill="url(#s9vtop)"/>
-      <rect width="800" height="900" fill="url(#s9vbot)"/>
-    </svg>
-  </div>
-);
+const ph = (delay = 0, dur = 0.8, dir = '') => {
+  const kf = dir === 'left' ? 'phase-in-left' : dir === 'right' ? 'phase-in-right' : 'phase-in';
+  return `${kf} ${dur}s cubic-bezier(0.22,1,0.36,1) ${delay}s both`;
+};
 
-// ─── APP SALES BACKGROUND ────────────────────────────────────────────────────
+// ─── BACKGROUNDS ──────────────────────────────────────────────────────────────
 
-const APBackground = () => {
-  const cols = 28, rows = 36;
-  const cells = useMemo(() => {
-    const arr = [];
-    for (let r=0; r<rows; r++) for (let c=0; c<cols; c++) {
-      const o = Math.random() < 0.06 ? (Math.random()*0.28+0.05) : 0;
-      if (o > 0) arr.push({x: c*(800/cols), y: r*(900/rows), o});
-    }
-    return arr;
-  }, []);
+function LedgerBg({ accent = '#C4522A' }) {
   return (
-    <svg style={{position:"fixed",inset:0,width:"100%",height:"100%",zIndex:0,pointerEvents:"none"}} viewBox="0 0 800 900" preserveAspectRatio="xMidYMid slice">
-      <defs>
-        <radialGradient id="apbg" cx="50%" cy="30%" r="70%">
-          <stop offset="0%" stopColor="#041428"/><stop offset="100%" stopColor="#020810"/>
-        </radialGradient>
-        <radialGradient id="apg1" cx="80%" cy="15%" r="35%">
-          <stop offset="0%" stopColor="#003355" stopOpacity="0.8"/><stop offset="100%" stopColor="#020810" stopOpacity="0"/>
-        </radialGradient>
-        <filter id="apblur"><feGaussianBlur stdDeviation="3"/></filter>
-        <radialGradient id="apvig" cx="50%" cy="50%" r="70%">
-          <stop offset="60%" stopColor="transparent"/><stop offset="100%" stopColor="#020810" stopOpacity="0.7"/>
-        </radialGradient>
-      </defs>
-      <rect width="800" height="900" fill="url(#apbg)"/>
-      <rect width="800" height="900" fill="url(#apg1)"/>
-      {Array.from({length:cols+1},(_,i)=><line key={`v${i}`} x1={i*(800/cols)} y1="0" x2={i*(800/cols)} y2="900" stroke="#00e5ff" strokeWidth="0.3" opacity="0.06"/>)}
-      {Array.from({length:rows+1},(_,i)=><line key={`h${i}`} x1="0" y1={i*(900/rows)} x2="800" y2={i*(900/rows)} stroke="#00e5ff" strokeWidth="0.3" opacity="0.06"/>)}
-      {cells.map((c,i)=><rect key={i} x={c.x+1} y={c.y+1} width={800/cols-2} height={900/rows-2} fill="#00e5ff" opacity={c.o}/>)}
-      <line x1="0" y1="200" x2="800" y2="600" stroke="#00e5ff" strokeWidth="0.5" opacity="0.08"/>
-      <line x1="0" y1="500" x2="800" y2="100" stroke="#00ff9d" strokeWidth="0.4" opacity="0.06"/>
-      <rect x="0" y="295" width="800" height="2" fill="#00e5ff" opacity="0.12"/>
-      <path d="M10,10 L10,40 M10,10 L40,10" stroke="#00e5ff" strokeWidth="1" opacity="0.3" fill="none"/>
-      <path d="M790,10 L790,40 M790,10 L760,10" stroke="#00e5ff" strokeWidth="1" opacity="0.3" fill="none"/>
-      <path d="M10,890 L10,860 M10,890 L40,890" stroke="#00e5ff" strokeWidth="1" opacity="0.3" fill="none"/>
-      <path d="M790,890 L790,860 M790,890 L760,890" stroke="#00e5ff" strokeWidth="1" opacity="0.3" fill="none"/>
-      {Array.from({length:45},(_,i)=><rect key={i} x="0" y={i*20} width="800" height="1" fill="#000" opacity="0.12"/>)}
-      <rect width="800" height="900" fill="url(#apvig)"/>
-    </svg>
+    <div style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none', overflow: 'hidden' }}>
+      {/* Artwork */}
+      <div style={{
+        position: 'absolute', inset: 0,
+        backgroundImage: `url(${ARTWORK_IMG})`,
+        backgroundSize: 'cover', backgroundPosition: '55% center',
+        opacity: 0.14, filter: 'saturate(0.7)',
+        animation: ph(0, 2.5),
+      }} />
+      {/* Dark base */}
+      <div style={{ position: 'absolute', inset: 0, background: '#0D0C0B' }} />
+      {/* Gradient wash */}
+      <div style={{
+        position: 'absolute', inset: 0,
+        background: `radial-gradient(ellipse 120% 60% at 50% -8%, ${accent}55 0%, ${accent}22 40%, transparent 68%)`,
+        animation: ph(0.3, 1.8),
+      }} />
+      {/* Architectural grid */}
+      <div style={{
+        position: 'absolute', inset: 0,
+        backgroundImage: `linear-gradient(${accent} 1px, transparent 1px), linear-gradient(90deg, ${accent} 1px, transparent 1px)`,
+        backgroundSize: '40px 40px', opacity: 0.045,
+        animation: ph(0.5, 1.6),
+      }} />
+      {/* Orbs */}
+      <div style={{
+        position: 'absolute', top: '-10%', right: '-8%',
+        width: '55vw', height: '55vw', maxWidth: 440, maxHeight: 440,
+        background: `radial-gradient(circle, ${accent}38 0%, ${accent}14 40%, transparent 70%)`,
+        borderRadius: '50%', filter: 'blur(40px)',
+        animation: `orb-drift 18s ease-in-out infinite, ${ph(0.2, 2.2, 'right')}`,
+      }} />
+      <div style={{
+        position: 'absolute', bottom: '5%', left: '-12%',
+        width: '50vw', height: '50vw', maxWidth: 380, maxHeight: 380,
+        background: 'radial-gradient(circle, rgba(120,60,220,0.28) 0%, transparent 70%)',
+        borderRadius: '50%', filter: 'blur(48px)',
+        animation: `orb-drift 24s ease-in-out infinite 4s, ${ph(0.5, 2.0, 'left')}`,
+      }} />
+    </div>
   );
-};
+}
 
-// ─── LANDING SIGNAL9 HALF BG ─────────────────────────────────────────────────
+// ─── LANDING PAGE ─────────────────────────────────────────────────────────────
 
-const S9LandingBg = () => (
-  <div style={{position:"absolute",inset:0,overflow:"hidden"}}>
-    <div style={{
-      position:"absolute",inset:0,
-      backgroundImage:`url(${ARTWORK_IMG})`,
-      backgroundSize:"cover",
-      backgroundPosition:"60% center",
-      filter:"brightness(0.38) saturate(0.8)",
-    }}/>
-    <svg style={{position:"absolute",inset:0,width:"100%",height:"100%"}} viewBox="0 0 400 900" preserveAspectRatio="xMidYMid slice">
-      <defs>
-        <radialGradient id="ls9vig" cx="50%" cy="45%" r="65%">
-          <stop offset="40%" stopColor="transparent"/>
-          <stop offset="100%" stopColor="#090705" stopOpacity="0.72"/>
-        </radialGradient>
-        <linearGradient id="ls9top" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#090705" stopOpacity="0.7"/>
-          <stop offset="22%" stopColor="#090705" stopOpacity="0"/>
-        </linearGradient>
-        <linearGradient id="ls9bot" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="70%" stopColor="#090705" stopOpacity="0"/>
-          <stop offset="100%" stopColor="#090705" stopOpacity="0.92"/>
-        </linearGradient>
-        <linearGradient id="ls9edge" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="68%" stopColor="#090705" stopOpacity="0"/>
-          <stop offset="100%" stopColor="#090705" stopOpacity="1"/>
-        </linearGradient>
-      </defs>
-      <rect width="400" height="900" fill="url(#ls9vig)"/>
-      <rect width="400" height="900" fill="url(#ls9top)"/>
-      <rect width="400" height="900" fill="url(#ls9bot)"/>
-      <rect width="400" height="900" fill="url(#ls9edge)"/>
-    </svg>
-  </div>
-);
+function LandingView({ transactions, onOpen, onBack }) {
+  const fyTotals = (biz) => {
+    const fy = currentFY(), txns = transactions[biz].filter(tx => getFY(tx.date) === fy);
+    const inn = txns.filter(tx => tx.type==="in").reduce((s,tx) => s+tx.amount, 0);
+    const out = txns.filter(tx => tx.type==="out").reduce((s,tx) => s+tx.amount, 0);
+    return { inn, out, net: inn - out };
+  };
 
-// ─── SHARED UI ────────────────────────────────────────────────────────────────
+  return (
+    <div style={{ minHeight: '100dvh', background: '#0D0C0B', color: '#EDE8E0', position: 'relative', overflow: 'hidden' }}>
+      <style>{globalCSS}</style>
 
-const TopBar = ({t, left, center, right}) => (
-  <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:`calc(env(safe-area-inset-top) + 0.85rem) 1rem 0.85rem`,borderBottom:`1px solid ${t.border}`,background: t.id==="ap"?"rgba(2,8,16,0.92)":"rgba(10,7,5,0.78)",position:"sticky",top:0,zIndex:20,backdropFilter:"blur(12px)",gap:"0.5rem"}}>
-    {left}
-    <span style={{fontSize:t.id==="ap"?"0.78rem":"0.88rem",letterSpacing:t.id==="ap"?"0.2em":"0.14em",textTransform:"uppercase",flex:1,textAlign:"center",color:t.textPrimary,fontFamily:t.font}}>{center}</span>
-    {right}
-  </div>
-);
+      {/* Shared background */}
+      <div style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none', overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', inset: 0, backgroundImage: `url(${ARTWORK_IMG})`, backgroundSize: 'cover', backgroundPosition: '55% center', opacity: 0.13, filter: 'saturate(0.6)', animation: ph(0, 2.5) }} />
+        <div style={{ position: 'absolute', inset: 0, background: '#0D0C0B' }} />
+        <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse 100% 60% at 50% 0%, rgba(160,60,220,0.35) 0%, rgba(0,200,255,0.12) 50%, transparent 75%)', animation: ph(0.3, 2.0) }} />
+        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'linear-gradient(rgba(160,60,220,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(0,200,255,0.04) 1px, transparent 1px)', backgroundSize: '40px 40px', animation: ph(0.6, 1.8) }} />
+        {/* Split divider */}
+        <div style={{ position: 'absolute', left: '50%', top: 0, bottom: 0, width: 1, background: 'linear-gradient(to bottom, transparent 5%, rgba(160,80,220,0.4) 30%, rgba(0,200,255,0.35) 70%, transparent 95%)', animation: ph(1.0, 1.2) }} />
+        {/* Orbs */}
+        <div style={{ position: 'absolute', top: '-15%', left: '-10%', width: '60vw', height: '60vw', maxWidth: 400, borderRadius: '50%', background: 'radial-gradient(circle, rgba(196,82,42,0.3) 0%, transparent 70%)', filter: 'blur(48px)', animation: `orb-drift 20s ease-in-out infinite, ${ph(0.2, 2.2)}` }} />
+        <div style={{ position: 'absolute', top: '-10%', right: '-10%', width: '55vw', height: '55vw', maxWidth: 380, borderRadius: '50%', background: 'radial-gradient(circle, rgba(0,200,255,0.25) 0%, transparent 70%)', filter: 'blur(40px)', animation: `orb-drift 18s ease-in-out infinite 6s, ${ph(0.4, 2.0)}` }} />
+      </div>
 
-const BackBtn = ({t, onClick}) => (
-  <button onClick={onClick} style={{background:"none",border:"none",color:t.accent,cursor:"pointer",fontSize:"0.85rem",padding:0,fontFamily:t.font,whiteSpace:"nowrap",letterSpacing:t.id==="ap"?"0.1em":"0"}}>← {t.id==="ap"?"BACK":"Back"}</button>
-);
+      {/* HoloRings */}
+      <div style={{ position: 'fixed', inset: 0, zIndex: 1, pointerEvents: 'none', overflow: 'hidden', animation: ph(0.8, 1.6) }}>
+        <HoloRings size={300} color="#C4522A" style={{ position: 'absolute', bottom: -80, left: -80, opacity: 0.45 }} />
+        <HoloRings size={220} color="#00C8FF" style={{ position: 'absolute', top: -60, right: -60, opacity: 0.40 }} />
+        <HoloRings size={140} color="#A040E0" style={{ position: 'absolute', top: '42%', left: '45%', opacity: 0.32 }} />
+      </div>
 
-const Btn = ({t, onClick, children, style={}}) => (
-  <button onClick={onClick} style={{background:"none",border:`1px solid ${t.accent}`,color:t.accent,cursor:"pointer",fontSize:"0.75rem",padding:"0.28rem 0.6rem",borderRadius:t.id==="ap"?"2px":"4px",fontFamily:t.font,letterSpacing:t.id==="ap"?"0.1em":"0",transition:"all 0.15s",...style}}>{children}</button>
-);
+      {/* Scan line */}
+      <div style={{ position: 'fixed', inset: 0, zIndex: 2, pointerEvents: 'none', overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', left: 0, right: 0, height: 2, background: 'linear-gradient(90deg, transparent 0%, rgba(160,60,220,0.5) 20%, rgba(0,200,255,0.9) 50%, rgba(160,60,220,0.5) 80%, transparent 100%)', boxShadow: '0 0 12px rgba(0,200,255,0.5)', filter: 'blur(0.5px)', animation: 'prismatic-scan 3s cubic-bezier(0.4,0,0.6,1) 0.5s 1 forwards' }} />
+      </div>
 
-// ─── MAIN APP ─────────────────────────────────────────────────────────────────
+      {/* Back button */}
+      <div style={{ position: 'fixed', top: 'calc(env(safe-area-inset-top) + 0.75rem)', left: '1rem', zIndex: 10, animation: ph(0.4, 0.8, 'left') }}>
+        <button onClick={onBack} style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', background: 'rgba(13,12,11,0.7)', backdropFilter: 'blur(12px)', border: '0.5px solid rgba(255,255,255,0.1)', borderRadius: 8, padding: '0.4rem 0.75rem', cursor: 'pointer', color: 'rgba(220,200,180,0.8)', fontSize: '0.7rem', letterSpacing: '0.1em', textTransform: 'uppercase', fontFamily: '"DM Mono", monospace' }}>
+          ← Back
+        </button>
+      </div>
 
-export default function Ledger() {
-  const navigate = useNavigate();
-  const [leaving, setLeaving] = useState(false);
+      {/* Content */}
+      <div style={{ position: 'relative', zIndex: 3, minHeight: '100dvh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 'calc(env(safe-area-inset-top) + 5rem) 1.25rem calc(env(safe-area-inset-bottom) + 5.5rem)' }}>
 
-  function goBack() {
-    setLeaving(true);
-    setTimeout(() => navigate(-1), 280);
-  }
+        {/* Title block */}
+        <div style={{ textAlign: 'center', marginBottom: '2.5rem', animation: ph(0.6, 1.1) }}>
+          <div style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.58rem', letterSpacing: '0.35em', textTransform: 'uppercase', color: 'rgba(160,130,90,0.65)', marginBottom: '0.75rem' }}>
+            ■ Business Ledger
+          </div>
+          <h1 style={{ fontFamily: '"Playfair Display", serif', fontStyle: 'italic', fontWeight: 700, fontSize: 'clamp(2.8rem, 10vw, 4.5rem)', margin: 0, letterSpacing: '-0.02em', background: 'linear-gradient(135deg, #C4522A 0%, #FFB700 40%, #00C8FF 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', filter: 'drop-shadow(0 0 30px rgba(196,82,42,0.4))' }}>
+            Ledger
+          </h1>
+          <div style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', letterSpacing: '0.25em', textTransform: 'uppercase', color: 'rgba(0,200,255,0.45)', marginTop: '0.5rem' }}>
+            {currentFY()} · Active
+          </div>
+        </div>
 
-  const saved = loadData();
-  const [transactions, setTransactions] = useState(saved?.transactions || {"Signal9":[],"App Sales":[]});
-  const [categories, setCategories] = useState(saved?.categories || DEFAULT_CATEGORIES);
-  const [view, setView] = useState("landing");
-  const [activeBiz, setActiveBiz] = useState(null);
-  const [editingId, setEditingId] = useState(null);
+        {/* Business cards */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', width: '100%', maxWidth: '460px' }}>
+          {[['Signal9', '#C4522A', '#FFB700', 'Fine Art Studio', '↑'], ['App Sales', '#00C8FF', '#00FF9D', '// Digital Products', '›_']].map(([biz, accent, secondary, sub, arrow], cardIdx) => {
+            const fy = fyTotals(biz);
+            const allI = transactions[biz].filter(tx => tx.type==="in").reduce((s,tx) => s+tx.amount, 0);
+            const allO = transactions[biz].filter(tx => tx.type==="out").reduce((s,tx) => s+tx.amount, 0);
+            return (
+              <button key={biz} onClick={() => onOpen(biz)} style={{ animation: ph(0.9 + cardIdx * 0.2, 1.0, cardIdx === 0 ? 'left' : 'right') }}>
+                <div style={{
+                  background: `linear-gradient(135deg, ${accent}1A 0%, ${accent}0D 60%, rgba(13,12,11,0.9) 100%)`,
+                  border: `1px solid ${accent}45`,
+                  borderRadius: 14,
+                  padding: '1.4rem',
+                  cursor: 'pointer',
+                  textAlign: 'left',
+                  color: '#EDE8E0',
+                  width: '100%',
+                  backdropFilter: 'blur(20px)',
+                  boxShadow: `0 0 40px ${accent}18, 0 4px 24px rgba(0,0,0,0.6), inset 0 1px 0 ${accent}25`,
+                  clipPath: 'polygon(0 0, calc(100% - 18px) 0, 100% 18px, 100% 100%, 0 100%)',
+                  filter: `drop-shadow(0 0 20px ${accent}28)`,
+                  transition: 'all 0.2s',
+                }}>
+                  {/* Top accent line */}
+                  <div style={{ position: 'relative', marginBottom: '1rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                      <div>
+                        <div style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.52rem', letterSpacing: '0.22em', textTransform: 'uppercase', color: `${accent}90`, marginBottom: '0.3rem' }}>{sub}</div>
+                        <div style={{ fontFamily: '"Playfair Display", serif', fontStyle: 'italic', fontWeight: 600, fontSize: '1.5rem', color: accent, textShadow: `0 0 20px ${accent}50` }}>{biz}</div>
+                      </div>
+                      <div style={{ fontFamily: '"DM Mono", monospace', fontSize: '1.4rem', color: `${accent}60`, marginTop: '0.1rem' }}>{arrow}</div>
+                    </div>
+                  </div>
+
+                  {/* All-time */}
+                  <div style={{ display: 'flex', gap: '0.6rem', fontSize: '0.78rem', marginBottom: '0.65rem', flexWrap: 'wrap', alignItems: 'center' }}>
+                    <span style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.52rem', textTransform: 'uppercase', letterSpacing: '0.12em', color: `${accent}55` }}>All time</span>
+                    <span style={{ color: secondary }}>▲ {fmt(allI)}</span>
+                    <span style={{ color: '#FF4D6A' }}>▼ {fmt(allO)}</span>
+                    <span style={{ color: allI-allO >= 0 ? secondary : '#FF4D6A', fontFamily: '"DM Mono", monospace', fontWeight: 700 }}>{fmt(allI-allO)}</span>
+                  </div>
+
+                  {/* FY */}
+                  <div style={{ borderTop: `1px solid ${accent}25`, paddingTop: '0.6rem', display: 'flex', gap: '0.6rem', fontSize: '0.78rem', flexWrap: 'wrap', alignItems: 'center' }}>
+                    <span style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.52rem', color: accent, letterSpacing: '0.1em' }}>{currentFY()}</span>
+                    <span style={{ color: secondary }}>▲ {fmt(fy.inn)}</span>
+                    <span style={{ color: '#FF4D6A' }}>▼ {fmt(fy.out)}</span>
+                    <span style={{ color: fy.net >= 0 ? secondary : '#FF4D6A', fontFamily: '"DM Mono", monospace', fontWeight: 700 }}>{fmt(fy.net)}</span>
+                  </div>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+
+        <div style={{ marginTop: '2.5rem', fontFamily: '"DM Mono", monospace', fontSize: '0.55rem', color: 'rgba(60,40,20,0.45)', letterSpacing: '0.2em', textTransform: 'uppercase', animation: ph(1.4, 0.8) }}>
+          Kirk's Business Tracker · Signal9 Studio
+        </div>
+      </div>
+
+      <BottomNav />
+    </div>
+  );
+}
+
+// ─── LIST VIEW ────────────────────────────────────────────────────────────────
+
+function ListView({ activeBiz, transactions, categories, onBack, onAdd, onEdit, onDelete, onExport, onToggleCat, catView }) {
+  const accent = BIZ_ACCENT[activeBiz];
+  const secondary = BIZ_SECONDARY[activeBiz];
+  const bizTxns = transactions[activeBiz];
+
+  const [filterType, setFilterType] = useState('all');
+  const [filterMonth, setFilterMonth] = useState('all');
+  const [filterFY, setFilterFY] = useState('all');
+  const [searchQ, setSearchQ] = useState('');
+  const [sortBy, setSortBy] = useState('date_desc');
   const [confirmDel, setConfirmDel] = useState(null);
-  const [filterType, setFilterType] = useState("all");
-  const [filterMonth, setFilterMonth] = useState("all");
-  const [filterFY, setFilterFY] = useState("all");
-  const [searchQ, setSearchQ] = useState("");
-  const [sortBy, setSortBy] = useState("date_desc");
-  const [form, setForm] = useState({type:"in",description:"",category:"",amount:"",date:today(),notes:""});
-  const [formError, setFormError] = useState("");
-  const [catView, setCatView] = useState(false);
-  const [newCat, setNewCat] = useState("");
-
-  useEffect(() => { saveData({transactions, categories}); }, [transactions, categories]);
-
-  const t = activeBiz ? THEMES[activeBiz] : THEMES.Signal9;
-  const isAP = activeBiz === "App Sales";
-  const bizTxns = activeBiz ? transactions[activeBiz] : [];
 
   const months = useMemo(() => [...new Set(bizTxns.map(tx => getMonthKey(tx.date)))].sort().reverse(), [bizTxns]);
   const fyears = useMemo(() => [...new Set(bizTxns.map(tx => getFY(tx.date)))].sort().reverse(), [bizTxns]);
 
   const filtered = useMemo(() => {
     let list = [...bizTxns];
-    if (filterType !== "all") list = list.filter(tx => tx.type === filterType);
-    if (filterMonth !== "all") list = list.filter(tx => getMonthKey(tx.date) === filterMonth);
-    if (filterFY !== "all") list = list.filter(tx => getFY(tx.date) === filterFY);
-    if (searchQ.trim()) { const q = searchQ.toLowerCase(); list = list.filter(tx => tx.description.toLowerCase().includes(q) || tx.category.toLowerCase().includes(q) || (tx.notes||"").toLowerCase().includes(q)); }
+    if (filterType !== 'all') list = list.filter(tx => tx.type === filterType);
+    if (filterMonth !== 'all') list = list.filter(tx => getMonthKey(tx.date) === filterMonth);
+    if (filterFY !== 'all') list = list.filter(tx => getFY(tx.date) === filterFY);
+    if (searchQ.trim()) { const q = searchQ.toLowerCase(); list = list.filter(tx => tx.description.toLowerCase().includes(q) || tx.category.toLowerCase().includes(q) || (tx.notes||'').toLowerCase().includes(q)); }
     switch(sortBy) {
-      case "date_asc": list.sort((a,b) => a.date.localeCompare(b.date)); break;
-      case "date_desc": list.sort((a,b) => b.date.localeCompare(a.date)); break;
-      case "amount_desc": list.sort((a,b) => b.amount - a.amount); break;
-      case "amount_asc": list.sort((a,b) => a.amount - b.amount); break;
+      case 'date_asc':    list.sort((a,b) => a.date.localeCompare(b.date)); break;
+      case 'date_desc':   list.sort((a,b) => b.date.localeCompare(a.date)); break;
+      case 'amount_desc': list.sort((a,b) => b.amount - a.amount); break;
+      case 'amount_asc':  list.sort((a,b) => a.amount - b.amount); break;
     }
     return list;
   }, [bizTxns, filterType, filterMonth, filterFY, searchQ, sortBy]);
 
-  const totalIn = filtered.filter(tx => tx.type === "in").reduce((s,tx) => s+tx.amount, 0);
-  const totalOut = filtered.filter(tx => tx.type === "out").reduce((s,tx) => s+tx.amount, 0);
+  const totalIn  = filtered.filter(tx => tx.type === 'in').reduce((s,tx) => s+tx.amount, 0);
+  const totalOut = filtered.filter(tx => tx.type === 'out').reduce((s,tx) => s+tx.amount, 0);
   const net = totalIn - totalOut;
 
-  const fyTotals = (biz) => {
-    const fy = currentFY(), txns = transactions[biz].filter(tx => getFY(tx.date) === fy);
-    const inn = txns.filter(tx => tx.type==="in").reduce((s,tx) => s+tx.amount, 0);
-    const out = txns.filter(tx => tx.type==="out").reduce((s,tx) => s+tx.amount, 0);
-    return {inn, out, net: inn-out};
+  const selectStyle = {
+    flex: 1, minWidth: 80,
+    background: 'rgba(13,12,11,0.8)',
+    border: `1px solid ${accent}30`,
+    borderRadius: 6, color: '#C8BFB5',
+    fontFamily: '"DM Mono", monospace', fontSize: '0.62rem',
+    padding: '0.3rem 0.4rem', outline: 'none', colorScheme: 'dark',
   };
-
-  const openBiz = (biz) => { setActiveBiz(biz); setFilterType("all"); setFilterMonth("all"); setFilterFY("all"); setSearchQ(""); setSortBy("date_desc"); setCatView(false); setView("list"); };
-  const openAdd = () => { setEditingId(null); setForm({type:"in",description:"",category:categories[activeBiz][0],amount:"",date:today(),notes:""}); setFormError(""); setView("form"); };
-  const openEdit = (tx) => { setEditingId(tx.id); setForm({type:tx.type,description:tx.description,category:tx.category,amount:String(tx.amount),date:tx.date,notes:tx.notes||""}); setFormError(""); setView("form"); };
-
-  const submitForm = () => {
-    if (!form.description.trim()) return setFormError("Please add a description.");
-    const amt = parseFloat(form.amount);
-    if (!form.amount || isNaN(amt) || amt <= 0) return setFormError("Please enter a valid amount.");
-    if (!form.date) return setFormError("Please select a date.");
-    const entry = {id:editingId||Date.now(),type:form.type,description:form.description.trim(),category:form.category,amount:amt,date:form.date,notes:form.notes.trim()};
-    setTransactions(prev => ({...prev,[activeBiz]: editingId ? prev[activeBiz].map(tx => tx.id===editingId?entry:tx) : [entry,...prev[activeBiz]]}));
-    setView("list");
-  };
-
-  const deleteEntry = (id) => { setTransactions(prev => ({...prev,[activeBiz]:prev[activeBiz].filter(tx=>tx.id!==id)})); setConfirmDel(null); };
-  const addCat = () => { const c=newCat.trim(); if(!c||categories[activeBiz].includes(c)) return; setCategories(prev=>({...prev,[activeBiz]:[...prev[activeBiz],c]})); setNewCat(""); };
-  const removeCat = (cat) => { if(categories[activeBiz].length<=1) return; setCategories(prev=>({...prev,[activeBiz]:prev[activeBiz].filter(c=>c!==cat)})); };
-
   const inputStyle = {
-    background: isAP ? "rgba(0,20,40,0.9)" : "rgba(14,10,7,0.78)",
-    border: `1px solid ${t.border}`,
-    borderRadius: isAP ? "2px" : "4px",
-    color: t.textPrimary,
-    fontFamily: t.font,
-    fontSize: "0.88rem",
-    padding: "0.6rem 0.8rem",
-    outline: "none",
-    width: "100%",
-    boxSizing: "border-box",
-    colorScheme: "dark",
+    background: 'rgba(13,12,11,0.85)',
+    border: `1px solid ${accent}30`,
+    borderRadius: 6, color: '#EDE8E0',
+    fontFamily: '"DM Mono", monospace', fontSize: '0.82rem',
+    padding: '0.55rem 0.75rem', outline: 'none', width: '100%', boxSizing: 'border-box', colorScheme: 'dark',
   };
-  const labelStyle = {fontSize:"0.68rem",letterSpacing:isAP?"0.2em":"0.12em",textTransform:"uppercase",color:t.textSec,marginTop:"0.9rem",marginBottom:"0.35rem",display:"block"};
 
-  // ── LANDING ───────────────────────────────────────────────────────────────
-
-  if (view === "landing") return (
-    <div className={leaving ? "ledger-leave" : "ledger-enter"} style={{minHeight:"100vh",background:"#0d0b08",fontFamily:"Georgia,serif",color:"#e8e4dc",position:"relative",overflow:"hidden"}}>
+  return (
+    <div style={{ minHeight: '100dvh', background: '#0D0C0B', color: '#EDE8E0', display: 'flex', flexDirection: 'column', position: 'relative' }}>
       <style>{globalCSS}</style>
-      <div style={{position:"fixed",inset:0,display:"flex",zIndex:0}}>
-        <div style={{flex:1,position:"relative"}}><S9LandingBg/></div>
-        <div style={{flex:1,position:"relative",overflow:"hidden"}}><APBackground/></div>
-      </div>
-      <div style={{position:"fixed",left:"50%",top:0,bottom:0,width:"1px",background:"linear-gradient(to bottom,transparent 5%,rgba(160,80,160,0.5) 30%,rgba(180,100,180,0.3) 50%,rgba(0,229,255,0.4) 70%,transparent 95%)",zIndex:1}}/>
+      <LedgerBg accent={accent} />
 
-      {/* Back button */}
-      <div style={{position:"fixed",top:`calc(env(safe-area-inset-top) + 0.75rem)`,left:"1rem",zIndex:10}}>
-        <button onClick={goBack} style={{
-          display:"flex",alignItems:"center",gap:"0.35rem",
-          background:"rgba(0,0,0,0.45)",backdropFilter:"blur(10px)",
-          border:"0.5px solid rgba(255,255,255,0.12)",borderRadius:8,
-          padding:"0.4rem 0.75rem",cursor:"pointer",
-          color:"rgba(220,200,180,0.8)",fontSize:"0.7rem",
-          letterSpacing:"0.1em",textTransform:"uppercase",fontFamily:"Georgia,serif",
+      {/* HoloRings */}
+      <div style={{ position: 'fixed', inset: 0, zIndex: 1, pointerEvents: 'none', overflow: 'hidden', animation: ph(0.6, 1.4) }}>
+        <HoloRings size={280} color={accent}   style={{ position: 'absolute', bottom: -80, left: -80, opacity: 0.46 }} />
+        <HoloRings size={190} color="#A040E0"  style={{ position: 'absolute', top: -55, right: -55, opacity: 0.38 }} />
+        <HoloRings size={130} color={secondary} style={{ position: 'absolute', top: '40%', right: -40, opacity: 0.30 }} />
+      </div>
+
+      {/* Scan line */}
+      <div style={{ position: 'fixed', inset: 0, zIndex: 2, pointerEvents: 'none', overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', left: 0, right: 0, height: 2, background: `linear-gradient(90deg, transparent 0%, ${accent}44 10%, ${accent}cc 30%, ${accent} 50%, ${accent}cc 70%, ${accent}44 90%, transparent 100%)`, boxShadow: `0 0 12px ${accent}66`, filter: 'blur(0.5px)', animation: 'prismatic-scan 3s cubic-bezier(0.4,0,0.6,1) 0.2s 1 forwards' }} />
+      </div>
+
+      <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100dvh', position: 'relative', zIndex: 3, paddingBottom: 'calc(env(safe-area-inset-bottom) + 88px)' }}>
+
+        {/* Header */}
+        <div style={{
+          position: 'sticky', top: 0, zIndex: 20,
+          padding: 'calc(env(safe-area-inset-top) + 10px) 16px 12px',
+          background: 'linear-gradient(to bottom, rgba(8,7,6,0.98) 0%, rgba(13,12,11,0.94) 100%)',
+          backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)',
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          boxShadow: '0 4px 32px rgba(0,0,0,0.55)',
+          overflow: 'hidden', animation: ph(0, 0.9),
         }}>
-          ← Back
-        </button>
-      </div>
-
-      <div style={{position:"relative",zIndex:2,minHeight:"100vh",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:`calc(env(safe-area-inset-top) + 2rem) 1.25rem calc(env(safe-area-inset-bottom) + 5.5rem)`}}>
-        <div style={{textAlign:"center",marginBottom:"2.5rem"}}>
-          <div style={{fontSize:"0.65rem",letterSpacing:"0.35em",textTransform:"uppercase",color:"rgba(160,130,90,0.7)",marginBottom:"0.8rem"}}>Business Ledger</div>
-          <h1 style={{fontSize:"2.6rem",fontWeight:"normal",margin:0,letterSpacing:"0.12em",background:"linear-gradient(135deg,#e07020 0%,#c9a96e 45%,#00e5ff 100%)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>LEDGER</h1>
-          <div style={{fontSize:"0.62rem",letterSpacing:"0.25em",textTransform:"uppercase",color:"rgba(120,90,55,0.7)",marginTop:"0.6rem"}}>{currentFY()}</div>
+          {/* Holo bottom border */}
+          <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 1.5, background: `linear-gradient(90deg, transparent 0%, ${accent}cc 30%, ${accent} 50%, ${accent}cc 70%, transparent 100%)`, backgroundSize: '300% 100%', animation: 'holo-border 4s linear infinite' }} />
+          <button onClick={onBack} style={{ background: 'none', border: `1px solid ${accent}40`, borderRadius: 8, color: accent, cursor: 'pointer', fontFamily: '"DM Mono", monospace', fontSize: '0.65rem', padding: '0.3rem 0.7rem', letterSpacing: '0.1em' }}>← BACK</button>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.42rem', color: `${accent}70`, letterSpacing: '0.22em', textTransform: 'uppercase', marginBottom: 2 }}>■ Ledger</div>
+            <h1 style={{ fontFamily: '"Playfair Display", serif', fontStyle: 'italic', fontWeight: 600, fontSize: '1.05rem', color: accent, margin: 0, textShadow: `0 0 20px ${accent}50` }}>{activeBiz}</h1>
+          </div>
+          <div style={{ display: 'flex', gap: 6 }}>
+            <button onClick={onToggleCat} style={{ background: `${accent}15`, border: `1px solid ${accent}35`, borderRadius: 6, color: `${accent}CC`, cursor: 'pointer', fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', padding: '0.28rem 0.55rem', letterSpacing: '0.08em' }}>⚙</button>
+            <button onClick={onExport} style={{ background: `${accent}15`, border: `1px solid ${accent}35`, borderRadius: 6, color: `${accent}CC`, cursor: 'pointer', fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', padding: '0.28rem 0.55rem', letterSpacing: '0.08em' }}>CSV↓</button>
+            <button onClick={onAdd} style={{ background: `linear-gradient(135deg, ${accent}40, ${accent}22)`, border: `1px solid ${accent}70`, borderRadius: 6, color: accent, cursor: 'pointer', fontFamily: '"DM Mono", monospace', fontSize: '0.65rem', padding: '0.3rem 0.7rem', letterSpacing: '0.08em', boxShadow: `0 0 12px ${accent}30` }}>+ Add</button>
+          </div>
         </div>
 
-        <div style={{display:"flex",flexDirection:"column",gap:"1rem",width:"100%",maxWidth:"460px"}}>
-          {[["Signal9","s9"],["App Sales","ap"]].map(([biz,id]) => {
-            const th = THEMES[biz], fy = fyTotals(biz);
-            const allI = transactions[biz].filter(tx=>tx.type==="in").reduce((s,tx)=>s+tx.amount,0);
-            const allO = transactions[biz].filter(tx=>tx.type==="out").reduce((s,tx)=>s+tx.amount,0);
-            const isap = id === "ap";
-            return (
-              <button key={biz} onClick={()=>openBiz(biz)} style={{
-                background: isap
-                  ? "linear-gradient(135deg, rgba(4,16,38,0.85) 0%, rgba(2,28,52,0.78) 100%)"
-                  : "linear-gradient(135deg, rgba(52,18,52,0.72) 0%, rgba(28,10,28,0.62) 100%)",
-                border: `1px solid ${isap?"rgba(0,229,255,0.22)":"rgba(160,80,160,0.38)"}`,
-                borderRadius: isap ? "2px" : "6px",
-                padding: "1.25rem",
-                cursor: "pointer",
-                textAlign: "left",
-                color: th.textPrimary,
-                width: "100%",
-                backdropFilter: "blur(14px)",
-                fontFamily: th.font,
-                transition: "border-color 0.2s",
-              }} className={`land-card-${id}`}>
-                <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:"0.85rem"}}>
-                  <div>
-                    <div style={{fontSize:"0.62rem",letterSpacing:isap?"0.25em":"0.15em",textTransform:"uppercase",color:th.textSec,marginBottom:"0.28rem"}}>{isap?"// APP_SALES":"Fine Art Studio"}</div>
-                    <div style={{fontSize:"1.45rem",fontWeight:"normal",letterSpacing:isap?"0.08em":"0.03em"}}>{biz}</div>
-                  </div>
-                  <span style={{color:th.accent,opacity:0.5,fontSize:"1.1rem",marginTop:"0.1rem"}}>{isap?"›_":"↑"}</span>
-                </div>
-                <div style={{display:"flex",gap:"0.7rem",fontSize:"0.78rem",marginBottom:"0.55rem",flexWrap:"wrap",alignItems:"center"}}>
-                  <span style={{color:th.textDim,fontSize:"0.6rem",textTransform:"uppercase",letterSpacing:"0.1em"}}>{isap?"ALL_TIME":"All time"}</span>
-                  <span style={{color:th.incomeText}}>▲ {fmt(allI)}</span>
-                  <span style={{color:th.expenseText}}>▼ {fmt(allO)}</span>
-                  <span style={{color:allI-allO>=0?th.incomeText:th.expenseText,fontWeight:"bold"}}>{fmt(allI-allO)}</span>
-                </div>
-                <div style={{borderTop:`1px solid ${th.border}`,paddingTop:"0.55rem",display:"flex",gap:"0.7rem",fontSize:"0.78rem",flexWrap:"wrap",alignItems:"center"}}>
-                  <span style={{color:th.accent,fontSize:"0.62rem",letterSpacing:"0.1em"}}>{currentFY()}</span>
-                  <span style={{color:th.incomeText}}>▲ {fmt(fy.inn)}</span>
-                  <span style={{color:th.expenseText}}>▼ {fmt(fy.out)}</span>
-                  <span style={{color:fy.net>=0?th.incomeText:th.expenseText}}>{fmt(fy.net)}</span>
-                </div>
-              </button>
-            );
-          })}
+        {/* Summary bar */}
+        <div style={{ display: 'flex', background: 'rgba(13,12,11,0.85)', borderBottom: `1px solid ${accent}25`, backdropFilter: 'blur(8px)', animation: ph(0.2, 0.9) }}>
+          {[['Income', totalIn, secondary], ['Expenses', totalOut, '#FF4D6A'], ['Net', net, net >= 0 ? secondary : '#FF4D6A']].map(([label, val, col], i) => (
+            <div key={label} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '0.75rem 0.4rem', borderRight: i < 2 ? `1px solid ${accent}20` : 'none' }}>
+              <span style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.5rem', letterSpacing: '0.15em', textTransform: 'uppercase', color: `${accent}60`, marginBottom: '0.2rem' }}>{label}</span>
+              <span style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.82rem', fontWeight: 700, color: col, textShadow: `0 0 10px ${col}60` }}>{fmt(val)}</span>
+            </div>
+          ))}
         </div>
-        <div style={{marginTop:"2.5rem",fontSize:"0.62rem",color:"rgba(60,40,20,0.5)",letterSpacing:"0.18em",textTransform:"uppercase"}}>Kirk's Business Tracker</div>
+
+        {/* Cat editor */}
+        {catView && (
+          <CatEditor activeBiz={activeBiz} categories={categories} accent={accent} onExternalAdd={(biz, cat) => onToggleCat(biz, cat, 'add')} onExternalRemove={(biz, cat) => onToggleCat(biz, cat, 'remove')} />
+        )}
+
+        {/* Filters */}
+        <div style={{ background: 'rgba(13,12,11,0.7)', borderBottom: `1px solid ${accent}20`, backdropFilter: 'blur(6px)', animation: ph(0.35, 0.9) }}>
+          <div style={{ display: 'flex' }}>
+            {[['all','All'],['in','▲ Income'],['out','▼ Expenses']].map(([v,l]) => (
+              <button key={v} onClick={() => setFilterType(v)} style={{ flex: 1, background: 'none', border: 'none', borderBottom: `2px solid ${filterType===v ? accent : 'transparent'}`, color: filterType===v ? accent : 'rgba(160,140,120,0.5)', cursor: 'pointer', padding: '0.55rem 0.3rem', fontFamily: '"DM Mono", monospace', fontSize: '0.65rem', letterSpacing: '0.06em', transition: 'color 0.15s' }}>{l}</button>
+            ))}
+          </div>
+          <div style={{ display: 'flex', gap: 6, padding: '0.45rem 0.75rem 0', flexWrap: 'wrap' }}>
+            {[
+              [filterMonth, [['all','All months'], ...months.map(m => [m, new Date(m+'-01').toLocaleDateString('en-AU',{month:'long',year:'numeric'})])], (v) => { setFilterMonth(v); setFilterFY('all'); }],
+              [filterFY, [['all','All FYs'], ...fyears.map(f => [f,f])], (v) => { setFilterFY(v); setFilterMonth('all'); }],
+              [sortBy, [['date_desc','Newest'],['date_asc','Oldest'],['amount_desc','Highest'],['amount_asc','Lowest']], (v) => setSortBy(v)],
+            ].map(([val, opts, handler], i) => (
+              <select key={i} value={val} onChange={e => handler(e.target.value)} style={selectStyle}>
+                {opts.map(([v,l]) => <option key={v} value={v}>{l}</option>)}
+              </select>
+            ))}
+          </div>
+          {/* Search */}
+          <div style={{ display: 'flex', alignItems: 'center', margin: '0.45rem 0.75rem 0.6rem', background: 'rgba(13,12,11,0.9)', border: `1px solid ${accent}28`, borderRadius: 8, padding: '0 0.75rem' }}>
+            <span style={{ color: `${accent}60`, fontSize: '0.9rem', marginRight: '0.5rem' }}>⊕</span>
+            <input style={{ flex: 1, background: 'none', border: 'none', color: '#EDE8E0', fontFamily: '"DM Mono", monospace', fontSize: '0.78rem', padding: '0.45rem 0', outline: 'none' }} placeholder="Search description, category, notes…" value={searchQ} onChange={e => setSearchQ(e.target.value)} />
+            {searchQ && <button onClick={() => setSearchQ('')} style={{ background: 'none', border: 'none', color: `${accent}60`, cursor: 'pointer', fontSize: '1.1rem', padding: 0 }}>×</button>}
+          </div>
+        </div>
+
+        {/* Transaction list */}
+        <div style={{ flex: 1, padding: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+          {filtered.length === 0 ? (
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: `${accent}50`, paddingTop: '4rem', gap: '0.5rem', textAlign: 'center', animation: ph(0.5, 0.8) }}>
+              <div style={{ fontSize: '2rem', opacity: 0.3, marginBottom: '0.5rem' }}>✦</div>
+              <p style={{ margin: 0, fontFamily: '"DM Mono", monospace', fontSize: '0.8rem' }}>No entries match.</p>
+              {bizTxns.length === 0 && <p style={{ margin: 0, fontFamily: '"DM Mono", monospace', fontSize: '0.68rem', opacity: 0.5 }}>Tap + Add to record your first transaction.</p>}
+            </div>
+          ) : filtered.map((tx, i) => (
+            <div key={tx.id} style={{
+              display: 'flex', alignItems: 'center',
+              background: `linear-gradient(135deg, ${tx.type==='in' ? secondary : '#FF4D6A'}12 0%, rgba(13,12,11,0.88) 100%)`,
+              border: `1px solid ${tx.type==='in' ? secondary : '#FF4D6A'}28`,
+              borderRadius: 10, overflow: 'hidden', gap: '0.6rem',
+              backdropFilter: 'blur(8px)',
+              boxShadow: `0 0 20px ${tx.type==='in' ? secondary : '#FF4D6A'}0A`,
+              animation: ph(0.4 + i * 0.04, 0.7, i % 2 === 0 ? 'left' : 'right'),
+              clipPath: 'polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%)',
+            }}>
+              {/* Accent stripe */}
+              <div style={{ width: 4, alignSelf: 'stretch', flexShrink: 0, background: tx.type==='in' ? secondary : '#FF4D6A', boxShadow: `0 0 8px ${tx.type==='in' ? secondary : '#FF4D6A'}80` }} />
+              <div style={{ flex: 1, padding: '0.65rem 0.25rem 0.65rem 0', minWidth: 0 }}>
+                <div style={{ fontFamily: '"Playfair Display", serif', fontSize: '0.88rem', marginBottom: '0.22rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: '#EDE8E0' }}>{tx.description}</div>
+                <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', alignItems: 'center' }}>
+                  <span style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.58rem', background: `${accent}15`, color: `${accent}AA`, padding: '0.1rem 0.4rem', borderRadius: 8, border: `1px solid ${accent}25` }}>{tx.category}</span>
+                  <span style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.58rem', color: 'rgba(160,140,120,0.6)' }}>{fmtDate(tx.date)}</span>
+                  {tx.notes && <span style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.58rem', color: 'rgba(160,140,120,0.5)', fontStyle: 'italic' }}>📓 {tx.notes.length > 22 ? tx.notes.slice(0,22)+'…' : tx.notes}</span>}
+                </div>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.3rem', padding: '0.6rem 0.65rem 0.6rem 0', flexShrink: 0 }}>
+                <div style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.88rem', fontWeight: 700, color: tx.type==='in' ? secondary : '#FF4D6A', textShadow: `0 0 10px ${tx.type==='in' ? secondary : '#FF4D6A'}70`, whiteSpace: 'nowrap' }}>{tx.type==='in' ? '+' : '−'}{fmt(tx.amount)}</div>
+                <div style={{ display: 'flex', gap: '0.4rem' }}>
+                  <button onClick={() => onEdit(tx)} style={{ background: 'none', border: 'none', color: `${accent}70`, cursor: 'pointer', fontSize: '0.85rem', padding: 0 }}>✎</button>
+                  <button onClick={() => setConfirmDel(tx.id)} style={{ background: 'none', border: 'none', color: 'rgba(255,77,106,0.5)', cursor: 'pointer', fontSize: '1rem', padding: 0, lineHeight: 1 }}>×</button>
+                </div>
+              </div>
+            </div>
+          ))}
+          {filtered.length > 0 && (
+            <div style={{ textAlign: 'center', fontFamily: '"DM Mono", monospace', fontSize: '0.58rem', color: `${accent}45`, padding: '0.5rem', letterSpacing: '0.1em' }}>
+              {filtered.length} entr{filtered.length === 1 ? 'y' : 'ies'}{(searchQ || filterType !== 'all' || filterMonth !== 'all' || filterFY !== 'all') ? ' (filtered)' : ''}
+            </div>
+          )}
+        </div>
       </div>
+
+      {/* Delete confirm */}
+      {confirmDel && (
+        <div onClick={() => setConfirmDel(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100, padding: '1rem' }}>
+          <div onClick={e => e.stopPropagation()} style={{ background: 'linear-gradient(135deg, rgba(13,12,11,0.98) 0%, rgba(20,15,12,0.95) 100%)', border: `1px solid ${accent}35`, borderRadius: 14, padding: '2rem 1.5rem', maxWidth: 300, width: '100%', textAlign: 'center', backdropFilter: 'blur(20px)', boxShadow: `0 0 40px rgba(0,0,0,0.8)`, clipPath: 'polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 0 100%)' }}>
+            <div style={{ fontSize: '1.8rem', marginBottom: '0.5rem' }}>⚠</div>
+            <p style={{ fontFamily: '"Playfair Display", serif', fontStyle: 'italic', fontSize: '1.1rem', margin: '0 0 0.4rem', color: '#EDE8E0' }}>Delete entry?</p>
+            <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.72rem', color: 'rgba(160,140,120,0.7)', margin: '0 0 1.5rem' }}>This cannot be undone.</p>
+            <div style={{ display: 'flex', gap: '0.75rem' }}>
+              <button onClick={() => setConfirmDel(null)} style={{ flex: 1, background: `${accent}15`, border: `1px solid ${accent}30`, color: `${accent}AA`, fontFamily: '"DM Mono", monospace', fontSize: '0.82rem', padding: '0.65rem', borderRadius: 8, cursor: 'pointer' }}>Cancel</button>
+              <button onClick={() => { onDelete(confirmDel); setConfirmDel(null); }} style={{ flex: 1, background: 'rgba(255,77,106,0.1)', border: '1px solid rgba(255,77,106,0.45)', color: '#FF4D6A', fontFamily: '"DM Mono", monospace', fontSize: '0.82rem', padding: '0.65rem', borderRadius: 8, cursor: 'pointer' }}>Delete</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <BottomNav />
     </div>
   );
+}
 
-  // ── INNER SCREENS ─────────────────────────────────────────────────────────
+// ─── CATEGORY EDITOR PANEL ────────────────────────────────────────────────────
 
-  const Bg = isAP ? APBackground : S9Background;
+function CatEditor({ activeBiz, categories, accent, onExternalAdd, onExternalRemove }) {
+  const [newCat, setNewCat] = useState('');
+  return (
+    <div style={{ background: 'rgba(13,12,11,0.9)', borderBottom: `1px solid ${accent}25`, padding: '0.9rem 1rem', backdropFilter: 'blur(12px)', animation: ph(0, 0.5) }}>
+      <div style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.55rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: accent, marginBottom: '0.65rem' }}>Categories — {activeBiz}</div>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem', marginBottom: '0.65rem' }}>
+        {categories[activeBiz].map(c => (
+          <div key={c} style={{ display: 'flex', alignItems: 'center', background: `${accent}15`, border: `1px solid ${accent}28`, borderRadius: 20, padding: '0.18rem 0.3rem 0.18rem 0.65rem', gap: '0.3rem' }}>
+            <span style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.72rem', color: '#C8BFB5' }}>{c}</span>
+            <button onClick={() => onExternalRemove(activeBiz, c)} style={{ background: 'none', border: 'none', color: `${accent}60`, cursor: 'pointer', fontSize: '1rem', padding: 0, lineHeight: 1 }}>×</button>
+          </div>
+        ))}
+      </div>
+      <div style={{ display: 'flex', gap: '0.5rem' }}>
+        <input style={{ flex: 1, background: 'rgba(13,12,11,0.9)', border: `1px solid ${accent}28`, borderRadius: 6, color: '#EDE8E0', fontFamily: '"DM Mono", monospace', fontSize: '0.78rem', padding: '0.45rem 0.7rem', outline: 'none', colorScheme: 'dark' }} placeholder="New category…" value={newCat} onChange={e => setNewCat(e.target.value)} onKeyDown={e => e.key === 'Enter' && (onExternalAdd(activeBiz, newCat), setNewCat(''))} />
+        <button onClick={() => { onExternalAdd(activeBiz, newCat); setNewCat(''); }} style={{ background: `${accent}20`, border: `1px solid ${accent}45`, color: accent, cursor: 'pointer', padding: '0.45rem 0.9rem', borderRadius: 6, fontFamily: '"DM Mono", monospace', fontSize: '0.78rem' }}>Add</button>
+      </div>
+    </div>
+  );
+}
+
+// ─── FORM VIEW ────────────────────────────────────────────────────────────────
+
+function FormView({ activeBiz, categories, editingId, onBack, onSubmit, onDeleteEdit, initialForm }) {
+  const accent = BIZ_ACCENT[activeBiz];
+  const secondary = BIZ_SECONDARY[activeBiz];
+  const [form, setForm] = useState(initialForm);
+  const [formError, setFormError] = useState('');
+
+  const submit = () => {
+    if (!form.description.trim()) return setFormError('Please add a description.');
+    const amt = parseFloat(form.amount);
+    if (!form.amount || isNaN(amt) || amt <= 0) return setFormError('Please enter a valid amount.');
+    if (!form.date) return setFormError('Please select a date.');
+    onSubmit({ id: editingId || Date.now(), type: form.type, description: form.description.trim(), category: form.category, amount: amt, date: form.date, notes: form.notes.trim() });
+  };
+
+  const inputStyle = {
+    background: 'rgba(13,12,11,0.9)', border: `1px solid ${accent}30`,
+    borderRadius: 8, color: '#EDE8E0',
+    fontFamily: '"DM Mono", monospace', fontSize: '0.85rem',
+    padding: '0.6rem 0.8rem', outline: 'none', width: '100%', boxSizing: 'border-box', colorScheme: 'dark',
+  };
+  const labelStyle = { fontFamily: '"DM Mono", monospace', fontSize: '0.58rem', letterSpacing: '0.18em', textTransform: 'uppercase', color: `${accent}80`, marginTop: '1rem', marginBottom: '0.35rem', display: 'block' };
 
   return (
-    <div className={leaving ? "ledger-leave" : "ledger-enter"} style={{minHeight:"100vh",background:t.bg,fontFamily:t.font,color:t.textPrimary,display:"flex",flexDirection:"column",position:"relative"}}>
+    <div style={{ minHeight: '100dvh', background: '#0D0C0B', color: '#EDE8E0', display: 'flex', flexDirection: 'column', position: 'relative' }}>
       <style>{globalCSS}</style>
-      <Bg/>
+      <LedgerBg accent={accent} />
 
-      {view === "list" && (
-        <div style={{display:"flex",flexDirection:"column",minHeight:"100vh",position:"relative",zIndex:1,paddingBottom:"calc(env(safe-area-inset-bottom) + 72px)"}}>
-          <TopBar t={t}
-            left={<BackBtn t={t} onClick={()=>setView("landing")}/>}
-            center={isAP ? activeBiz.toUpperCase().replace(" ","_") : activeBiz}
-            right={
-              <div style={{display:"flex",gap:"0.4rem"}}>
-                <Btn t={t} onClick={()=>setCatView(!catView)}>{isAP?"[CFG]":"⚙"}</Btn>
-                <Btn t={t} onClick={()=>exportCSV(bizTxns,activeBiz)}>{isAP?"[CSV↓]":"↓ CSV"}</Btn>
-                <Btn t={t} onClick={openAdd} style={{background:t.accentDim}}>{isAP?"[+_NEW]":"+ Add"}</Btn>
-              </div>
-            }
-          />
-          {isAP && <div style={{padding:"0.28rem 1rem",background:"rgba(0,229,255,0.04)",borderBottom:`1px solid ${t.border}`,fontSize:"0.62rem",color:t.textDim,letterSpacing:"0.15em",fontFamily:t.font}}>SYS:LEDGER // MODULE:APP_SALES // STATUS:ACTIVE</div>}
-          {!isAP && <div style={{height:"2px",background:"linear-gradient(to right,transparent,rgba(196,90,26,0.5),rgba(122,184,208,0.25),transparent)"}}/>}
+      <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100dvh', position: 'relative', zIndex: 3, paddingBottom: 'calc(env(safe-area-inset-bottom) + 88px)' }}>
 
-          {catView && (
-            <div style={{background:t.surfaceStrong,borderBottom:`1px solid ${t.border}`,padding:"1rem",backdropFilter:"blur(12px)"}}>
-              <div style={{fontSize:"0.65rem",letterSpacing:"0.2em",textTransform:"uppercase",color:t.accent,marginBottom:"0.75rem"}}>{isAP?"// CATEGORIES":"Categories"} — {activeBiz}</div>
-              <div style={{display:"flex",flexWrap:"wrap",gap:"0.4rem",marginBottom:"0.75rem"}}>
-                {categories[activeBiz].map(c => (
-                  <div key={c} style={{display:"flex",alignItems:"center",background:t.accentDim,border:`1px solid ${t.border}`,borderRadius:isAP?"2px":"20px",padding:"0.18rem 0.3rem 0.18rem 0.65rem",gap:"0.3rem"}}>
-                    <span style={{fontSize:"0.78rem",color:t.textSec}}>{c}</span>
-                    <button onClick={()=>removeCat(c)} style={{background:"none",border:"none",color:t.textDim,cursor:"pointer",fontSize:"1rem",padding:0,lineHeight:1,fontFamily:t.font}}>×</button>
-                  </div>
-                ))}
-              </div>
-              <div style={{display:"flex",gap:"0.5rem"}}>
-                <input style={{...inputStyle,flex:1}} placeholder={isAP?"new_category…":"New category…"} value={newCat} onChange={e=>setNewCat(e.target.value)} onKeyDown={e=>e.key==="Enter"&&addCat()}/>
-                <button onClick={addCat} style={{background:t.accentDim,border:`1px solid ${t.accent}`,color:t.accent,cursor:"pointer",padding:"0.5rem 0.9rem",borderRadius:isAP?"2px":"4px",fontFamily:t.font,fontSize:"0.82rem"}}>{isAP?"ADD":"Add"}</button>
-              </div>
-            </div>
-          )}
+        {/* Header */}
+        <div style={{ position: 'sticky', top: 0, zIndex: 20, padding: 'calc(env(safe-area-inset-top) + 10px) 16px 12px', background: 'linear-gradient(to bottom, rgba(8,7,6,0.98) 0%, rgba(13,12,11,0.94) 100%)', backdropFilter: 'blur(24px)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', boxShadow: '0 4px 32px rgba(0,0,0,0.55)', overflow: 'hidden', animation: ph(0, 0.9) }}>
+          <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 1.5, background: `linear-gradient(90deg, transparent 0%, ${accent}cc 30%, ${accent} 50%, ${accent}cc 70%, transparent 100%)`, animation: 'holo-border 4s linear infinite' }} />
+          <button onClick={onBack} style={{ background: 'none', border: `1px solid ${accent}40`, borderRadius: 8, color: accent, cursor: 'pointer', fontFamily: '"DM Mono", monospace', fontSize: '0.65rem', padding: '0.3rem 0.7rem', letterSpacing: '0.1em' }}>← BACK</button>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.42rem', color: `${accent}70`, letterSpacing: '0.22em', textTransform: 'uppercase', marginBottom: 2 }}>■ {activeBiz}</div>
+            <h1 style={{ fontFamily: '"Playfair Display", serif', fontStyle: 'italic', fontWeight: 600, fontSize: '1.05rem', color: accent, margin: 0, textShadow: `0 0 20px ${accent}50` }}>{editingId ? 'Edit Entry' : 'New Entry'}</h1>
+          </div>
+          <div style={{ width: 60 }} />
+        </div>
 
-          <div style={{display:"flex",background:t.surfaceStrong,borderBottom:`1px solid ${t.border}`,backdropFilter:"blur(8px)"}}>
-            {[["Income",totalIn,t.incomeText],["Expenses",totalOut,t.expenseText],["Net",net,net>=0?t.incomeText:t.expenseText]].map(([label,val,col],i) => (
-              <div key={label} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",padding:"0.8rem 0.4rem",borderRight:i<2?`1px solid ${t.border}`:"none"}}>
-                <span style={{fontSize:"0.58rem",letterSpacing:"0.15em",textTransform:"uppercase",color:t.textDim,marginBottom:"0.2rem"}}>{isAP?label.toUpperCase():label}</span>
-                <span style={{fontSize:"0.88rem",color:col}}>{fmt(val)}</span>
-              </div>
+        {/* Form */}
+        <div style={{ padding: '1.25rem 1rem', display: 'flex', flexDirection: 'column', gap: '0.1rem', position: 'relative', zIndex: 1, animation: ph(0.2, 0.9) }}>
+
+          {/* Type toggle */}
+          <div style={{ display: 'flex', gap: '0.6rem', marginBottom: '1rem' }}>
+            {[['in', '▲ Income', secondary], ['out', '▼ Expense', '#FF4D6A']].map(([v, l, col]) => (
+              <button key={v} onClick={() => setForm(f => ({...f, type: v}))} style={{ flex: 1, background: form.type === v ? `${col}18` : 'rgba(13,12,11,0.7)', border: `1px solid ${form.type === v ? col : accent+'28'}`, color: form.type === v ? col : 'rgba(160,140,120,0.6)', padding: '0.7rem', borderRadius: 10, cursor: 'pointer', fontFamily: '"DM Mono", monospace', fontSize: '0.82rem', letterSpacing: '0.06em', transition: 'all 0.15s', boxShadow: form.type === v ? `0 0 16px ${col}30` : 'none' }}>{l}</button>
             ))}
           </div>
 
-          <div style={{background:t.surface,borderBottom:`1px solid ${t.border}`,backdropFilter:"blur(6px)"}}>
-            <div style={{display:"flex"}}>
-              {[["all",isAP?"ALL":"All"],["in",isAP?"▲ INCOME":"▲ Income"],["out",isAP?"▼ EXPENSE":"▼ Expenses"]].map(([v,l]) => (
-                <button key={v} onClick={()=>setFilterType(v)} style={{flex:1,background:"none",border:"none",borderBottom:`2px solid ${filterType===v?t.accent:"transparent"}`,color:filterType===v?t.accent:t.textDim,cursor:"pointer",padding:"0.6rem 0.3rem",fontSize:"0.74rem",letterSpacing:isAP?"0.1em":"0.03em",fontFamily:t.font,transition:"color 0.15s"}}>{l}</button>
-              ))}
-            </div>
-            <div style={{display:"flex",gap:"0.4rem",padding:"0.5rem 0.75rem 0",flexWrap:"wrap"}}>
-              {[
-                [filterMonth,[["all","All months"],...months.map(m=>[m,new Date(m+"-01").toLocaleDateString("en-AU",{month:"long",year:"numeric"})])],(v)=>{setFilterMonth(v);setFilterFY("all");}],
-                [filterFY,[["all","All FYs"],...fyears.map(f=>[f,f])],(v)=>{setFilterFY(v);setFilterMonth("all");}],
-                [sortBy,[["date_desc",isAP?"DATE↓":"Newest"],["date_asc",isAP?"DATE↑":"Oldest"],["amount_desc",isAP?"AMT↓":"Highest"],["amount_asc",isAP?"AMT↑":"Lowest"]],(v)=>setSortBy(v)],
-              ].map(([val,opts,handler],i) => (
-                <select key={i} value={val} onChange={e=>handler(e.target.value)} style={{...inputStyle,flex:1,minWidth:"80px",fontSize:"0.7rem",padding:"0.32rem 0.45rem"}}>
-                  {opts.map(([v,l]) => <option key={v} value={v}>{l}</option>)}
-                </select>
-              ))}
-            </div>
-            <div style={{display:"flex",alignItems:"center",margin:"0.5rem 0.75rem 0.65rem",background:isAP?"rgba(0,20,40,0.9)":"rgba(12,8,5,0.78)",border:`1px solid ${t.border}`,borderRadius:isAP?"2px":"4px",padding:"0 0.75rem"}}>
-              <span style={{color:t.textDim,fontSize:"1rem",marginRight:"0.5rem"}}>⊕</span>
-              <input style={{flex:1,background:"none",border:"none",color:t.textPrimary,fontFamily:t.font,fontSize:"0.82rem",padding:"0.5rem 0",outline:"none"}} placeholder={isAP?"SEARCH_RECORDS…":"Search description, category, notes…"} value={searchQ} onChange={e=>setSearchQ(e.target.value)}/>
-              {searchQ && <button onClick={()=>setSearchQ("")} style={{background:"none",border:"none",color:t.textDim,cursor:"pointer",fontSize:"1.1rem",padding:0,fontFamily:t.font}}>×</button>}
-            </div>
+          <label style={labelStyle}>Description</label>
+          <input style={inputStyle} placeholder="e.g. Harvest Market print sale" value={form.description} onChange={e => setForm(f => ({...f, description: e.target.value}))} />
+
+          <label style={labelStyle}>Category</label>
+          <select style={inputStyle} value={form.category} onChange={e => setForm(f => ({...f, category: e.target.value}))}>
+            {categories[activeBiz].map(c => <option key={c}>{c}</option>)}
+          </select>
+
+          <label style={labelStyle}>Amount (AUD)</label>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <span style={{ fontFamily: '"DM Mono", monospace', color: accent, fontSize: '1.1rem' }}>$</span>
+            <input style={{ ...inputStyle, flex: 1 }} type="number" min="0" step="0.01" placeholder="0.00" value={form.amount} onChange={e => setForm(f => ({...f, amount: e.target.value}))} />
           </div>
 
-          <div style={{flex:1,padding:"0.75rem",display:"flex",flexDirection:"column",gap:"0.5rem",position:"relative",zIndex:1}}>
-            {filtered.length === 0 ? (
-              <div style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",color:t.textDim,paddingTop:"4rem",gap:"0.4rem",textAlign:"center"}}>
-                <div style={{fontSize:"1.8rem",marginBottom:"0.5rem",opacity:0.3}}>{isAP?"[ ]":"✦"}</div>
-                <p style={{margin:0}}>{isAP?"NO_RECORDS_FOUND":"No entries match."}</p>
-                {bizTxns.length === 0 && <p style={{margin:0,fontSize:"0.75rem",opacity:0.5}}>{isAP?"PRESS [+_NEW] TO INITIALISE":"Tap + Add to record your first transaction."}</p>}
-              </div>
-            ) : filtered.map(tx => (
-              <div key={tx.id} style={{display:"flex",alignItems:"center",background:isAP?"rgba(4,16,32,0.85)":"rgba(14,9,6,0.72)",border:`1px solid ${t.border}`,borderRadius:isAP?"2px":"5px",overflow:"hidden",gap:"0.6rem",backdropFilter:"blur(4px)"}} className="txn-card">
-                <div style={{width:"4px",alignSelf:"stretch",flexShrink:0,background:tx.type==="in"?t.income:t.expense}}/>
-                <div style={{flex:1,padding:"0.65rem 0.25rem 0.65rem 0",minWidth:0}}>
-                  <div style={{fontSize:"0.87rem",marginBottom:"0.22rem",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{isAP?tx.description.toUpperCase():tx.description}</div>
-                  <div style={{display:"flex",gap:"0.4rem",flexWrap:"wrap",alignItems:"center"}}>
-                    <span style={{fontSize:"0.63rem",background:isAP?"rgba(0,229,255,0.07)":"rgba(196,90,26,0.12)",color:t.textSec,padding:"0.1rem 0.42rem",borderRadius:isAP?"2px":"10px",border:`1px solid ${t.border}`}}>{tx.category}</span>
-                    <span style={{fontSize:"0.63rem",color:t.textDim}}>{fmtDate(tx.date)}</span>
-                    {tx.notes && <span style={{fontSize:"0.63rem",color:t.textDim,fontStyle:isAP?"normal":"italic"}} title={tx.notes}>{isAP?"[NOTE]":"📓"} {tx.notes.length>25?tx.notes.slice(0,25)+"…":tx.notes}</span>}
-                  </div>
-                </div>
-                <div style={{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:"0.32rem",padding:"0.6rem 0.65rem 0.6rem 0",flexShrink:0}}>
-                  <div style={{fontSize:"0.87rem",color:tx.type==="in"?t.incomeText:t.expenseText,whiteSpace:"nowrap"}}>{tx.type==="in"?"+":"−"}{fmt(tx.amount)}</div>
-                  <div style={{display:"flex",gap:"0.4rem"}}>
-                    <button onClick={()=>openEdit(tx)} style={{background:"none",border:"none",color:t.textDim,cursor:"pointer",fontSize:"0.85rem",padding:0,fontFamily:t.font}} title="Edit">{isAP?"[✎]":"✎"}</button>
-                    <button onClick={()=>setConfirmDel(tx.id)} style={{background:"none",border:"none",color:t.textDim,cursor:"pointer",fontSize:"1rem",padding:0,lineHeight:1,fontFamily:t.font}} title="Delete">×</button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-          {filtered.length > 0 && (
-            <div style={{textAlign:"center",fontSize:"0.65rem",color:t.textDim,padding:"0.5rem",letterSpacing:"0.08em",position:"relative",zIndex:1}}>
-              {filtered.length} {isAP?"RECORD":"entr"}{filtered.length===1?(isAP?"":"y"):(isAP?"S":"ies")}{searchQ||filterType!=="all"||filterMonth!=="all"||filterFY!=="all"?" (filtered)":""}
-            </div>
+          <label style={labelStyle}>Date</label>
+          <input style={inputStyle} type="date" value={form.date} onChange={e => setForm(f => ({...f, date: e.target.value}))} />
 
+          <label style={labelStyle}>Notes <span style={{ color: `${accent}50`, textTransform: 'none', letterSpacing: 0, fontSize: '0.58rem' }}>(optional)</span></label>
+          <textarea style={{ ...inputStyle, resize: 'vertical', fontFamily: '"DM Mono", monospace' }} rows={3} placeholder="Invoice number, client name, context…" value={form.notes} onChange={e => setForm(f => ({...f, notes: e.target.value}))} />
+
+          {formError && <p style={{ fontFamily: '"DM Mono", monospace', color: '#FF4D6A', fontSize: '0.75rem', margin: '0.4rem 0 0' }}>{formError}</p>}
+
+          <button onClick={submit} style={{ marginTop: '1.5rem', background: `linear-gradient(135deg, ${accent}40, ${accent}28)`, border: `1px solid ${accent}70`, borderRadius: 10, color: accent, fontFamily: '"Playfair Display", serif', fontStyle: 'italic', fontSize: '1rem', letterSpacing: '0.04em', padding: '0.85rem', cursor: 'pointer', fontWeight: 600, boxShadow: `0 0 24px ${accent}35`, textShadow: `0 0 12px ${accent}80` }}>
+            {editingId ? 'Save Changes' : 'Save Entry'}
+          </button>
+          {editingId && (
+            <button onClick={onDeleteEdit} style={{ marginTop: '0.5rem', background: 'none', border: '1px solid rgba(255,77,106,0.25)', borderRadius: 10, color: 'rgba(255,77,106,0.7)', fontFamily: '"DM Mono", monospace', fontSize: '0.78rem', padding: '0.65rem', cursor: 'pointer' }}>Delete this entry</button>
           )}
         </div>
-      )}
+      </div>
 
-      {view === "form" && (
-        <div style={{display:"flex",flexDirection:"column",minHeight:"100vh",position:"relative",zIndex:1,paddingBottom:"calc(env(safe-area-inset-bottom) + 72px)"}}>
-          <TopBar t={t}
-            left={<BackBtn t={t} onClick={()=>setView("list")}/>}
-            center={isAP?(editingId?"EDIT_RECORD":"NEW_RECORD"):(editingId?"Edit Entry":"New Entry")}
-            right={<span style={{fontSize:"0.68rem",color:t.textDim,letterSpacing:"0.1em"}}>{activeBiz}</span>}
-          />
-          {isAP && <div style={{padding:"0.28rem 1rem",background:"rgba(0,229,255,0.04)",borderBottom:`1px solid ${t.border}`,fontSize:"0.62rem",color:t.textDim,letterSpacing:"0.15em"}}>INPUT_MODE // AWAITING_DATA_ENTRY</div>}
-          {!isAP && <div style={{height:"2px",background:"linear-gradient(to right,transparent,rgba(196,90,26,0.5),rgba(122,184,208,0.25),transparent)"}}/>}
-          <div style={{padding:"1.25rem 1rem",display:"flex",flexDirection:"column",gap:"0.2rem",position:"relative",zIndex:1}}>
-            <div style={{display:"flex",gap:"0.6rem",marginBottom:"1rem"}}>
-              {[["in",isAP?"▲ INCOMING":"▲ Incoming"],["out",isAP?"▼ OUTGOING":"▼ Outgoing"]].map(([v,l]) => (
-                <button key={v} onClick={()=>setForm(f=>({...f,type:v}))} style={{flex:1,background:form.type===v?(v==="in"?t.incomeActive.background:t.expenseActive.background):t.accentDim,border:form.type===v?(v==="in"?t.incomeActive.border:t.expenseActive.border):`1px solid ${t.border}`,color:form.type===v?(v==="in"?t.incomeText:t.expenseText):t.textSec,padding:"0.7rem",borderRadius:isAP?"2px":"5px",cursor:"pointer",fontFamily:t.font,fontSize:"0.85rem",letterSpacing:isAP?"0.1em":"0",transition:"all 0.15s"}}>{l}</button>
-              ))}
-            </div>
-            <label style={labelStyle}>{isAP?"DESCRIPTION":"Description"}</label>
-            <input style={inputStyle} placeholder={isAP?"e.g. APP_LICENSE_SALE":"e.g. Harvest Market print sale"} value={form.description} onChange={e=>setForm(f=>({...f,description:e.target.value}))}/>
-            <label style={labelStyle}>{isAP?"CATEGORY":"Category"}</label>
-            <select style={inputStyle} value={form.category} onChange={e=>setForm(f=>({...f,category:e.target.value}))}>
-              {categories[activeBiz].map(c => <option key={c}>{c}</option>)}
-            </select>
-            <label style={labelStyle}>{isAP?"AMOUNT_AUD":"Amount (AUD)"}</label>
-            <div style={{display:"flex",alignItems:"center",gap:"0.5rem"}}>
-              <span style={{color:t.accent,fontSize:"1rem"}}>$</span>
-              <input style={{...inputStyle,flex:1}} type="number" min="0" step="0.01" placeholder="0.00" value={form.amount} onChange={e=>setForm(f=>({...f,amount:e.target.value}))}/>
-            </div>
-            <label style={labelStyle}>{isAP?"DATE":"Date"}</label>
-            <input style={inputStyle} type="date" value={form.date} onChange={e=>setForm(f=>({...f,date:e.target.value}))}/>
-            <label style={labelStyle}>{isAP?"NOTES // OPTIONAL":"Notes"} {!isAP&&<span style={{color:t.textDim,textTransform:"none",letterSpacing:0,fontSize:"0.68rem"}}>(optional)</span>}</label>
-            <textarea style={{...inputStyle,resize:"vertical",fontFamily:t.font}} rows={3} placeholder={isAP?"// invoice_ref, client_id, context…":"Invoice number, client name, context…"} value={form.notes} onChange={e=>setForm(f=>({...f,notes:e.target.value}))}/>
-            {formError && <p style={{color:t.expenseText,fontSize:"0.78rem",margin:"0.4rem 0 0"}}>{formError}</p>}
-            <button onClick={submitForm} style={{marginTop:"1.5rem",background:t.accent,border:"none",borderRadius:isAP?"2px":"5px",color:isAP?"#020810":"#0e0a06",fontFamily:t.font,fontSize:"0.92rem",letterSpacing:isAP?"0.15em":"0.04em",padding:"0.82rem",cursor:"pointer",fontWeight:"bold"}}>{isAP?(editingId?"COMMIT_CHANGES":"SAVE_RECORD"):(editingId?"Save Changes":"Save Entry")}</button>
-            {editingId && <button onClick={()=>{setConfirmDel(editingId);setView("list");}} style={{marginTop:"0.5rem",background:"none",border:`1px solid rgba(196,90,26,0.25)`,borderRadius:isAP?"2px":"5px",color:isAP?"#ff4d6a":"#8a4020",fontFamily:t.font,fontSize:"0.82rem",padding:"0.65rem",cursor:"pointer"}}>{isAP?"DELETE_RECORD":"Delete this entry"}</button>}
-          </div>
-        </div>
-      )}
-
-      {confirmDel && (
-        <div onClick={()=>setConfirmDel(null)} style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.82)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:100,padding:"1rem"}}>
-          <div onClick={e=>e.stopPropagation()} style={{background:isAP?"#040f20":"#110d0a",border:`1px solid ${isAP?"rgba(255,77,106,0.4)":"rgba(196,90,26,0.3)"}`,borderRadius:isAP?"2px":"8px",padding:"2rem 1.5rem",maxWidth:"300px",width:"100%",textAlign:"center",backdropFilter:"blur(16px)"}}>
-            <div style={{fontSize:"1.5rem",color:t.accent,marginBottom:"0.5rem"}}>{isAP?"⚠_":"⚠"}</div>
-            <p style={{fontSize:"1rem",margin:"0 0 0.4rem",color:t.textPrimary,letterSpacing:isAP?"0.1em":"0"}}>{isAP?"CONFIRM_DELETE":"Delete entry?"}</p>
-            <p style={{fontSize:"0.78rem",color:t.textSec,margin:"0 0 1.5rem"}}>{isAP?"ACTION_IRREVERSIBLE":"This cannot be undone."}</p>
-            <div style={{display:"flex",gap:"0.75rem"}}>
-              <button onClick={()=>setConfirmDel(null)} style={{flex:1,background:t.accentDim,border:`1px solid ${t.border}`,color:t.textSec,fontFamily:t.font,fontSize:"0.88rem",padding:"0.65rem",borderRadius:isAP?"2px":"5px",cursor:"pointer"}}>{isAP?"[CANCEL]":"Cancel"}</button>
-              <button onClick={()=>deleteEntry(confirmDel)} style={{flex:1,background:isAP?"rgba(255,77,106,0.1)":"rgba(196,90,26,0.1)",border:`1px solid ${isAP?"rgba(255,77,106,0.5)":"rgba(196,90,26,0.4)"}`,color:isAP?"#ff4d6a":"#e08040",fontFamily:t.font,fontSize:"0.88rem",padding:"0.65rem",borderRadius:isAP?"2px":"5px",cursor:"pointer"}}>{isAP?"[DELETE]":"Delete"}</button>
-            </div>
-          </div>
-        </div>
-      )}
       <BottomNav />
     </div>
+  );
+}
+
+// ─── MAIN CONTROLLER ──────────────────────────────────────────────────────────
+
+export default function Ledger() {
+  const navigate = useNavigate();
+  const [leaving, setLeaving] = useState(false);
+
+  function goBack() { setLeaving(true); setTimeout(() => navigate(-1), 280); }
+
+  const saved = loadData();
+  const [transactions, setTransactions] = useState(saved?.transactions || { Signal9: [], 'App Sales': [] });
+  const [categories, setCategories]     = useState(saved?.categories   || DEFAULT_CATEGORIES);
+  const [view, setView]                 = useState('landing');
+  const [activeBiz, setActiveBiz]       = useState(null);
+  const [editingId, setEditingId]       = useState(null);
+  const [catView, setCatView]           = useState(false);
+  const [initialForm, setInitialForm]   = useState(null);
+
+  useEffect(() => { saveData({ transactions, categories }); }, [transactions, categories]);
+
+  const openBiz  = (biz) => { setActiveBiz(biz); setCatView(false); setView('list'); };
+  const openAdd  = ()    => { setEditingId(null); setInitialForm({ type: 'in', description: '', category: categories[activeBiz][0], amount: '', date: today(), notes: '' }); setView('form'); };
+  const openEdit = (tx)  => { setEditingId(tx.id); setInitialForm({ type: tx.type, description: tx.description, category: tx.category, amount: String(tx.amount), date: tx.date, notes: tx.notes||'' }); setView('form'); };
+
+  const submitForm = (entry) => {
+    setTransactions(prev => ({ ...prev, [activeBiz]: editingId ? prev[activeBiz].map(tx => tx.id === editingId ? entry : tx) : [entry, ...prev[activeBiz]] }));
+    setView('list');
+  };
+  const deleteEntry = (id) => { setTransactions(prev => ({ ...prev, [activeBiz]: prev[activeBiz].filter(tx => tx.id !== id) })); };
+
+  const handleCatToggle = (biz, cat, action) => {
+    if (action === 'add') {
+      const c = cat.trim(); if (!c || categories[biz].includes(c)) return;
+      setCategories(prev => ({ ...prev, [biz]: [...prev[biz], c] }));
+    } else {
+      if (categories[biz].length <= 1) return;
+      setCategories(prev => ({ ...prev, [biz]: prev[biz].filter(c => c !== cat) }));
+    }
+  };
+
+  if (view === 'landing') return <LandingView transactions={transactions} onOpen={openBiz} onBack={goBack} />;
+
+  if (view === 'form') return (
+    <FormView
+      activeBiz={activeBiz}
+      categories={categories}
+      editingId={editingId}
+      initialForm={initialForm}
+      onBack={() => setView('list')}
+      onSubmit={submitForm}
+      onDeleteEdit={() => { deleteEntry(editingId); setView('list'); }}
+    />
+  );
+
+  return (
+    <ListView
+      activeBiz={activeBiz}
+      transactions={transactions}
+      categories={categories}
+      catView={catView}
+      onBack={() => setView('landing')}
+      onAdd={openAdd}
+      onEdit={openEdit}
+      onDelete={deleteEntry}
+      onExport={() => exportCSV(transactions[activeBiz], activeBiz)}
+      onToggleCat={(biz, cat, action) => action ? handleCatToggle(biz, cat, action) : setCatView(v => !v)}
+    />
   );
 }
 
 const globalCSS = `
   * { box-sizing: border-box; }
   body { margin: 0; }
-  input::placeholder, textarea::placeholder { color: #3a2818; opacity: 1; }
+  input::placeholder, textarea::placeholder { color: rgba(90,70,50,0.5); opacity: 1; }
   input:focus, select:focus, textarea:focus { outline: none; }
-  .land-card-s9:hover { border-color: rgba(200,100,200,0.65) !important; }
-  .land-card-ap:hover { border-color: rgba(0,229,255,0.5) !important; }
-  .txn-card:hover { border-color: rgba(196,90,26,0.4) !important; }
   input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.4); }
   select option { background: #0e0a06; }
   textarea { font-family: inherit; }
   ::-webkit-scrollbar { width: 4px; }
   ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: rgba(196,90,26,0.3); border-radius: 2px; }
-
-  @keyframes ledgerFadeIn {
-    from { opacity: 0; transform: translateY(14px) scale(0.985); }
-    to   { opacity: 1; transform: translateY(0)    scale(1); }
-  }
-  @keyframes ledgerFadeOut {
-    from { opacity: 1; transform: translateY(0)     scale(1); }
-    to   { opacity: 0; transform: translateY(-10px) scale(0.99); }
-  }
-  .ledger-enter  { animation: ledgerFadeIn  0.38s cubic-bezier(0.22,0.8,0.36,1) both; }
-  .ledger-leave  { animation: ledgerFadeOut 0.28s cubic-bezier(0.4,0,1,1) both; }
+  ::-webkit-scrollbar-thumb { background: rgba(196,82,42,0.3); border-radius: 2px; }
 `;

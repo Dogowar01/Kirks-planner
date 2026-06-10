@@ -1,6 +1,6 @@
 import HoloRings from './HoloRings'
 
-export default function SectionShell({ accent, bgImage, children, className = '' }) {
+export default function SectionShell({ accent, bgImage, children, className = '', index = 0 }) {
   return (
     <div
       className={className}
@@ -148,7 +148,11 @@ export default function SectionShell({ accent, bgImage, children, className = ''
       }} />
 
       {/* Content */}
-      <div style={{ position: 'relative', zIndex: 2, paddingTop: 'max(env(safe-area-inset-top), 12px)' }}>
+      <div style={{
+        position: 'relative', zIndex: 2,
+        paddingTop: 'max(env(safe-area-inset-top), 12px)',
+        animation: `phase-in 0.85s cubic-bezier(0.22,1,0.36,1) ${0.1 + index * 0.25}s both`,
+      }}>
         {children}
       </div>
     </div>
