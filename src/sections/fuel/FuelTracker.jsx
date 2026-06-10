@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ChevronLeft, Plus, Download, Upload, Fuel, Zap, TrendingDown, TrendingUp } from 'lucide-react'
-import BottomNav from '../../components/BottomNav'
+import { Plus, Download, Upload, Fuel, Zap, TrendingDown, TrendingUp } from 'lucide-react'
+import { LayoutGrid } from 'lucide-react'
 import HoloRings from '../../components/HoloRings'
 
 // ── Storage ───────────────────────────────────────────────────────────────────
@@ -690,7 +690,7 @@ export default function FuelTracker() {
       {/* Toast */}
       {toast && (
         <div style={{
-          position: 'fixed', bottom: 'calc(env(safe-area-inset-bottom) + 88px)',
+          position: 'fixed', bottom: 'calc(env(safe-area-inset-bottom) + 1.5rem)',
           left: '50%', transform: 'translateX(-50%)', zIndex: 300, whiteSpace: 'nowrap',
           background: 'rgba(10,9,8,0.95)', borderRadius: 6, padding: '10px 18px',
           border: '0.5px solid rgba(255,183,0,0.4)',
@@ -715,14 +715,15 @@ export default function FuelTracker() {
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         boxShadow: '0 4px 32px rgba(0,0,0,0.6)',
       }}>
-        {/* Left — back */}
-        <button onClick={() => navigate(-1)} style={{
-          background: 'none', border: 'none', cursor: 'pointer',
-          display: 'flex', alignItems: 'center', gap: 6, padding: '6px 0',
-          color: 'rgba(255,183,0,0.6)',
+        {/* Left — hub */}
+        <button onClick={() => navigate('/hub')} style={{
+          display: 'flex', alignItems: 'center', gap: 4,
+          fontFamily: '"DM Mono", monospace', fontSize: '0.44rem', letterSpacing: '0.14em',
+          color: 'rgba(255,183,0,0.7)', background: 'rgba(255,183,0,0.08)',
+          border: '0.5px solid rgba(255,183,0,0.3)', borderRadius: 6,
+          padding: '5px 9px', cursor: 'pointer', textTransform: 'uppercase', flexShrink: 0,
         }}>
-          <ChevronLeft size={16} strokeWidth={1.5} />
-          <span style={{ fontFamily: '"DM Mono"', fontSize: '0.55rem', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Back</span>
+          <LayoutGrid size={11} strokeWidth={1.5} />HUB
         </button>
 
         {/* Center — title */}
@@ -788,7 +789,6 @@ export default function FuelTracker() {
         />
       )}
 
-      <BottomNav />
     </div>
   )
 }
