@@ -239,7 +239,9 @@ export default function Subscriptions() {
         </Modal>
       )}
 
-      <ConfirmDialog open={!!deleteId} message="Delete this subscription?" onConfirm={() => { deleteSubscription(deleteId); setDeleteId(null) }} onCancel={() => setDeleteId(null)} accent={ACCENT} />
+      {deleteId && (
+        <ConfirmDialog message="Delete this subscription?" onConfirm={() => { deleteSubscription(deleteId); setDeleteId(null) }} onCancel={() => setDeleteId(null)} />
+      )}
     </SectionShell>
   )
 }
