@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ChevronLeft, Plus, Download, Upload, Fuel, Zap, TrendingDown, TrendingUp } from 'lucide-react'
 import BottomNav from '../../components/BottomNav'
+import HoloRings from '../../components/HoloRings'
 
 // ── Storage ───────────────────────────────────────────────────────────────────
 
@@ -664,6 +665,13 @@ export default function FuelTracker() {
       fontFamily: '"DM Sans", sans-serif',
       position: 'relative',
     }}>
+
+      {/* Holo ring clusters */}
+      <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', overflow: 'hidden', zIndex: 0 }}>
+        <HoloRings size={300} color="#FFB700" style={{ position: 'absolute', bottom: -100, left: -100, opacity: 0.22 }} />
+        <HoloRings size={180} color="#00C8FF" style={{ position: 'absolute', top: -50, right: -50, opacity: 0.2 }} />
+        <HoloRings size={130} color="#A040E0" style={{ position: 'absolute', top: '45%', right: -45, opacity: 0.16 }} />
+      </div>
 
       {/* Background grid + scan */}
       <div style={{

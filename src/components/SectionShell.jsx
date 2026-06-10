@@ -1,3 +1,5 @@
+import HoloRings from './HoloRings'
+
 export default function SectionShell({ accent, bgImage, children, className = '' }) {
   return (
     <div
@@ -109,6 +111,22 @@ export default function SectionShell({ accent, bgImage, children, className = ''
           <div style={{ position: 'absolute', top: 0, bottom: 0, [h]: 0, width: 1, background: `${accent}80` }} />
         </div>
       ))}
+
+      {/* Holographic ring clusters — fixed viewport, partially cropped */}
+      <div style={{ position: 'fixed', inset: 0, zIndex: 2, pointerEvents: 'none', overflow: 'hidden' }}>
+        {/* Ring cluster 1 — bottom-left, large, accent colour */}
+        <HoloRings size={320} color={accent} style={{
+          position: 'absolute', bottom: -110, left: -110, opacity: 0.28,
+        }} />
+        {/* Ring cluster 2 — top-right, medium, cyan */}
+        <HoloRings size={220} color="#00C8FF" style={{
+          position: 'absolute', top: -70, right: -70, opacity: 0.22,
+        }} />
+        {/* Ring cluster 3 — mid-left, small, purple */}
+        <HoloRings size={150} color="#A040E0" style={{
+          position: 'absolute', top: '38%', left: -55, opacity: 0.18,
+        }} />
+      </div>
 
       {/* Holographic prismatic scan line — drifts full page height */}
       <div style={{ position: 'fixed', inset: 0, zIndex: 3, pointerEvents: 'none', overflow: 'hidden' }}>

@@ -137,6 +137,18 @@
   100% { top: 100%; opacity: 0; }
 }
 
+/* ─── Holo ring spin keyframes ───────────────────────────────────────────── */
+
+@keyframes holo-spin-cw {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+@keyframes holo-spin-ccw {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(-360deg); }
+}
+
 /* ─── Holographic keyframes ──────────────────────────────────────────────── */
 
 /* Full-spectrum rainbow sweep across a surface */

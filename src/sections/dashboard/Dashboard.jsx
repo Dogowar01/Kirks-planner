@@ -8,6 +8,7 @@ import CategoryBadge from '../../components/CategoryBadge'
 import Modal from '../../components/Modal'
 import ConfirmDialog from '../../components/ConfirmDialog'
 import heroBg from '../../assets/art-newyork.jpg'
+import HoloRings from '../../components/HoloRings'
 
 const CAT_COLORS = {
   signal9:  '#C4522A',
@@ -305,6 +306,17 @@ function LiveClock({ taskCount = 0, eventCount = 0 }) {
         background: 'radial-gradient(circle, rgba(196,82,42,0.12) 0%, rgba(160,80,160,0.04) 60%, transparent 75%)',
         pointerEvents: 'none',
         animation: 'orb-drift 15s ease-in-out 5s infinite reverse',
+      }} />
+
+      {/* ── HOLO RING CLUSTERS — hero layer ── */}
+      <HoloRings size={280} color="#C4522A" style={{
+        position: 'absolute', bottom: -90, left: -90, opacity: 0.22, zIndex: 2,
+      }} />
+      <HoloRings size={180} color="#00C8FF" style={{
+        position: 'absolute', top: -50, right: -50, opacity: 0.28, zIndex: 2,
+      }} />
+      <HoloRings size={130} color="#A040E0" style={{
+        position: 'absolute', top: '30%', left: '30%', opacity: 0.16, zIndex: 2,
       }} />
 
       {/* ── HOLOGRAPHIC PRISMATIC SCAN — full hero width ── */}
