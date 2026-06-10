@@ -400,7 +400,7 @@ function Calculator() {
       onPointerLeave={e => { e.currentTarget.style.transform=''; e.currentTarget.style.filter='' }}
       style={{
         ...bStyle(t), gridRow: rs, gridColumn: cs, fontSize: fs || (t==='fn'?'0.62rem':'0.95rem'),
-        animation: `phase-in 0.55s cubic-bezier(0.22,1,0.36,1) ${btnDelay}s both`,
+        animation: bootPhase < 3 ? `phase-in 0.55s cubic-bezier(0.22,1,0.36,1) ${btnDelay}s both` : 'none',
       }}>
       <span style={{ lineHeight:1 }}>{k}</span>
       {sub && <span style={{ fontSize:'0.45rem', marginTop:2, opacity:0.6, letterSpacing:'0.1em' }}>{sub}</span>}
