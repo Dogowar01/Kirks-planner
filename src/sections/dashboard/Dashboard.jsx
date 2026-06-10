@@ -384,26 +384,33 @@ function LiveClock({ taskCount = 0, eventCount = 0 }) {
 
       {/* SYSTEM HUD — top right */}
       <div style={{
-        position: 'absolute', top: 'calc(env(safe-area-inset-top) + 8px)', right: 14, zIndex: 5,
-        display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 3,
+        position: 'absolute', top: 'calc(env(safe-area-inset-top) + 10px)', right: 16, zIndex: 5,
+        display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6,
         animation: 'hud-slide-in 0.7s ease 0.3s both',
+        background: 'rgba(6,5,4,0.55)',
+        backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)',
+        border: '0.5px solid rgba(0,200,255,0.18)',
+        borderRadius: 8, padding: '10px 14px 12px',
+        boxShadow: '0 0 24px rgba(0,200,255,0.08), inset 0 1px 0 rgba(255,255,255,0.06)',
       }}>
         <div style={{
-          fontFamily: '"DM Mono", monospace', fontSize: '0.36rem',
-          color: 'rgba(0,200,255,0.45)', letterSpacing: '0.22em', textTransform: 'uppercase',
-          paddingBottom: 4, borderBottom: '0.5px solid rgba(0,200,255,0.15)', marginBottom: 2,
+          fontFamily: '"DM Mono", monospace', fontSize: '0.5rem',
+          color: 'rgba(0,200,255,0.7)', letterSpacing: '0.2em', textTransform: 'uppercase',
+          paddingBottom: 6, borderBottom: '0.5px solid rgba(0,200,255,0.2)', marginBottom: 1,
+          width: '100%', textAlign: 'right',
+          textShadow: '0 0 10px rgba(0,200,255,0.5)',
         }}>
           ■ SIG9 LIVE
         </div>
         {[
           ['STATUS', 'ONLINE',        '#00FF9D'],
-          ['TASKS',  `${taskCount}`,  '#C4522A'],
-          ['EVENTS', `${eventCount}`, 'rgba(0,200,255,0.7)'],
+          ['TASKS',  `${taskCount}`,  '#E05828'],
+          ['EVENTS', `${eventCount}`, '#00C8FF'],
         ].map(([k, v, c]) => (
-          <div key={k} style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-            <span style={{ fontFamily: '"DM Mono"', fontSize: '0.34rem', color: 'rgba(0,200,255,0.28)', letterSpacing: '0.12em' }}>{k}</span>
-            <div style={{ width: 3, height: 3, borderRadius: '50%', background: c, boxShadow: `0 0 5px ${c}` }} />
-            <span style={{ fontFamily: '"DM Mono"', fontSize: '0.34rem', color: c, letterSpacing: '0.08em', textShadow: `0 0 8px ${c}80` }}>{v}</span>
+          <div key={k} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span style={{ fontFamily: '"DM Mono"', fontSize: '0.46rem', color: 'rgba(0,200,255,0.4)', letterSpacing: '0.14em' }}>{k}</span>
+            <div style={{ width: 5, height: 5, borderRadius: '50%', background: c, boxShadow: `0 0 8px ${c}, 0 0 16px ${c}88` }} />
+            <span style={{ fontFamily: '"DM Mono"', fontSize: '0.55rem', fontWeight: 700, color: c, letterSpacing: '0.06em', textShadow: `0 0 12px ${c}` }}>{v}</span>
           </div>
         ))}
       </div>
