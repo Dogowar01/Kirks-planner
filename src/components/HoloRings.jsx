@@ -27,28 +27,35 @@ function blipAt(radius, angle, color) {
   return { cx: C + radius * Math.cos(rad), cy: C + radius * Math.sin(rad), color }
 }
 
-export default function HoloRings({ size = 240, color = '#00C8FF', style = {} }) {
-  const glow = `drop-shadow(0 0 4px ${color}aa)`
+export default function HoloRings({ size = 240, color = '#00C8FF', style = {}, pulse = false }) {
+  const glow = `drop-shadow(0 0 6px ${color}cc) drop-shadow(0 0 14px ${color}55)`
 
   // Cardinal blips on ring 2
   const blips = [0, 180].map(a => blipAt(48, a, color))
 
+  // Pulse animation wraps the whole component if enabled
+  const pulseStyle = pulse ? {
+    animation: 'holo-pulse 3.5s ease-in-out infinite',
+  } : {}
+
   return (
     <div style={{
       position: 'relative', width: size, height: size,
-      pointerEvents: 'none', userSelect: 'none', ...style,
+      pointerEvents: 'none', userSelect: 'none',
+      ...pulseStyle,
+      ...style,
     }}>
 
       {/* ── Ring 1: Outer — slow CW, fine dash + 36 ticks ── */}
       <div style={{ position: 'absolute', inset: 0, animation: 'holo-spin-cw 28s linear infinite' }}>
         <svg viewBox="0 0 100 100" style={{ width: '100%', height: '100%', filter: glow }}>
           <circle cx={C} cy={C} r={48} fill="none"
-            stroke={color} strokeWidth="0.3" strokeOpacity="0.3" strokeDasharray="3 3" />
+            stroke={color} strokeWidth="0.4" strokeOpacity="0.55" strokeDasharray="3 3" />
           {ticks(48, 36, [0, 90, 180, 270]).map((t, i) => (
             <line key={i} x1={t.x1} y1={t.y1} x2={t.x2} y2={t.y2}
               stroke={color}
-              strokeWidth={t.isMaj ? 1.2 : 0.4}
-              strokeOpacity={t.isMaj ? 0.85 : 0.25} />
+              strokeWidth={t.isMaj ? 1.4 : 0.5}
+              strokeOpacity={t.isMaj ? 1 : 0.45} />
           ))}
           {/* Cardinal labels */}
           {[
@@ -61,7 +68,7 @@ export default function HoloRings({ size = 240, color = '#00C8FF', style = {} })
             return (
               <text key={label}
                 x={C + 42 * Math.cos(rad)} y={C + 42 * Math.sin(rad)}
-                fill={color} fillOpacity="0.35"
+                fill={color} fillOpacity="0.65"
                 fontSize="4" textAnchor="middle" dominantBaseline="middle"
                 fontFamily="DM Mono, monospace" letterSpacing="0.1">
                 {label}
@@ -75,10 +82,10 @@ export default function HoloRings({ size = 240, color = '#00C8FF', style = {} })
       <div style={{ position: 'absolute', inset: '10%', animation: 'holo-spin-ccw 17s linear infinite' }}>
         <svg viewBox="0 0 100 100" style={{ width: '100%', height: '100%', filter: glow }}>
           <circle cx={C} cy={C} r={48} fill="none"
-            stroke={color} strokeWidth="0.8" strokeOpacity="0.5"
+            stroke={color} strokeWidth="1" strokeOpacity="0.75"
             strokeDasharray="52 18 8 18" />
           {blips.map((b, i) => (
-            <circle key={i} cx={b.cx} cy={b.cy} r={2.2} fill={b.color} fillOpacity="0.8" />
+            <circle key={i} cx={b.cx} cy={b.cy} r={2.5} fill={b.color} fillOpacity="1" />
           ))}
         </svg>
       </div>
@@ -87,7 +94,7 @@ export default function HoloRings({ size = 240, color = '#00C8FF', style = {} })
       <div style={{ position: 'absolute', inset: '22%', animation: 'holo-spin-cw 10s linear infinite' }}>
         <svg viewBox="0 0 100 100" style={{ width: '100%', height: '100%', filter: glow }}>
           <circle cx={C} cy={C} r={48} fill="none"
-            stroke={color} strokeWidth="1" strokeOpacity="0.6"
+            stroke={color} strokeWidth="1.2" strokeOpacity="0.85"
             strokeDasharray="16 8 4 8 16 8" />
           {/* Triangle notch ticks at 4 cardinal points */}
           {ticks(48, 4, [0, 90, 180, 270]).map((t, i) => {
@@ -96,7 +103,7 @@ export default function HoloRings({ size = 240, color = '#00C8FF', style = {} })
             return (
               <polygon key={i}
                 points={`${t.x2},${t.y2} ${t.x1 + nx},${t.y1 + ny} ${t.x1 - nx},${t.y1 - ny}`}
-                fill={color} fillOpacity="0.75" />
+                fill={color} fillOpacity="0.95" />
             )
           })}
         </svg>
@@ -106,19 +113,19 @@ export default function HoloRings({ size = 240, color = '#00C8FF', style = {} })
       <div style={{ position: 'absolute', inset: '35%', animation: 'holo-spin-ccw 7s linear infinite' }}>
         <svg viewBox="0 0 100 100" style={{ width: '100%', height: '100%', filter: glow }}>
           <circle cx={C} cy={C} r={48} fill="none"
-            stroke={color} strokeWidth="1.5" strokeOpacity="0.7"
+            stroke={color} strokeWidth="2" strokeOpacity="0.9"
             strokeDasharray="28 72" />
           <circle cx={C} cy={C} r={48} fill="none"
-            stroke={color} strokeWidth="0.5" strokeOpacity="0.35"
+            stroke={color} strokeWidth="0.6" strokeOpacity="0.5"
             strokeDasharray="28 72" strokeDashoffset="50" />
         </svg>
       </div>
 
       {/* ── Ring 5: Innermost — CW very fast, single thin line ── */}
       <div style={{ position: 'absolute', inset: '44%', animation: 'holo-spin-cw 4s linear infinite' }}>
-        <svg viewBox="0 0 100 100" style={{ width: '100%', height: '100%' }}>
+        <svg viewBox="0 0 100 100" style={{ width: '100%', height: '100%', filter: glow }}>
           <circle cx={C} cy={C} r={48} fill="none"
-            stroke={color} strokeWidth="2" strokeOpacity="0.9"
+            stroke={color} strokeWidth="2.5" strokeOpacity="1"
             strokeDasharray="12 88" />
         </svg>
       </div>
@@ -127,14 +134,14 @@ export default function HoloRings({ size = 240, color = '#00C8FF', style = {} })
       <div style={{
         position: 'absolute', top: '50%', left: '50%',
         transform: 'translate(-50%,-50%)',
-        width: size * 0.04, height: size * 0.04,
+        width: size * 0.05, height: size * 0.05,
         borderRadius: '50%',
         background: color,
-        boxShadow: `0 0 6px ${color}, 0 0 18px ${color}aa, 0 0 36px ${color}55`,
+        boxShadow: `0 0 8px ${color}, 0 0 24px ${color}cc, 0 0 48px ${color}66`,
       }} />
       {/* Crosshair lines */}
-      <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: size * 0.15, height: 0.5, background: `linear-gradient(to right, transparent, ${color}60, transparent)` }} />
-      <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: 0.5, height: size * 0.15, background: `linear-gradient(to bottom, transparent, ${color}60, transparent)` }} />
+      <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: size * 0.18, height: 0.5, background: `linear-gradient(to right, transparent, ${color}80, transparent)` }} />
+      <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: 0.5, height: size * 0.18, background: `linear-gradient(to bottom, transparent, ${color}80, transparent)` }} />
     </div>
   )
 }

@@ -1285,7 +1285,7 @@ export default function Tools() {
 
   return (
     <SectionShell accent="#00C8FF" bgImage={bgImg}>
-      <PageHeader subtitle="UTILITIES" title={active ? (tool?.label || 'Tools') : 'Tools'} accent="#00C8FF">
+      <PageHeader subtitle="UTILITIES" title={active ? (tool?.label || 'Tools') : 'Tools'} accent="#00C8FF" showBack>
         {active && (
           <button onClick={() => setActive(null)} style={{
             background: 'rgba(0,200,255,0.1)', border: '0.5px solid rgba(0,200,255,0.4)',

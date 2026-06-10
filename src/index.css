@@ -183,6 +183,13 @@
   to   { transform: rotate(-360deg); }
 }
 
+/* Breathing glow pulse for HoloRings */
+@keyframes holo-pulse {
+  0%   { opacity: var(--pulse-lo, 0.55); filter: brightness(1); }
+  50%  { opacity: var(--pulse-hi, 1);    filter: brightness(1.35); }
+  100% { opacity: var(--pulse-lo, 0.55); filter: brightness(1); }
+}
+
 /* ─── Holographic keyframes ──────────────────────────────────────────────── */
 
 /* Full-spectrum rainbow sweep across a surface */

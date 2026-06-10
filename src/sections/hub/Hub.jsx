@@ -180,12 +180,12 @@ export default function Hub() {
   return (
     <div style={{ minHeight: '100vh', background: '#080706', position: 'relative', overflow: 'hidden' }}>
 
-      {/* Background rings — very subtle */}
-      <div style={{ position: 'fixed', top: '40%', right: '-10%', pointerEvents: 'none', zIndex: 0 }}>
-        <HoloRings color="#C4522A" size={500} style={{ opacity: 0.06 }} />
+      {/* Background rings — pulsating */}
+      <div style={{ position: 'fixed', top: '35%', right: '-8%', pointerEvents: 'none', zIndex: 0 }}>
+        <HoloRings color="#C4522A" size={520} pulse style={{ opacity: 0.55, '--pulse-lo': '0.35', '--pulse-hi': '0.7', animation: 'holo-pulse 4s ease-in-out infinite' }} />
       </div>
-      <div style={{ position: 'fixed', bottom: '-5%', left: '-8%', pointerEvents: 'none', zIndex: 0 }}>
-        <HoloRings color="#00C8FF" size={360} style={{ opacity: 0.05 }} />
+      <div style={{ position: 'fixed', bottom: '-8%', left: '-10%', pointerEvents: 'none', zIndex: 0 }}>
+        <HoloRings color="#00C8FF" size={380} pulse style={{ opacity: 0.45, '--pulse-lo': '0.28', '--pulse-hi': '0.6', animation: 'holo-pulse 5.5s ease-in-out 1.2s infinite' }} />
       </div>
 
       {/* Architectural grid */}
