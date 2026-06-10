@@ -1393,7 +1393,7 @@ const CURRENCIES = [
   { code: 'THB', name: 'Thai Baht',         flag: '🇹🇭' },
 ]
 
-const TARGET_CODES = ['USD','EUR','GBP','JPY','NZD','SGD','CAD','CHF']
+const TARGET_CODES = ['AUD','USD','EUR','GBP','JPY','NZD','SGD','CAD','CHF']
 
 function CurrencyConverter() {
   const [base, setBase] = useState('AUD')

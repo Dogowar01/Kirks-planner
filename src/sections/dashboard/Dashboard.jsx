@@ -1886,6 +1886,55 @@ function HabitStrip({ onNavigate }) {
   )
 }
 
+// ─── Shopping Strip ───────────────────────────────────────────────────────────
+function ShoppingStrip({ onNavigate }) {
+  const { shopping, updateShoppingList } = useStore()
+  const listsWithItems = shopping.filter(l => l.items.some(i => !i.done))
+  if (listsWithItems.length === 0) return null
+
+  const toggleItem = (list, itemId) => {
+    updateShoppingList(list.id, { items: list.items.map(i => i.id === itemId ? { ...i, done: !i.done } : i) })
+  }
+
+  const accent = '#F97316'
+  return (
+    <section>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+        <SectionLabel color={accent} seq="08">Shopping</SectionLabel>
+        <button onClick={onNavigate} style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', color: '#A09890', letterSpacing: '0.1em' }}>ALL →</button>
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+        {listsWithItems.map(list => {
+          const undone = list.items.filter(i => !i.done)
+          const listColor = list.color || accent
+          return (
+            <div key={list.id} style={{ background: 'rgba(14,12,11,0.8)', border: `0.5px solid ${listColor}20`, borderRadius: 12, overflow: 'hidden' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 14px', borderBottom: '0.5px solid rgba(255,255,255,0.04)' }}>
+                <div style={{ width: 8, height: 8, borderRadius: '50%', background: listColor, boxShadow: `0 0 6px ${listColor}80`, flexShrink: 0 }} />
+                <span style={{ fontFamily: '"Playfair Display", serif', fontStyle: 'italic', fontSize: '0.9rem', color: '#EDE8E0', flex: 1 }}>{list.name}</span>
+                <span style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.48rem', color: 'rgba(160,140,120,0.4)', letterSpacing: '0.08em' }}>{undone.length} left</span>
+              </div>
+              <div style={{ padding: '6px 14px 10px' }}>
+                {undone.slice(0, 5).map(item => (
+                  <div key={item.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '6px 0', borderBottom: '0.5px solid rgba(255,255,255,0.03)' }}>
+                    <button onClick={() => toggleItem(list, item.id)} style={{ width: 18, height: 18, borderRadius: 5, border: `1.5px solid rgba(255,255,255,0.15)`, background: 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }} />
+                    <span style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.72rem', color: '#C8BFB5', flex: 1 }}>
+                      {item.name}{item.qty && item.qty !== '1' ? <span style={{ marginLeft: 5, fontSize: '0.55rem', color: 'rgba(160,140,120,0.4)' }}>×{item.qty}</span> : null}
+                    </span>
+                  </div>
+                ))}
+                {undone.length > 5 && (
+                  <button onClick={onNavigate} style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.48rem', color: 'rgba(160,140,120,0.35)', background: 'none', border: 'none', cursor: 'pointer', paddingTop: 6, letterSpacing: '0.08em' }}>+{undone.length - 5} more →</button>
+                )}
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    </section>
+  )
+}
+
 // ─── Quick Contacts ───────────────────────────────────────────────────────────
 function QuickContacts({ onNavigate }) {
   const { contacts } = useStore()
@@ -2128,6 +2177,11 @@ export default function Dashboard() {
         {/* Quick Contacts */}
         <SectionShell color="#00C8FF" from="right" delay={5.55}>
           <QuickContacts onNavigate={() => navigate('/contacts')} />
+        </SectionShell>
+
+        {/* Shopping lists */}
+        <SectionShell color="#F97316" from="left" delay={6.0}>
+          <ShoppingStrip onNavigate={() => navigate('/shopping')} />
         </SectionShell>
 
       </div>
