@@ -209,7 +209,7 @@ function usePinnedCountdown(settings) {
   return { label: ev.label, date: ev.date, d, h, m, s, arrived: false }
 }
 
-function LiveClock() {
+function LiveClock({ taskCount = 0, eventCount = 0 }) {
   const [now, setNow] = useState(new Date())
   const weather = useWeather()
   const { history: ratesHistory, error: ratesError } = useRates()
@@ -227,8 +227,9 @@ function LiveClock() {
   return (
     <div className="relative overflow-hidden"
       style={{
-        borderBottom: '0.5px solid rgba(255,255,255,0.06)',
-        minHeight: 200,
+        borderBottom: '0.5px solid rgba(0,200,255,0.12)',
+        minHeight: 210,
+        boxShadow: '0 1px 0 rgba(0,200,255,0.06), 0 4px 40px rgba(0,0,0,0.6)',
       }}>
 
       {/* Background image */}
@@ -237,21 +238,21 @@ function LiveClock() {
         backgroundImage: `url(${heroBg})`,
         backgroundSize: 'cover',
         backgroundPosition: 'center 30%',
-        opacity: 0.42,
+        opacity: 0.38,
       }} />
 
-      {/* Gradient overlay */}
+      {/* Deep gradient — heavier vignette for contrast */}
       <div style={{
         position: 'absolute', inset: 0,
-        background: 'linear-gradient(135deg, rgba(10,9,8,0.92) 0%, rgba(13,12,11,0.48) 55%, rgba(6,14,22,0.85) 100%)',
+        background: 'linear-gradient(135deg, rgba(6,5,4,0.95) 0%, rgba(12,11,10,0.55) 50%, rgba(4,10,20,0.9) 100%)',
       }} />
 
       {/* Architectural grid — precision graph paper, slow drift */}
       <div style={{
         position: 'absolute', inset: 0, pointerEvents: 'none',
         backgroundImage: `
-          linear-gradient(rgba(196,82,42,0.045) 1px, transparent 1px),
-          linear-gradient(90deg, rgba(196,82,42,0.045) 1px, transparent 1px)
+          linear-gradient(rgba(196,82,42,0.055) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(196,82,42,0.055) 1px, transparent 1px)
         `,
         backgroundSize: '36px 36px',
         animation: 'grid-drift 18s linear infinite',
@@ -264,44 +265,106 @@ function LiveClock() {
           90deg,
           transparent 0px,
           transparent 5px,
-          rgba(0,200,255,0.015) 5px,
-          rgba(0,200,255,0.015) 5.5px
+          rgba(0,200,255,0.018) 5px,
+          rgba(0,200,255,0.018) 5.5px
         )`,
       }} />
 
-      {/* Scanline sweep */}
+      {/* Dual scanlines — cyan + amber at different speeds */}
       <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none' }}>
         <div style={{
           position: 'absolute', left: 0, right: 0, height: 140,
-          background: 'linear-gradient(to bottom, transparent 0%, rgba(0,200,255,0.025) 45%, rgba(0,200,255,0.025) 55%, transparent 100%)',
+          background: 'linear-gradient(to bottom, transparent 0%, rgba(0,200,255,0.028) 45%, rgba(0,200,255,0.028) 55%, transparent 100%)',
           animation: 'hero-scan 10s linear infinite',
+        }} />
+        <div style={{
+          position: 'absolute', left: 0, right: 0, height: 80,
+          background: 'linear-gradient(to bottom, transparent 0%, rgba(200,140,0,0.018) 50%, transparent 100%)',
+          animation: 'hero-scan 7s linear 3.5s infinite',
         }} />
       </div>
 
-      {/* Atmospheric orbs */}
+      {/* Data stream — right edge */}
       <div style={{
-        position: 'absolute', top: -60, right: -40,
-        width: 280, height: 280, borderRadius: '50%',
-        background: 'radial-gradient(circle, rgba(0,200,255,0.07) 0%, rgba(196,82,42,0.04) 50%, transparent 70%)',
-        pointerEvents: 'none',
-      }} />
-      <div style={{
-        position: 'absolute', bottom: -80, left: 40,
-        width: 220, height: 220, borderRadius: '50%',
-        background: 'radial-gradient(circle, rgba(196,82,42,0.10) 0%, transparent 70%)',
-        pointerEvents: 'none',
+        position: 'absolute', right: 0, top: 0, bottom: 0, width: 1, pointerEvents: 'none',
+        backgroundImage: 'repeating-linear-gradient(to bottom, transparent 0px, transparent 10px, rgba(0,200,255,0.2) 10px, rgba(0,200,255,0.2) 11px)',
+        animation: 'data-stream-flow 1.8s linear infinite',
       }} />
 
-      {/* Corner brackets — brighter with cyan tint */}
-      <CornerBrackets size={16} thickness={1} color="#00C8FF" opacity={0.45} inset={10} />
+      {/* Atmospheric orbs — drifting */}
+      <div style={{
+        position: 'absolute', top: -60, right: -40,
+        width: 300, height: 300, borderRadius: '50%',
+        background: 'radial-gradient(circle, rgba(0,200,255,0.09) 0%, rgba(196,82,42,0.05) 50%, transparent 70%)',
+        pointerEvents: 'none',
+        animation: 'orb-drift 20s ease-in-out infinite',
+      }} />
+      <div style={{
+        position: 'absolute', bottom: -80, left: 20,
+        width: 250, height: 250, borderRadius: '50%',
+        background: 'radial-gradient(circle, rgba(196,82,42,0.12) 0%, rgba(160,80,160,0.04) 60%, transparent 75%)',
+        pointerEvents: 'none',
+        animation: 'orb-drift 15s ease-in-out 5s infinite reverse',
+      }} />
+
+      {/* Corner brackets — bright cyan */}
+      <CornerBrackets size={18} thickness={1} color="#00C8FF" opacity={0.55} inset={10} />
+
+      {/* SYSTEM HUD — top right */}
+      <div style={{
+        position: 'absolute', top: 'calc(env(safe-area-inset-top) + 8px)', right: 14, zIndex: 5,
+        display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 3,
+        animation: 'hud-slide-in 0.7s ease 0.3s both',
+      }}>
+        <div style={{
+          fontFamily: '"DM Mono", monospace', fontSize: '0.36rem',
+          color: 'rgba(0,200,255,0.45)', letterSpacing: '0.22em', textTransform: 'uppercase',
+          paddingBottom: 4, borderBottom: '0.5px solid rgba(0,200,255,0.15)', marginBottom: 2,
+        }}>
+          ■ SIG9 LIVE
+        </div>
+        {[
+          ['STATUS', 'ONLINE',        '#00FF9D'],
+          ['TASKS',  `${taskCount}`,  '#C4522A'],
+          ['EVENTS', `${eventCount}`, 'rgba(0,200,255,0.7)'],
+        ].map(([k, v, c]) => (
+          <div key={k} style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+            <span style={{ fontFamily: '"DM Mono"', fontSize: '0.34rem', color: 'rgba(0,200,255,0.28)', letterSpacing: '0.12em' }}>{k}</span>
+            <div style={{ width: 3, height: 3, borderRadius: '50%', background: c, boxShadow: `0 0 5px ${c}` }} />
+            <span style={{ fontFamily: '"DM Mono"', fontSize: '0.34rem', color: c, letterSpacing: '0.08em', textShadow: `0 0 8px ${c}80` }}>{v}</span>
+          </div>
+        ))}
+      </div>
 
       {/* Content */}
       <div className="relative px-6 pb-6" style={{ paddingTop: 'calc(env(safe-area-inset-top) + 40px)' }}>
-        <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.65rem', color: '#A09890', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: 8 }}>
-          {format(now, "EEEE · d MMMM yyyy")} · <span style={{ color: '#C4522A' }}>WK {format(now, "w")}</span>
-        </p>
-        <h1 style={{ fontFamily: '"Playfair Display", serif', fontStyle: 'italic', fontWeight: 600, fontSize: 'clamp(1.6rem, 5vw, 2.4rem)', color: '#EDE8E0', lineHeight: 1.15, letterSpacing: '-0.02em' }}>
+        {/* Date line — DM Mono precision */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+          <div style={{ width: 2, height: 10, background: '#C4522A', boxShadow: '0 0 6px #C4522A' }} />
+          <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.62rem', color: '#7A7268', letterSpacing: '0.14em', textTransform: 'uppercase' }}>
+            {format(now, "EEE · dd MMM yyyy")}
+          </p>
+          <div style={{ width: 1, height: 8, background: 'rgba(0,200,255,0.3)' }} />
+          <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.62rem', color: 'rgba(0,200,255,0.55)', letterSpacing: '0.12em' }}>
+            WK{format(now, "w")}
+          </p>
+        </div>
+
+        {/* Glitch-animated greeting */}
+        <h1 style={{
+          fontFamily: '"Playfair Display", serif', fontStyle: 'italic', fontWeight: 600,
+          fontSize: 'clamp(1.65rem, 5.5vw, 2.6rem)', color: '#EDE8E0', lineHeight: 1.1,
+          letterSpacing: '-0.02em', position: 'relative',
+          animation: 'title-ghost 16s ease-in-out infinite',
+        }}>
           {greeting} Kirk.
+          {/* Blinking cyan cursor */}
+          <span style={{
+            display: 'inline-block', width: 2.5, height: '0.75em',
+            background: '#00C8FF', marginLeft: 6, verticalAlign: 'middle',
+            boxShadow: '0 0 10px rgba(0,200,255,1), 0 0 20px rgba(0,200,255,0.5)',
+            animation: 'cursor-blink 1.1s ease-in-out infinite',
+          }} />
         </h1>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 6, marginBottom: 4 }}>
           <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.75rem', color: '#EDE8E0', margin: 0, letterSpacing: '0.04em' }}>
@@ -463,20 +526,33 @@ function LiveClock() {
 
 function StatCard({ icon: Icon, label, value, color, onClick }) {
   return (
-    <button onClick={onClick} className="card text-left w-full transition-all duration-150 hover:border-white/10 group">
-      <div className="flex items-start justify-between">
-        <div>
-          <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', color: '#A09890', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: 10 }}>
-            {label}
-          </p>
-          <p style={{ fontFamily: '"Playfair Display", serif', fontWeight: 600, fontSize: '2rem', color: '#EDE8E0', lineHeight: 1 }}>
-            {value}
-          </p>
-        </div>
-        <div className="p-2 rounded-lg mt-1" style={{ background: color + '18' }}>
-          <Icon size={16} style={{ color }} strokeWidth={1.5} />
-        </div>
+    <button onClick={onClick} className="card text-left w-full transition-all duration-150 group"
+      style={{ padding: '12px 12px 10px', position: 'relative', overflow: 'hidden' }}>
+      {/* Watermark icon */}
+      <div style={{ position: 'absolute', bottom: 8, right: 8, opacity: 0.12, pointerEvents: 'none' }}>
+        <Icon size={22} style={{ color }} strokeWidth={1} />
       </div>
+      {/* Neon number */}
+      <p style={{
+        fontFamily: '"DM Mono", monospace', fontWeight: 700,
+        fontSize: '1.9rem', lineHeight: 1, letterSpacing: '-0.02em',
+        color, textShadow: `0 0 16px ${color}88, 0 0 40px ${color}40`,
+        marginBottom: 6,
+      }}>
+        {String(value).padStart(2, '0')}
+      </p>
+      {/* Label */}
+      <p style={{
+        fontFamily: '"DM Mono", monospace', fontSize: '0.45rem',
+        color: 'rgba(160,150,140,0.7)', letterSpacing: '0.18em', textTransform: 'uppercase',
+      }}>
+        {label}
+      </p>
+      {/* Bottom accent line */}
+      <div style={{
+        position: 'absolute', bottom: 0, left: 0, right: 0, height: 1,
+        background: `linear-gradient(to right, ${color}55, transparent)`,
+      }} />
     </button>
   )
 }
@@ -846,63 +922,88 @@ function CornerBrackets({ size = 12, thickness = 1, color = '#C4522A', opacity =
   )
 }
 
-function SectionLabel({ children, color }) {
+function SectionLabel({ children, color, seq = '—' }) {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 12 }}>
-      {/* Left tick */}
-      <div style={{ width: 8, height: 1.5, background: color || '#A09890', opacity: 0.7, flexShrink: 0 }} />
+    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 12 }}>
+      {/* Sequence tag */}
+      <span style={{ fontFamily: '"DM Mono"', fontSize: '0.36rem', color: `${color}55`, letterSpacing: '0.08em', flexShrink: 0 }}>{seq}</span>
+      {/* Bracket + label */}
+      <span style={{ fontFamily: '"DM Mono"', fontSize: '0.52rem', color: `${color}70`, flexShrink: 0 }}>[</span>
       <p style={{
         fontFamily: '"DM Mono", monospace', fontSize: '0.58rem',
         color: color || '#A09890',
         letterSpacing: '0.22em', textTransform: 'uppercase',
+        textShadow: `0 0 10px ${color}55`,
       }}>
         {children}
       </p>
-      {/* Right fading rule */}
-      <div style={{
-        flex: 1, height: 0.5, maxWidth: 48,
-        background: `linear-gradient(to right, ${color || '#A09890'}50, transparent)`,
-        flexShrink: 0,
-      }} />
+      <span style={{ fontFamily: '"DM Mono"', fontSize: '0.52rem', color: `${color}70`, flexShrink: 0 }}>]</span>
+      {/* Fading rule + terminal dot */}
+      <div style={{ flex: 1, height: 0.5, background: `linear-gradient(to right, ${color}45, transparent)` }} />
+      <div style={{ width: 3, height: 3, borderRadius: '50%', background: color, boxShadow: `0 0 6px ${color}`, opacity: 0.65, flexShrink: 0 }} />
     </div>
   )
 }
 
 function SectionShell({ color, children, style }) {
   return (
-    <div style={{
-      '--section-accent': color,
-      '--section-card-tint': color + '14',
-      '--section-card-border': color + '28',
-      position: 'relative',
-      padding: '16px 14px 18px',
-      background: `linear-gradient(155deg, ${color}14 0%, ${color}07 55%, rgba(0,200,255,0.02) 100%)`,
-      border: `0.5px solid ${color}28`,
-      boxShadow: `0 0 60px ${color}0d, inset 0 1px 0 ${color}20`,
-      // Architectural chamfer — top-right corner cut
-      clipPath: 'polygon(0 0, calc(100% - 22px) 0, 100% 22px, 100% 100%, 0 100%)',
-      // Drop-shadow traces the entire chamfered outline including the diagonal
-      filter: `drop-shadow(0 0 18px ${color}22) drop-shadow(0 2px 8px rgba(0,0,0,0.5))`,
-      ...style,
-    }}>
-      {/* Top accent bar with anchor tick + diminishing ticks */}
-      <div style={{ position: 'relative', height: 1.5, marginBottom: 14 }}>
-        <div style={{
-          position: 'absolute', inset: 0,
-          background: `linear-gradient(to right, ${color} 0%, ${color}cc 25%, ${color}55 60%, transparent 100%)`,
-          boxShadow: `0 0 14px 1px ${color}88, 0 0 4px ${color}cc`,
-        }} />
-        {/* Anchor tick */}
-        <div style={{ position: 'absolute', left: 0, top: -3, width: 2, height: 8, background: `linear-gradient(to bottom, ${color}, transparent)` }} />
-        {/* Diminishing ticks */}
-        {[15, 32, 56].map((pct, i) => (
+    <div style={{ position: 'relative', animation: 'section-appear 0.4s ease both' }}>
+      {/* Corner markers — outside clip-path, staggered blink */}
+      {[
+        { top: 0, left: 0 },
+        { bottom: 0, left: 0 },
+        { bottom: 0, right: 0 },
+      ].map((pos, i) => {
+        const isBottom = 'bottom' in pos
+        const isRight  = 'right' in pos
+        return (
           <div key={i} style={{
-            position: 'absolute', left: `${pct}%`, top: -1, width: 0.5, height: [5,4,3][i],
-            background: `${color}${['cc','88','55'][i]}`,
+            position: 'absolute', ...pos, width: 12, height: 12,
+            pointerEvents: 'none', zIndex: 10,
+            animation: `corner-blink ${2.2 + i * 0.8}s ease-in-out ${i * 0.45}s infinite`,
+          }}>
+            <div style={{ position: 'absolute', [isBottom ? 'bottom' : 'top']: 0, left: 0, right: 0, height: 1, background: color, opacity: 0.6 }} />
+            <div style={{ position: 'absolute', top: 0, bottom: 0, [isRight ? 'right' : 'left']: 0, width: 1, background: color, opacity: 0.6 }} />
+          </div>
+        )
+      })}
+
+      {/* Clipped shell */}
+      <div style={{
+        '--section-accent': color,
+        '--section-card-tint': color + '14',
+        '--section-card-border': color + '28',
+        position: 'relative',
+        padding: '16px 14px 18px',
+        background: `linear-gradient(155deg, ${color}16 0%, ${color}08 50%, rgba(0,200,255,0.025) 100%)`,
+        border: `0.5px solid ${color}30`,
+        boxShadow: `0 0 60px ${color}0e, inset 0 1px 0 ${color}22`,
+        clipPath: 'polygon(0 0, calc(100% - 22px) 0, 100% 22px, 100% 100%, 0 100%)',
+        filter: `drop-shadow(0 0 20px ${color}28) drop-shadow(0 3px 10px rgba(0,0,0,0.6))`,
+        ...style,
+      }}>
+        {/* Animated power-on bar */}
+        <div style={{ position: 'relative', height: 1.5, marginBottom: 14, overflow: 'hidden' }}>
+          <div style={{
+            position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
+            background: `linear-gradient(to right, ${color} 0%, ${color}cc 25%, ${color}55 60%, transparent 100%)`,
+            boxShadow: `0 0 14px 1px ${color}99, 0 0 5px ${color}dd`,
+            transformOrigin: 'left',
+            animation: 'power-bar-sweep 1.1s cubic-bezier(0.22,1,0.36,1) both',
           }} />
-        ))}
+          {/* Anchor tick */}
+          <div style={{ position: 'absolute', left: 0, top: -3, width: 2, height: 8, background: `linear-gradient(to bottom, ${color}, transparent)` }} />
+          {/* Diminishing ticks */}
+          {[15, 32, 58].map((pct, i) => (
+            <div key={i} style={{
+              position: 'absolute', left: `${pct}%`, top: -1,
+              width: 0.5, height: [5,4,3][i],
+              background: `${color}${['cc','88','55'][i]}`,
+            }} />
+          ))}
+        </div>
+        {children}
       </div>
-      {children}
     </div>
   )
 }
@@ -1454,13 +1555,13 @@ export default function Dashboard() {
 
   return (
     <div>
-      <LiveClock />
+      <LiveClock taskCount={openTasks.length} eventCount={upcomingEvents.length} />
 
       <div className="p-5 md:p-6 max-w-3xl space-y-7">
 
         {/* Stats */}
         <SectionShell color="#C4522A">
-          <SectionLabel color="#D4724A">Overview</SectionLabel>
+          <SectionLabel color="#D4724A" seq="01">Overview</SectionLabel>
           <div className="grid grid-cols-3 gap-3">
             <StatCard icon={CheckSquare} label="Open Tasks"      value={openTasks.length}       color="#D4724A" onClick={() => navigate('/tasks')} />
             <StatCard icon={Calendar}    label="Events (7d)"     value={upcomingEvents.length}   color="#D4724A" onClick={() => navigate('/calendar')} />
@@ -1470,7 +1571,7 @@ export default function Dashboard() {
 
         {/* Quick Add + Focus Moment */}
         <SectionShell color="#9A58A8">
-          <SectionLabel color="#B878C8">Actions</SectionLabel>
+          <SectionLabel color="#B878C8" seq="02">Actions</SectionLabel>
           <div className="space-y-3">
             <QuickAdd onAdd={(data) => addTask(data)} />
             <FocusMomentButton />
@@ -1489,7 +1590,7 @@ export default function Dashboard() {
         {todayEvents.length > 0 && (
           <SectionShell color="#267A68">
             <section>
-              <SectionLabel color="#38A88E">Today</SectionLabel>
+              <SectionLabel color="#38A88E" seq="04">Today</SectionLabel>
               <div className="space-y-2">
                 {todayEvents.map(ev => (
                   <button key={ev.id} onClick={() => navigate('/calendar')}
@@ -1512,7 +1613,7 @@ export default function Dashboard() {
         <SectionShell color="#8A3A20">
         <section>
           <div className="flex items-center justify-between mb-2.5">
-            <SectionLabel color="#B85A38">Active Tasks</SectionLabel>
+            <SectionLabel color="#B85A38" seq="05">Active Tasks</SectionLabel>
             <button onClick={() => navigate('/tasks')} style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', color: '#A09890', letterSpacing: '0.1em' }}>
               ALL →
             </button>
@@ -1538,7 +1639,7 @@ export default function Dashboard() {
         <SectionShell color="#6A3A88">
           <section>
             <div className="flex items-center justify-between mb-2.5">
-              <SectionLabel color="#9060B8">Upcoming</SectionLabel>
+              <SectionLabel color="#9060B8" seq="06">Upcoming</SectionLabel>
               <button onClick={() => navigate('/calendar')} style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', color: '#A09890', letterSpacing: '0.1em' }}>
                 CALENDAR →
               </button>

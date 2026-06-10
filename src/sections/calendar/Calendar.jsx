@@ -327,46 +327,55 @@ export default function Calendar() {
         ))}
       </div>
 
-      {/* Grid wrapper with atmospheric overlay */}
-      <div style={{ position: 'relative', borderRadius: 12, overflow: 'hidden', border: '0.5px solid rgba(106,122,90,0.18)' }}>
-        {/* Warm atmospheric corner glow */}
-        <div style={{
-          position: 'absolute', top: -40, right: -40, width: 200, height: 200,
-          borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(160,120,40,0.06) 0%, transparent 70%)',
-          pointerEvents: 'none', zIndex: 1,
-        }} />
-        <div className="grid grid-cols-7 gap-px" style={{ background: 'rgba(106,122,90,0.07)' }}>
+      {/* Grid wrapper */}
+      <div style={{ position: 'relative', borderRadius: 10, overflow: 'hidden', border: '0.5px solid rgba(106,122,90,0.22)', boxShadow: '0 0 40px rgba(0,0,0,0.5), inset 0 0 80px rgba(0,200,255,0.01)' }}>
+        {/* Atmospheric overlays */}
+        <div style={{ position: 'absolute', top: -40, right: -40, width: 220, height: 220, borderRadius: '50%', background: 'radial-gradient(circle, rgba(0,200,255,0.04) 0%, transparent 70%)', pointerEvents: 'none', zIndex: 1 }} />
+        <div style={{ position: 'absolute', bottom: -20, left: -20, width: 180, height: 180, borderRadius: '50%', background: 'radial-gradient(circle, rgba(196,82,42,0.05) 0%, transparent 70%)', pointerEvents: 'none', zIndex: 1 }} />
+        <div className="grid grid-cols-7 gap-px" style={{ background: 'rgba(0,200,255,0.04)' }}>
         {days.map(day => {
           const dayEvents = eventsOnDay(day)
           const isCurrentMonth = isSameMonth(day, month)
           const isSelectedDay = selected && isSameDay(day, selected)
+          const todayDay = isToday(day)
           return (
             <button key={day.toISOString()}
               onClick={() => { setSelected(day); setAddDate(format(day, 'yyyy-MM-dd')) }}
-              className="min-h-[60px] p-1.5 text-left transition-all duration-150"
+              className="min-h-[64px] p-1.5 text-left transition-all duration-150"
               style={{
                 background: isSelectedDay
-                  ? 'rgba(196,82,42,0.18)'
-                  : isCurrentMonth ? 'rgba(18,16,14,0.92)' : 'rgba(11,10,9,0.85)',
-                outline: isSelectedDay ? '0.5px solid rgba(196,82,42,0.5)' : 'none',
+                  ? 'rgba(196,82,42,0.2)'
+                  : isCurrentMonth ? 'rgba(14,12,11,0.96)' : 'rgba(9,8,7,0.92)',
+                outline: isSelectedDay ? '0.5px solid rgba(196,82,42,0.6)' : 'none',
                 outlineOffset: -1,
+                position: 'relative',
               }}
-              onMouseEnter={e => { if (!isSelectedDay) e.currentTarget.style.background = 'rgba(106,122,90,0.12)' }}
-              onMouseLeave={e => { if (!isSelectedDay) e.currentTarget.style.background = isCurrentMonth ? 'rgba(18,16,14,0.92)' : 'rgba(11,10,9,0.85)' }}>
+              onMouseEnter={e => {
+                if (!isSelectedDay) {
+                  e.currentTarget.style.background = 'rgba(0,200,255,0.06)'
+                  e.currentTarget.style.outline = '0.5px solid rgba(0,200,255,0.2)'
+                  e.currentTarget.style.outlineOffset = '-1px'
+                }
+              }}
+              onMouseLeave={e => {
+                if (!isSelectedDay) {
+                  e.currentTarget.style.background = isCurrentMonth ? 'rgba(14,12,11,0.96)' : 'rgba(9,8,7,0.92)'
+                  e.currentTarget.style.outline = 'none'
+                }
+              }}>
               <span style={{
                 fontFamily: '"DM Mono", monospace',
-                fontSize: '0.68rem',
-                display: isToday(day) ? 'flex' : 'inline',
-                alignItems: 'center',
-                justifyContent: 'center',
-                width: isToday(day) ? 24 : 'auto',
-                height: isToday(day) ? 24 : 'auto',
-                borderRadius: isToday(day) ? '50%' : 0,
-                background: isToday(day) ? '#C4522A' : 'none',
-                color: isToday(day) ? '#fff' : isCurrentMonth ? '#C8BFB5' : '#3A3530',
-                animation: isToday(day) ? 'today-ring 2.8s ease-in-out infinite' : 'none',
-                fontWeight: isToday(day) ? 700 : 400,
+                fontSize: '0.7rem',
+                display: todayDay ? 'flex' : 'inline',
+                alignItems: 'center', justifyContent: 'center',
+                width: todayDay ? 24 : 'auto',
+                height: todayDay ? 24 : 'auto',
+                borderRadius: todayDay ? '50%' : 0,
+                background: todayDay ? '#C4522A' : 'none',
+                color: todayDay ? '#fff' : isCurrentMonth ? '#C8BFB5' : '#2E2A28',
+                animation: todayDay ? 'today-ring 2.6s ease-in-out infinite' : 'none',
+                fontWeight: todayDay ? 800 : 400,
+                letterSpacing: todayDay ? 0 : '0.02em',
               }}>
                 {format(day, 'd')}
               </span>

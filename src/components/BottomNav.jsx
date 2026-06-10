@@ -56,13 +56,26 @@ export default function BottomNav() {
       {/* Bottom bar */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 flex"
         style={{
-          background: 'linear-gradient(to top, rgba(8,7,6,1) 0%, rgba(13,12,10,0.97) 100%)',
-          backdropFilter: 'blur(28px)',
-          WebkitBackdropFilter: 'blur(28px)',
-          borderTop: '0.5px solid rgba(196,82,42,0.18)',
+          background: 'linear-gradient(to top, rgba(6,5,4,1) 0%, rgba(12,11,10,0.98) 100%)',
+          backdropFilter: 'blur(32px)',
+          WebkitBackdropFilter: 'blur(32px)',
+          borderTop: '0.5px solid rgba(196,82,42,0.15)',
           paddingBottom: 'env(safe-area-inset-bottom)',
-          boxShadow: '0 -6px 40px rgba(0,0,0,0.7), 0 -1px 0 rgba(196,82,42,0.08)',
+          boxShadow: '0 -8px 48px rgba(0,0,0,0.8), 0 -1px 0 rgba(196,82,42,0.06)',
+          position: 'relative',
         }}>
+
+        {/* Energy flow — animated light streak across the top edge */}
+        <div style={{
+          position: 'absolute', top: 0, left: 0, right: 0, height: 1,
+          overflow: 'hidden', pointerEvents: 'none',
+        }}>
+          <div style={{
+            position: 'absolute', top: 0, height: '100%', width: '40%',
+            background: 'linear-gradient(90deg, transparent 0%, rgba(196,82,42,0.5) 20%, rgba(255,140,80,1) 50%, rgba(196,82,42,0.5) 80%, transparent 100%)',
+            animation: 'nav-energy-flow 4s linear infinite',
+          }} />
+        </div>
         {PRIMARY.map(({ to, label, Icon }) => (
           <NavLink key={to} to={to}
             className="flex-1 flex flex-col items-center py-2.5 gap-1 transition-all duration-200 relative"
@@ -71,12 +84,12 @@ export default function BottomNav() {
               <>
                 {isActive && (
                   <>
-                    {/* Sharp geometric indicator line */}
+                    {/* Pulsing indicator line */}
                     <span style={{
                       position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)',
                       width: 30, height: 1.5,
-                      background: 'linear-gradient(to right, transparent 0%, #E06840 18%, #FF8050 50%, #E06840 82%, transparent 100%)',
-                      boxShadow: '0 0 8px 1px rgba(224,104,64,1), 0 0 20px rgba(224,104,64,0.6), 0 0 40px rgba(224,104,64,0.25)',
+                      background: 'linear-gradient(to right, transparent 0%, #E06840 18%, #FF9060 50%, #E06840 82%, transparent 100%)',
+                      animation: 'nav-active-pulse 2.2s ease-in-out infinite',
                     }} />
                     {/* End cap ticks */}
                     <span style={{ position: 'absolute', top: 0, left: 'calc(50% - 15px)', width: 1.5, height: 5, background: 'linear-gradient(to bottom, #E06840cc, transparent)', }} />

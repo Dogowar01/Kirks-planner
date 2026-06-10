@@ -43,26 +43,22 @@ export default function SectionShell({ accent, bgImage, children, className = ''
         pointerEvents: 'none',
       }} />
 
-      {/* Top accent bar — architectural with tick marks */}
-      <div style={{ position: 'relative', zIndex: 2, height: 2 }}>
-        {/* Main bar */}
+      {/* Top accent bar — animated power-on sweep */}
+      <div style={{ position: 'relative', zIndex: 2, height: 2, overflow: 'hidden' }}>
+        {/* Sweeping fill bar */}
         <div style={{
-          position: 'absolute', inset: 0,
+          position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
           background: `linear-gradient(90deg, ${accent}ff 0%, ${accent}dd 30%, ${accent}88 65%, transparent 100%)`,
-          boxShadow: `0 0 14px 1px ${accent}88`,
+          boxShadow: `0 0 16px 1px ${accent}aa, 0 0 4px ${accent}ff`,
+          transformOrigin: 'left',
+          animation: 'power-bar-sweep 1.0s cubic-bezier(0.22,1,0.36,1) both',
         }} />
         {/* Left anchor tick */}
-        <div style={{
-          position: 'absolute', left: 0, top: -3,
-          width: 2, height: 8,
-          background: `linear-gradient(to bottom, ${accent}, transparent)`,
-        }} />
-        {/* Tick marks across the bar */}
+        <div style={{ position: 'absolute', left: 0, top: -3, width: 2, height: 8, background: `linear-gradient(to bottom, ${accent}, transparent)` }} />
+        {/* Diminishing ticks */}
         {[12, 28, 52].map((pct, i) => (
           <div key={i} style={{
-            position: 'absolute',
-            left: `${pct}%`,
-            top: -2, width: 0.5, height: 5,
+            position: 'absolute', left: `${pct}%`, top: -2, width: 0.5, height: 5,
             background: `linear-gradient(to bottom, ${accent}${['cc','99','66'][i]}, transparent)`,
           }} />
         ))}
