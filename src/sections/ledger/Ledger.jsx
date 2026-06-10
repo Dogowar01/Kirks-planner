@@ -75,7 +75,7 @@ function LedgerBg({ accent = '#C4522A' }) {
       <div style={{
         position: 'absolute', inset: 0,
         backgroundImage: `linear-gradient(${accent} 1px, transparent 1px), linear-gradient(90deg, ${accent} 1px, transparent 1px)`,
-        backgroundSize: '40px 40px', opacity: 0.045,
+        backgroundSize: '40px 40px', opacity: 0.022,
         animation: ph(0.5, 1.6),
       }} />
       {/* Orbs */}
@@ -116,7 +116,7 @@ function LandingView({ transactions, onOpen, onBack }) {
         <div style={{ position: 'absolute', inset: 0, backgroundImage: `url(${ARTWORK_IMG})`, backgroundSize: 'cover', backgroundPosition: '55% center', opacity: 0.13, filter: 'saturate(0.6)', animation: ph(0, 2.5) }} />
         <div style={{ position: 'absolute', inset: 0, background: '#0D0C0B' }} />
         <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse 100% 60% at 50% 0%, rgba(160,60,220,0.35) 0%, rgba(0,200,255,0.12) 50%, transparent 75%)', animation: ph(0.3, 2.0) }} />
-        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'linear-gradient(rgba(160,60,220,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(0,200,255,0.04) 1px, transparent 1px)', backgroundSize: '40px 40px', animation: ph(0.6, 1.8) }} />
+        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'linear-gradient(rgba(160,60,220,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(0,200,255,0.02) 1px, transparent 1px)', backgroundSize: '40px 40px', animation: ph(0.6, 1.8) }} />
         {/* Split divider */}
         <div style={{ position: 'absolute', left: '50%', top: 0, bottom: 0, width: 1, background: 'linear-gradient(to bottom, transparent 5%, rgba(160,80,220,0.4) 30%, rgba(0,200,255,0.35) 70%, transparent 95%)', animation: ph(1.0, 1.2) }} />
         {/* Orbs */}
