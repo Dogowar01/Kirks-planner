@@ -50,14 +50,16 @@ function useWorldData(cities) {
     const tick = () => {
       const now = {}
       cities.forEach(c => {
-        const d = new Date()
-        const time = new Intl.DateTimeFormat('en-GB', {
-          timeZone: c.tz, hour: '2-digit', minute: '2-digit', hour12: false,
-        }).format(d)
-        const day = new Intl.DateTimeFormat('en-AU', {
-          timeZone: c.tz, weekday: 'short',
-        }).format(d)
-        now[c.name] = { time, day }
+        try {
+          const d = new Date()
+          const time = new Intl.DateTimeFormat('en-GB', {
+            timeZone: c.tz, hour: '2-digit', minute: '2-digit', hour12: false,
+          }).format(d)
+          const day = new Intl.DateTimeFormat('en-AU', {
+            timeZone: c.tz, weekday: 'short',
+          }).format(d)
+          now[c.name] = { time, day }
+        } catch { now[c.name] = { time: '--:--', day: '---' } }
       })
       setTimes(now)
     }
@@ -138,6 +140,8 @@ function NixieClock({ time, day, temp, city, flag, bootDelay = 0 }) {
 
   useEffect(() => {
     if (hasBootedRef.current) return
+    // Track every timer so they're all cancelled on unmount
+    const cleanups = []
     const startId = setTimeout(() => {
       hasBootedRef.current = true
       const realChars = timeRef.current ? timeRef.current.split('') : ['0','0',':','0','0']
@@ -146,33 +150,34 @@ function NixieClock({ time, day, temp, city, flag, bootDelay = 0 }) {
       const scrambleId = setInterval(() => {
         setBootChars(prev => prev.map((ch, i) => {
           if (ch === ':') return ':'
-          if (resolvedMask[i]) return realChars[i] // keep resolved
+          if (resolvedSoFar[i]) return realChars[i]
           return NIXIE_DIGITS[Math.floor(Math.random() * 10)]
         }))
       }, 50)
+      cleanups.push(() => clearInterval(scrambleId))
 
       // Resolve each digit left→right
       const resolvedSoFar = [false, false, false, false, false]
       realChars.forEach((ch, i) => {
         if (ch === ':') { resolvedSoFar[i] = true; return }
-        setTimeout(() => {
+        const tid = setTimeout(() => {
           resolvedSoFar[i] = true
           setResolvedMask([...resolvedSoFar])
-          setBootChars(prev => {
-            const next = [...prev]; next[i] = ch; return next
-          })
+          setBootChars(prev => { const next = [...prev]; next[i] = ch; return next })
         }, 300 + i * 280)
+        cleanups.push(() => clearTimeout(tid))
       })
 
       // End boot
-      setTimeout(() => {
+      const endId = setTimeout(() => {
         clearInterval(scrambleId)
         setBooting(false)
       }, 300 + realChars.length * 280 + 200)
+      cleanups.push(() => clearTimeout(endId))
 
     }, bootDelay * 1000)
 
-    return () => clearTimeout(startId)
+    return () => { clearTimeout(startId); cleanups.forEach(fn => fn()) }
   }, [])
 
   const displayChars = booting ? bootChars : (time ? time.split('') : ['–', '–', ':', '–', '–'])
