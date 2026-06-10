@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ARTWORK_IMG from '../../assets/ledger-artwork.jpg';
+import BottomNav from '../../components/BottomNav';
 
 // ─── DATA HELPERS ────────────────────────────────────────────────────────────
 
@@ -330,7 +331,7 @@ export default function Ledger() {
         </button>
       </div>
 
-      <div style={{position:"relative",zIndex:2,minHeight:"100vh",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:`calc(env(safe-area-inset-top) + 2rem) 1.25rem calc(env(safe-area-inset-bottom) + 2rem)`}}>
+      <div style={{position:"relative",zIndex:2,minHeight:"100vh",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:`calc(env(safe-area-inset-top) + 2rem) 1.25rem calc(env(safe-area-inset-bottom) + 5.5rem)`}}>
         <div style={{textAlign:"center",marginBottom:"2.5rem"}}>
           <div style={{fontSize:"0.65rem",letterSpacing:"0.35em",textTransform:"uppercase",color:"rgba(160,130,90,0.7)",marginBottom:"0.8rem"}}>Business Ledger</div>
           <h1 style={{fontSize:"2.6rem",fontWeight:"normal",margin:0,letterSpacing:"0.12em",background:"linear-gradient(135deg,#e07020 0%,#c9a96e 45%,#00e5ff 100%)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>LEDGER</h1>
@@ -384,6 +385,7 @@ export default function Ledger() {
         </div>
         <div style={{marginTop:"2.5rem",fontSize:"0.62rem",color:"rgba(60,40,20,0.5)",letterSpacing:"0.18em",textTransform:"uppercase"}}>Kirk's Business Tracker</div>
       </div>
+      <BottomNav />
     </div>
   );
 
@@ -397,7 +399,7 @@ export default function Ledger() {
       <Bg/>
 
       {view === "list" && (
-        <div style={{display:"flex",flexDirection:"column",minHeight:"100vh",position:"relative",zIndex:1}}>
+        <div style={{display:"flex",flexDirection:"column",minHeight:"100vh",position:"relative",zIndex:1,paddingBottom:"calc(env(safe-area-inset-bottom) + 72px)"}}>
           <TopBar t={t}
             left={<BackBtn t={t} onClick={()=>setView("landing")}/>}
             center={isAP ? activeBiz.toUpperCase().replace(" ","_") : activeBiz}
@@ -495,12 +497,13 @@ export default function Ledger() {
             <div style={{textAlign:"center",fontSize:"0.65rem",color:t.textDim,padding:"0.5rem",letterSpacing:"0.08em",position:"relative",zIndex:1}}>
               {filtered.length} {isAP?"RECORD":"entr"}{filtered.length===1?(isAP?"":"y"):(isAP?"S":"ies")}{searchQ||filterType!=="all"||filterMonth!=="all"||filterFY!=="all"?" (filtered)":""}
             </div>
+
           )}
         </div>
       )}
 
       {view === "form" && (
-        <div style={{display:"flex",flexDirection:"column",minHeight:"100vh",position:"relative",zIndex:1}}>
+        <div style={{display:"flex",flexDirection:"column",minHeight:"100vh",position:"relative",zIndex:1,paddingBottom:"calc(env(safe-area-inset-bottom) + 72px)"}}>
           <TopBar t={t}
             left={<BackBtn t={t} onClick={()=>setView("list")}/>}
             center={isAP?(editingId?"EDIT_RECORD":"NEW_RECORD"):(editingId?"Edit Entry":"New Entry")}
@@ -549,6 +552,7 @@ export default function Ledger() {
           </div>
         </div>
       )}
+      <BottomNav />
     </div>
   );
 }

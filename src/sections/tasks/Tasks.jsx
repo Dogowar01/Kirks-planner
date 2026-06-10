@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { format, parseISO } from 'date-fns'
-import { Plus, Bell, Trash2, ChevronDown, ChevronUp, Target } from 'lucide-react'
+import { Plus, Bell, Trash2, ChevronDown, ChevronUp, Target, Pencil } from 'lucide-react'
 import { useStore } from '../../hooks/useStore'
 import { CATEGORIES } from '../../lib/constants'
 import SectionShell from '../../components/SectionShell'
@@ -141,6 +141,9 @@ function TaskItem({ task, onToggle, onDelete, onEdit, projects, missions }) {
           <button onClick={() => setShowDetail(s=>!s)} className="p-1 text-text-tertiary hover:text-text-secondary">
             {showDetail ? <ChevronUp size={14}/> : <ChevronDown size={14}/>}
           </button>
+          <button onClick={() => onEdit(task)} className="p-1 text-text-tertiary hover:text-text-secondary transition-colors" title="Edit task">
+            <Pencil size={13} />
+          </button>
           <button onClick={() => onDelete(task.id)} className="p-1 text-text-tertiary hover:text-red-400 transition-colors">
             <Trash2 size={14} />
           </button>
@@ -157,6 +160,7 @@ export default function Tasks() {
   const [showModal, setShowModal] = useState(false)
   const [showDone, setShowDone]   = useState(false)
   const [deleteId, setDeleteId]   = useState(null)
+  const [editTask, setEditTask]   = useState(null)
 
   const activeMissions = missions.filter(m => m.status !== 'complete')
 
@@ -220,7 +224,7 @@ export default function Tasks() {
               <TaskItem key={t.id} task={t} projects={projects} missions={missions}
                 onToggle={(id, done) => updateTask(id, { done })}
                 onDelete={(id) => setDeleteId(id)}
-                onEdit={() => {}} />
+                onEdit={(t) => setEditTask(t)} />
             ))}
           </div>
       }
@@ -238,7 +242,7 @@ export default function Tasks() {
                 <TaskItem key={t.id} task={t} projects={projects} missions={missions}
                   onToggle={(id, d) => updateTask(id, { done: d })}
                   onDelete={(id) => setDeleteId(id)}
-                  onEdit={() => {}} />
+                  onEdit={(t) => setEditTask(t)} />
               ))}
             </div>
           )}
@@ -250,6 +254,17 @@ export default function Tasks() {
           <TaskForm projects={projects} missions={missions}
             onSave={(data) => { addTask(data); setShowModal(false) }}
             onClose={() => setShowModal(false)} />
+        </Modal>
+      )}
+
+      {editTask && (
+        <Modal title="Edit Task" onClose={() => setEditTask(null)}>
+          <TaskForm
+            initial={editTask}
+            projects={projects}
+            missions={missions}
+            onSave={(data) => { updateTask(editTask.id, data); setEditTask(null) }}
+            onClose={() => setEditTask(null)} />
         </Modal>
       )}
 

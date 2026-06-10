@@ -270,7 +270,7 @@ export default function Calendar() {
     .slice(0, 14)
 
   return (
-    <SectionShell accent="#3B82F6" bgImage={bgImg}>
+    <SectionShell accent="#6A7A5A" bgImage={bgImg}>
     <div className="p-4 md:p-6 max-w-3xl">
       <div className="flex items-center justify-between mb-6">
         <h1 className="section-title">Calendar</h1>
@@ -320,10 +320,23 @@ export default function Calendar() {
       {/* Calendar grid */}
       <div className="grid grid-cols-7 gap-px mb-1">
         {['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map(d => (
-          <div key={d} className="text-center text-[10px] font-medium text-text-tertiary py-1">{d}</div>
+          <div key={d} style={{
+            textAlign: 'center', fontSize: '0.6rem', fontFamily: '"DM Mono", monospace',
+            letterSpacing: '0.12em', textTransform: 'uppercase', color: '#5C5650', paddingBottom: 6,
+          }}>{d}</div>
         ))}
       </div>
-      <div className="grid grid-cols-7 gap-px rounded-card overflow-hidden" style={{ background: 'rgba(255,255,255,0.04)', border: '0.5px solid rgba(255,255,255,0.07)' }}>
+
+      {/* Grid wrapper with atmospheric overlay */}
+      <div style={{ position: 'relative', borderRadius: 12, overflow: 'hidden', border: '0.5px solid rgba(106,122,90,0.18)' }}>
+        {/* Warm atmospheric corner glow */}
+        <div style={{
+          position: 'absolute', top: -40, right: -40, width: 200, height: 200,
+          borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(160,120,40,0.06) 0%, transparent 70%)',
+          pointerEvents: 'none', zIndex: 1,
+        }} />
+        <div className="grid grid-cols-7 gap-px" style={{ background: 'rgba(106,122,90,0.07)' }}>
         {days.map(day => {
           const dayEvents = eventsOnDay(day)
           const isCurrentMonth = isSameMonth(day, month)
@@ -331,25 +344,29 @@ export default function Calendar() {
           return (
             <button key={day.toISOString()}
               onClick={() => { setSelected(day); setAddDate(format(day, 'yyyy-MM-dd')) }}
-              className="min-h-[60px] p-1.5 text-left transition-colors hover:bg-white/5"
+              className="min-h-[60px] p-1.5 text-left transition-all duration-150"
               style={{
                 background: isSelectedDay
-                  ? 'rgba(196,82,42,0.15)'
-                  : isCurrentMonth ? 'rgba(20,18,16,0.8)' : 'rgba(13,12,11,0.6)',
-                outline: isSelectedDay ? '0.5px solid rgba(196,82,42,0.4)' : 'none',
-              }}>
+                  ? 'rgba(196,82,42,0.18)'
+                  : isCurrentMonth ? 'rgba(18,16,14,0.92)' : 'rgba(11,10,9,0.85)',
+                outline: isSelectedDay ? '0.5px solid rgba(196,82,42,0.5)' : 'none',
+                outlineOffset: -1,
+              }}
+              onMouseEnter={e => { if (!isSelectedDay) e.currentTarget.style.background = 'rgba(106,122,90,0.12)' }}
+              onMouseLeave={e => { if (!isSelectedDay) e.currentTarget.style.background = isCurrentMonth ? 'rgba(18,16,14,0.92)' : 'rgba(11,10,9,0.85)' }}>
               <span style={{
                 fontFamily: '"DM Mono", monospace',
-                fontSize: '0.7rem',
+                fontSize: '0.68rem',
                 display: isToday(day) ? 'flex' : 'inline',
                 alignItems: 'center',
                 justifyContent: 'center',
-                width: isToday(day) ? 20 : 'auto',
-                height: isToday(day) ? 20 : 'auto',
+                width: isToday(day) ? 24 : 'auto',
+                height: isToday(day) ? 24 : 'auto',
                 borderRadius: isToday(day) ? '50%' : 0,
                 background: isToday(day) ? '#C4522A' : 'none',
-                color: isToday(day) ? '#fff' : isCurrentMonth ? '#C8BFB5' : '#4A4540',
-                boxShadow: isToday(day) ? '0 0 8px rgba(196,82,42,0.7)' : 'none',
+                color: isToday(day) ? '#fff' : isCurrentMonth ? '#C8BFB5' : '#3A3530',
+                animation: isToday(day) ? 'today-ring 2.8s ease-in-out infinite' : 'none',
+                fontWeight: isToday(day) ? 700 : 400,
               }}>
                 {format(day, 'd')}
               </span>
@@ -376,6 +393,7 @@ export default function Calendar() {
             </button>
           )
         })}
+        </div>
       </div>
 
       {/* Selected day events */}

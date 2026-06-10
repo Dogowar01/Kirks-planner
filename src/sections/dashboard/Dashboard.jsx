@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { format, isToday, isPast, parseISO, startOfDay, addDays, isWithinInterval, startOfMonth, endOfMonth, differenceInDays } from 'date-fns'
+import { format, isToday, isPast, parseISO, startOfDay, addDays, addMonths, isWithinInterval, startOfMonth, endOfMonth, differenceInDays } from 'date-fns'
 import { Bell, Plus, Calendar, CheckSquare, Briefcase, TrendingUp, Target, Pencil, Trash2, X, ChevronRight, Zap, ArrowRight, RotateCcw } from 'lucide-react'
 import { useStore } from '../../hooks/useStore'
 import { BUSINESSES } from '../../lib/constants'
@@ -237,30 +237,63 @@ function LiveClock() {
         backgroundImage: `url(${heroBg})`,
         backgroundSize: 'cover',
         backgroundPosition: 'center 30%',
-        opacity: 0.45,
+        opacity: 0.42,
       }} />
 
-      {/* Gradient overlay to keep text readable */}
+      {/* Gradient overlay */}
       <div style={{
         position: 'absolute', inset: 0,
-        background: 'linear-gradient(135deg, rgba(13,12,11,0.85) 0%, rgba(13,12,11,0.55) 60%, rgba(16,13,20,0.75) 100%)',
+        background: 'linear-gradient(135deg, rgba(10,9,8,0.92) 0%, rgba(13,12,11,0.48) 55%, rgba(6,14,22,0.85) 100%)',
       }} />
 
-      {/* Warm orb */}
+      {/* Architectural grid — precision graph paper, slow drift */}
+      <div style={{
+        position: 'absolute', inset: 0, pointerEvents: 'none',
+        backgroundImage: `
+          linear-gradient(rgba(196,82,42,0.045) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(196,82,42,0.045) 1px, transparent 1px)
+        `,
+        backgroundSize: '36px 36px',
+        animation: 'grid-drift 18s linear infinite',
+      }} />
+
+      {/* Tokyo rain curtain — vertical cyan hairlines */}
+      <div style={{
+        position: 'absolute', inset: 0, pointerEvents: 'none',
+        backgroundImage: `repeating-linear-gradient(
+          90deg,
+          transparent 0px,
+          transparent 5px,
+          rgba(0,200,255,0.015) 5px,
+          rgba(0,200,255,0.015) 5.5px
+        )`,
+      }} />
+
+      {/* Scanline sweep */}
+      <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none' }}>
+        <div style={{
+          position: 'absolute', left: 0, right: 0, height: 140,
+          background: 'linear-gradient(to bottom, transparent 0%, rgba(0,200,255,0.025) 45%, rgba(0,200,255,0.025) 55%, transparent 100%)',
+          animation: 'hero-scan 10s linear infinite',
+        }} />
+      </div>
+
+      {/* Atmospheric orbs */}
       <div style={{
         position: 'absolute', top: -60, right: -40,
-        width: 260, height: 260,
-        borderRadius: '50%',
-        background: 'radial-gradient(circle, rgba(196,82,42,0.14) 0%, transparent 70%)',
+        width: 280, height: 280, borderRadius: '50%',
+        background: 'radial-gradient(circle, rgba(0,200,255,0.07) 0%, rgba(196,82,42,0.04) 50%, transparent 70%)',
         pointerEvents: 'none',
       }} />
       <div style={{
-        position: 'absolute', bottom: -80, left: 60,
-        width: 200, height: 200,
-        borderRadius: '50%',
-        background: 'radial-gradient(circle, rgba(124,58,237,0.09) 0%, transparent 70%)',
+        position: 'absolute', bottom: -80, left: 40,
+        width: 220, height: 220, borderRadius: '50%',
+        background: 'radial-gradient(circle, rgba(196,82,42,0.10) 0%, transparent 70%)',
         pointerEvents: 'none',
       }} />
+
+      {/* Corner brackets — brighter with cyan tint */}
+      <CornerBrackets size={16} thickness={1} color="#00C8FF" opacity={0.45} inset={10} />
 
       {/* Content */}
       <div className="relative px-6 pb-6" style={{ paddingTop: 'calc(env(safe-area-inset-top) + 40px)' }}>
@@ -270,9 +303,25 @@ function LiveClock() {
         <h1 style={{ fontFamily: '"Playfair Display", serif', fontStyle: 'italic', fontWeight: 600, fontSize: 'clamp(1.6rem, 5vw, 2.4rem)', color: '#EDE8E0', lineHeight: 1.15, letterSpacing: '-0.02em' }}>
           {greeting} Kirk.
         </h1>
-        <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.75rem', color: '#A09890', marginTop: 6, marginBottom: 16 }}>
-          {format(now, "HH:mm")}
-        </p>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 6, marginBottom: 4 }}>
+          <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.75rem', color: '#EDE8E0', margin: 0, letterSpacing: '0.04em' }}>
+            {format(now, "HH:mm")}
+          </p>
+          <div style={{ width: 1, height: 12, background: 'rgba(0,200,255,0.35)' }} />
+          <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.52rem', color: 'rgba(0,200,255,0.5)', margin: 0, letterSpacing: '0.12em', textTransform: 'uppercase' }}>
+            SIG9 · LIVE
+          </p>
+        </div>
+
+        {/* Precision divider — electric cyan */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 0, marginBottom: 14 }}>
+          <div style={{ width: 5, height: 5, borderRadius: '50%', background: '#00C8FF', boxShadow: '0 0 8px rgba(0,200,255,1), 0 0 20px rgba(0,200,255,0.5)', flexShrink: 0 }} />
+          <div style={{ height: 0.5, flex: 1, background: 'linear-gradient(to right, rgba(0,200,255,0.8), rgba(0,200,255,0.15) 55%, transparent)' }} />
+          {[0,1,2,3].map(i => (
+            <div key={i} style={{ width: 0.5, height: i === 0 ? 8 : 4, background: `rgba(0,200,255,${0.65 - i*0.12})`, marginLeft: 11, flexShrink: 0 }} />
+          ))}
+          <div style={{ height: 0.5, width: 16, background: 'linear-gradient(to right, rgba(0,200,255,0.08), transparent)', marginLeft: 4 }} />
+        </div>
 
         {/* Exchange rate sparklines */}
         {(ratesHistory || ratesError) ? (
@@ -281,20 +330,21 @@ function LiveClock() {
               const vals = ratesHistory?.[ccy]
               const latest = ratesHistory?.latest?.[ccy]
               const up = vals ? vals[vals.length - 1] >= vals[0] : null
-              const trendColor = up === null ? '#A09890' : up ? '#4ade80' : '#f87171'
+              const trendColor = up === null ? '#A09890' : up ? '#00FF9D' : '#FF4D6A'
               return (
                 <div key={ccy} style={{
                   display: 'flex', alignItems: 'center', gap: 8,
-                  background: 'rgba(0,0,0,0.2)',
-                  border: '0.5px solid rgba(255,255,255,0.07)',
-                  borderRadius: 10, padding: '6px 10px',
+                  background: 'rgba(0,0,0,0.35)',
+                  border: `0.5px solid ${up === null ? 'rgba(255,255,255,0.06)' : up ? 'rgba(0,255,157,0.15)' : 'rgba(255,77,106,0.15)'}`,
+                  borderRadius: 8, padding: '6px 10px',
+                  boxShadow: up === null ? 'none' : `0 0 12px ${trendColor}15`,
                 }}>
                   <div>
-                    <div style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.5rem', color: '#7A7470', letterSpacing: '0.1em' }}>AUD/{ccy}</div>
-                    <div style={{ fontFamily: '"Playfair Display", serif', fontWeight: 600, fontSize: '1rem', color: '#EDE8E0', lineHeight: 1.2 }}>
+                    <div style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.5rem', color: 'rgba(0,200,255,0.4)', letterSpacing: '0.14em' }}>AUD/{ccy}</div>
+                    <div style={{ fontFamily: '"DM Mono", monospace', fontWeight: 600, fontSize: '0.95rem', color: '#EDE8E0', lineHeight: 1.2, letterSpacing: '0.02em' }}>
                       {latest ? latest.toFixed(dp) : '—'}
                     </div>
-                    <div style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.48rem', color: trendColor, letterSpacing: '0.06em', marginTop: 1 }}>
+                    <div style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.48rem', color: trendColor, letterSpacing: '0.06em', marginTop: 1, textShadow: `0 0 8px ${trendColor}80` }}>
                       {up === null ? '' : up ? '▲ UP 5D' : '▼ DOWN 5D'}
                     </div>
                   </div>
@@ -773,15 +823,48 @@ function QuickAdd({ onAdd }) {
   )
 }
 
+// ─── Architectural corner brackets ───────────────────────────────────────────
+function CornerBrackets({ size = 12, thickness = 1, color = '#C4522A', opacity = 0.5, inset = 0 }) {
+  const s = { position: 'absolute', width: size, height: size, pointerEvents: 'none' }
+  const h = { position: 'absolute', background: color, height: thickness, left: 0, right: 0 }
+  const v = { position: 'absolute', background: color, width: thickness, top: 0, bottom: 0 }
+  return (
+    <>
+      <div style={{ ...s, top: inset, left: inset }}>
+        <div style={{ ...h, top: 0 }} /><div style={{ ...v, left: 0 }} />
+      </div>
+      <div style={{ ...s, top: inset, right: inset }}>
+        <div style={{ ...h, top: 0 }} /><div style={{ ...v, right: 0 }} />
+      </div>
+      <div style={{ ...s, bottom: inset, left: inset }}>
+        <div style={{ ...h, bottom: 0 }} /><div style={{ ...v, left: 0 }} />
+      </div>
+      <div style={{ ...s, bottom: inset, right: inset }}>
+        <div style={{ ...h, bottom: 0 }} /><div style={{ ...v, right: 0 }} />
+      </div>
+    </>
+  )
+}
+
 function SectionLabel({ children, color }) {
   return (
-    <p style={{
-      fontFamily: '"DM Mono", monospace', fontSize: '0.6rem',
-      color: color || '#A09890',
-      letterSpacing: '0.18em', textTransform: 'uppercase', marginBottom: 10,
-    }}>
-      {children}
-    </p>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 12 }}>
+      {/* Left tick */}
+      <div style={{ width: 8, height: 1.5, background: color || '#A09890', opacity: 0.7, flexShrink: 0 }} />
+      <p style={{
+        fontFamily: '"DM Mono", monospace', fontSize: '0.58rem',
+        color: color || '#A09890',
+        letterSpacing: '0.22em', textTransform: 'uppercase',
+      }}>
+        {children}
+      </p>
+      {/* Right fading rule */}
+      <div style={{
+        flex: 1, height: 0.5, maxWidth: 48,
+        background: `linear-gradient(to right, ${color || '#A09890'}50, transparent)`,
+        flexShrink: 0,
+      }} />
+    </div>
   )
 }
 
@@ -791,23 +874,57 @@ function SectionShell({ color, children, style }) {
       '--section-accent': color,
       '--section-card-tint': color + '14',
       '--section-card-border': color + '28',
-      borderRadius: 14,
-      padding: '14px 14px 16px',
-      background: `linear-gradient(160deg, ${color}14 0%, ${color}06 55%, transparent 100%)`,
-      border: `0.5px solid ${color}30`,
-      boxShadow: `0 0 40px ${color}0E, inset 0 1px 0 ${color}18`,
+      position: 'relative',
+      padding: '16px 14px 18px',
+      background: `linear-gradient(155deg, ${color}14 0%, ${color}07 55%, rgba(0,200,255,0.02) 100%)`,
+      border: `0.5px solid ${color}28`,
+      boxShadow: `0 0 60px ${color}0d, inset 0 1px 0 ${color}20`,
+      // Architectural chamfer — top-right corner cut
+      clipPath: 'polygon(0 0, calc(100% - 22px) 0, 100% 22px, 100% 100%, 0 100%)',
+      // Drop-shadow traces the entire chamfered outline including the diagonal
+      filter: `drop-shadow(0 0 18px ${color}22) drop-shadow(0 2px 8px rgba(0,0,0,0.5))`,
       ...style,
     }}>
-      <div style={{
-        height: 2,
-        borderRadius: 1,
-        marginBottom: 14,
-        background: `linear-gradient(to right, ${color} 0%, ${color}70 45%, transparent 100%)`,
-        boxShadow: `0 0 12px ${color}80`,
-      }} />
+      {/* Top accent bar with anchor tick + diminishing ticks */}
+      <div style={{ position: 'relative', height: 1.5, marginBottom: 14 }}>
+        <div style={{
+          position: 'absolute', inset: 0,
+          background: `linear-gradient(to right, ${color} 0%, ${color}cc 25%, ${color}55 60%, transparent 100%)`,
+          boxShadow: `0 0 14px 1px ${color}88, 0 0 4px ${color}cc`,
+        }} />
+        {/* Anchor tick */}
+        <div style={{ position: 'absolute', left: 0, top: -3, width: 2, height: 8, background: `linear-gradient(to bottom, ${color}, transparent)` }} />
+        {/* Diminishing ticks */}
+        {[15, 32, 56].map((pct, i) => (
+          <div key={i} style={{
+            position: 'absolute', left: `${pct}%`, top: -1, width: 0.5, height: [5,4,3][i],
+            background: `${color}${['cc','88','55'][i]}`,
+          }} />
+        ))}
+      </div>
       {children}
     </div>
   )
+}
+
+// Expand recurring events up to ~400 days so Today and Upcoming are always accurate
+function expandRecurring(events) {
+  const today = startOfDay(new Date())
+  const farFuture = addDays(today, 400)
+  const result = []
+  for (const ev of events) {
+    result.push(ev)
+    if (!ev.recurring || ev.recurring === 'none') continue
+    const base = parseISO(ev.date)
+    for (let i = 1; i <= 60; i++) {
+      const d = ev.recurring === 'weekly'       ? addDays(base, 7 * i)
+              : ev.recurring === 'fortnightly'  ? addDays(base, 14 * i)
+              : addMonths(base, i)
+      if (d > farFuture) break
+      result.push({ ...ev, id: `${ev.id}_r${i}`, date: format(d, 'yyyy-MM-dd'), _recurring: true })
+    }
+  }
+  return result
 }
 
 const aud = (n) => Math.abs(n).toLocaleString('en-AU', { style: 'currency', currency: 'AUD', maximumFractionDigits: 0 })
@@ -907,6 +1024,11 @@ function FinancePulse({ onNavigate }) {
   const monthExpense = monthEntries.filter(e => e.type === 'expense').reduce((a, e) => a + e.amount, 0)
   const monthNet     = monthIncome - monthExpense
 
+  // Month progress
+  const dayOfMonth = now.getDate()
+  const totalDays  = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate()
+  const monthPct   = Math.round((dayOfMonth / totalDays) * 100)
+
   // Last 4 entries across all businesses, newest first
   const recent = [...entries].sort((a, b) => b.date.localeCompare(a.date) || b.id.localeCompare(a.id)).slice(0, 4)
 
@@ -918,32 +1040,55 @@ function FinancePulse({ onNavigate }) {
         </p>
         <div className="flex gap-2">
           <button onClick={() => setShowAdd(true)} className="btn-ghost text-xs py-1"><Plus size={12}/> Entry</button>
-          <button onClick={onNavigate} style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', color: '#A09890', letterSpacing: '0.1em' }}>
-            ALL →
+          <button onClick={onNavigate}
+            style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', letterSpacing: '0.1em',
+              color: '#C4522A', background: 'rgba(196,82,42,0.1)', border: '0.5px solid rgba(196,82,42,0.25)',
+              borderRadius: 6, padding: '3px 8px', cursor: 'pointer' }}>
+            LEDGER →
           </button>
         </div>
       </div>
 
       <div className="card">
         {/* Month net summary */}
-        <div className="flex items-end justify-between mb-4">
+        <div className="flex items-end justify-between mb-3">
           <div>
             <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.5rem', color: '#A09890', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 4 }}>
               {format(now, 'MMMM')} net
             </p>
-            <p style={{ fontFamily: '"Playfair Display", serif', fontWeight: 600, fontSize: '1.8rem', lineHeight: 1, color: monthNet >= 0 ? '#2D9E5A' : '#DC2626' }}>
+            <p style={{ fontFamily: '"DM Mono", monospace', fontWeight: 700, fontSize: '1.7rem', lineHeight: 1, letterSpacing: '-0.01em', color: monthNet >= 0 ? '#00FF9D' : '#FF4D6A', textShadow: monthNet >= 0 ? '0 0 20px rgba(0,255,157,0.4)' : '0 0 20px rgba(255,77,106,0.4)' }}>
               {monthNet < 0 ? '−' : '+'}{aud(monthNet)}
             </p>
           </div>
           <div className="flex gap-4 text-right">
             <div>
               <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.48rem', color: '#A09890', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 3 }}>In</p>
-              <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.75rem', color: '#2D9E5A' }}>{aud(monthIncome)}</p>
+              <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.75rem', color: '#00FF9D', textShadow: '0 0 8px rgba(0,255,157,0.5)' }}>{aud(monthIncome)}</p>
             </div>
             <div>
               <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.48rem', color: '#A09890', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 3 }}>Out</p>
-              <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.75rem', color: monthExpense > 0 ? '#DC2626' : '#A09890' }}>{aud(monthExpense)}</p>
+              <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.75rem', color: monthExpense > 0 ? '#FF4D6A' : '#A09890', textShadow: monthExpense > 0 ? '0 0 8px rgba(255,77,106,0.4)' : 'none' }}>{aud(monthExpense)}</p>
             </div>
+          </div>
+        </div>
+
+        {/* Month progress bar */}
+        <div style={{ marginBottom: 12 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+            <span style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.48rem', color: '#5C5650', letterSpacing: '0.08em' }}>
+              DAY {dayOfMonth} OF {totalDays}
+            </span>
+            <span style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.48rem', color: '#5C5650', letterSpacing: '0.08em' }}>
+              {monthPct}% THROUGH {format(now, 'MMM').toUpperCase()}
+            </span>
+          </div>
+          <div style={{ height: 2, background: 'rgba(255,255,255,0.05)', borderRadius: 1 }}>
+            <div style={{
+              height: '100%', width: `${monthPct}%`, borderRadius: 1,
+              background: `linear-gradient(to right, ${monthNet >= 0 ? '#00C870' : '#C4522A'}, ${monthNet >= 0 ? '#00FF9D' : '#FF4D6A'})`,
+              boxShadow: `0 0 10px ${monthNet >= 0 ? 'rgba(0,255,157,0.6)' : 'rgba(255,77,106,0.6)'}`,
+              transition: 'width 0.4s ease',
+            }} />
           </div>
         </div>
 
@@ -960,7 +1105,7 @@ function FinancePulse({ onNavigate }) {
                     {format(parseISO(e.date), 'dd MMM')}
                   </p>
                   <p className="flex-1 min-w-0 truncate" style={{ fontSize: '0.7rem', color: '#C8BFB5' }}>{e.source}</p>
-                  <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.7rem', color: isExp ? '#DC2626' : '#2D9E5A', fontWeight: 600, flexShrink: 0 }}>
+                  <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.7rem', color: isExp ? '#FF4D6A' : '#00FF9D', fontWeight: 600, flexShrink: 0, textShadow: isExp ? '0 0 6px rgba(255,77,106,0.4)' : '0 0 6px rgba(0,255,157,0.35)' }}>
                     {isExp ? '−' : '+'}{aud(e.amount)}
                   </p>
                 </div>
@@ -1279,14 +1424,17 @@ export default function Dashboard() {
   const today = startOfDay(new Date())
   const in7 = addDays(today, 7)
 
+  // Expand recurring events once — used throughout
+  const allExpanded = expandRecurring(events)
+
   const openTasks = tasks.filter(t => !t.done)
-  const upcomingEvents = events.filter(e => {
+  const upcomingEvents = allExpanded.filter(e => {
     const d = parseISO(e.date)
     return isWithinInterval(d, { start: today, end: in7 })
   })
   const activeProjects = projects.filter(p => p.status === 'active')
 
-  const todayEvents = events
+  const todayEvents = allExpanded
     .filter(e => isToday(parseISO(e.date)))
     .sort((a, b) => (a.time || '').localeCompare(b.time || ''))
 
@@ -1299,7 +1447,7 @@ export default function Dashboard() {
     })
     .slice(0, 5)
 
-  const next5Events = [...events]
+  const next5Events = [...allExpanded]
     .filter(e => !isPast(parseISO(e.date)) || isToday(parseISO(e.date)))
     .sort((a, b) => a.date.localeCompare(b.date) || (a.time || '').localeCompare(b.time || ''))
     .slice(0, 5)
