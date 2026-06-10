@@ -289,6 +289,12 @@ function LiveClock({ taskCount = 0, eventCount = 0 }) {
   const hour = now.getHours()
   const greeting = hour < 5 ? 'Still awake,' : hour < 12 ? 'Good morning,' : hour < 17 ? 'Good afternoon,' : 'Good evening,'
 
+  // shorthand: phase-in animation string
+  const ph = (delay, dur = 1.1, dir = '') => {
+    const kf = dir === 'left' ? 'phase-in-left' : dir === 'right' ? 'phase-in-right' : 'phase-in'
+    return `${kf} ${dur}s cubic-bezier(0.22,1,0.36,1) ${delay}s both`
+  }
+
   return (
     <div className="relative overflow-hidden"
       style={{
@@ -297,22 +303,23 @@ function LiveClock({ taskCount = 0, eventCount = 0 }) {
         boxShadow: '0 1px 0 rgba(0,200,255,0.06), 0 4px 40px rgba(0,0,0,0.6)',
       }}>
 
-      {/* Background image */}
+      {/* Background image — fades in first, slow */}
       <div style={{
         position: 'absolute', inset: 0,
         backgroundImage: `url(${heroBg})`,
         backgroundSize: 'cover',
         backgroundPosition: 'center 30%',
         opacity: 0.38,
+        animation: ph(0, 2.5),
       }} />
 
-      {/* Deep gradient — heavier vignette for contrast */}
+      {/* Deep gradient */}
       <div style={{
         position: 'absolute', inset: 0,
         background: 'linear-gradient(135deg, rgba(6,5,4,0.95) 0%, rgba(12,11,10,0.55) 50%, rgba(4,10,20,0.9) 100%)',
       }} />
 
-      {/* Architectural grid — precision graph paper, slow drift */}
+      {/* Architectural grid */}
       <div style={{
         position: 'absolute', inset: 0, pointerEvents: 'none',
         backgroundImage: `
@@ -320,10 +327,10 @@ function LiveClock({ taskCount = 0, eventCount = 0 }) {
           linear-gradient(90deg, rgba(196,82,42,0.055) 1px, transparent 1px)
         `,
         backgroundSize: '36px 36px',
-        animation: 'grid-drift 18s linear infinite',
+        animation: `grid-drift 18s linear infinite, ${ph(0.4, 1.8)}`,
       }} />
 
-      {/* Tokyo rain curtain — vertical cyan hairlines */}
+      {/* Tokyo rain curtain */}
       <div style={{
         position: 'absolute', inset: 0, pointerEvents: 'none',
         backgroundImage: `repeating-linear-gradient(
@@ -333,10 +340,11 @@ function LiveClock({ taskCount = 0, eventCount = 0 }) {
           rgba(0,200,255,0.018) 5px,
           rgba(0,200,255,0.018) 5.5px
         )`,
+        animation: ph(0.8, 1.6),
       }} />
 
-      {/* Dual scanlines — cyan + amber at different speeds */}
-      <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none' }}>
+      {/* Dual scanlines */}
+      <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none', animation: ph(1.0, 1.4) }}>
         <div style={{
           position: 'absolute', left: 0, right: 0, height: 140,
           background: 'linear-gradient(to bottom, transparent 0%, rgba(0,200,255,0.028) 45%, rgba(0,200,255,0.028) 55%, transparent 100%)',
@@ -353,60 +361,30 @@ function LiveClock({ taskCount = 0, eventCount = 0 }) {
       <div style={{
         position: 'absolute', right: 0, top: 0, bottom: 0, width: 1, pointerEvents: 'none',
         backgroundImage: 'repeating-linear-gradient(to bottom, transparent 0px, transparent 10px, rgba(0,200,255,0.2) 10px, rgba(0,200,255,0.2) 11px)',
-        animation: 'data-stream-flow 1.8s linear infinite',
+        animation: `data-stream-flow 1.8s linear infinite`,
       }} />
 
-      {/* Atmospheric orbs — drifting */}
+      {/* Atmospheric orbs */}
       <div style={{
         position: 'absolute', top: -60, right: -40,
         width: 300, height: 300, borderRadius: '50%',
         background: 'radial-gradient(circle, rgba(0,200,255,0.09) 0%, rgba(196,82,42,0.05) 50%, transparent 70%)',
         pointerEvents: 'none',
-        animation: 'orb-drift 20s ease-in-out infinite',
+        animation: `orb-drift 20s ease-in-out infinite, ${ph(0.2, 2.2, 'right')}`,
       }} />
       <div style={{
         position: 'absolute', bottom: -80, left: 20,
         width: 250, height: 250, borderRadius: '50%',
         background: 'radial-gradient(circle, rgba(196,82,42,0.12) 0%, rgba(160,80,160,0.04) 60%, transparent 75%)',
         pointerEvents: 'none',
-        animation: 'orb-drift 15s ease-in-out 5s infinite reverse',
+        animation: `orb-drift 15s ease-in-out 5s infinite reverse, ${ph(0.5, 2.0, 'left')}`,
       }} />
 
-      {/* ── HOLO RING CLUSTERS — hero layer ── */}
-      <HoloRings size={300} color="#C4522A" style={{
-        position: 'absolute', bottom: -90, left: -90, opacity: 0.52, zIndex: 2,
-      }} />
-      <HoloRings size={200} color="#00C8FF" style={{
-        position: 'absolute', top: -50, right: -50, opacity: 0.44, zIndex: 2,
-      }} />
-      <HoloRings size={145} color="#A040E0" style={{
-        position: 'absolute', top: '30%', left: '30%', opacity: 0.36, zIndex: 2,
-      }} />
-
-      {/* ── ACCENT SCAN LINE — runs once on mount ── */}
-      <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', overflow: 'hidden', zIndex: 3 }}>
-        <div style={{
-          position: 'absolute', left: 0, right: 0, height: 2,
-          background: 'linear-gradient(90deg, transparent 0%, rgba(196,82,42,0.44) 10%, rgba(196,82,42,0.8) 30%, #C4522A 50%, rgba(196,82,42,0.8) 70%, rgba(196,82,42,0.44) 90%, transparent 100%)',
-          boxShadow: '0 0 12px rgba(196,82,42,0.55), 0 0 24px rgba(196,82,42,0.28)',
-          filter: 'blur(0.5px)',
-          animation: 'prismatic-scan 2.4s cubic-bezier(0.4,0,0.6,1) 1 forwards',
-        }} />
-      </div>
-
-      {/* ── HOLOGRAPHIC FOIL OVERLAY — iridescent sheen on hero ── */}
-      <div style={{
-        position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 2,
-        background: 'linear-gradient(135deg, rgba(255,30,160,0.04) 0%, rgba(100,60,255,0.05) 25%, rgba(0,180,255,0.04) 50%, rgba(0,255,160,0.03) 75%, rgba(255,200,0,0.04) 100%)',
-        backgroundSize: '400% 400%',
-        animation: 'holo-border 10s ease infinite',
-      }} />
-
-      {/* ── GHOST TYPOGRAPHY — massive italic "SIGNAL9" — holographic stroke ── */}
+      {/* Ghost SIGNAL9 typography */}
       <div style={{
         position: 'absolute', inset: 0, display: 'flex', alignItems: 'center',
         justifyContent: 'center', pointerEvents: 'none', overflow: 'hidden',
-        zIndex: 1,
+        zIndex: 1, animation: ph(0.6, 2.0),
       }}>
         <span style={{
           fontFamily: '"Playfair Display", serif', fontStyle: 'italic', fontWeight: 900,
@@ -421,67 +399,79 @@ function LiveClock({ taskCount = 0, eventCount = 0 }) {
         </span>
       </div>
 
-      {/* ── RADAR PING — top-right corner ── */}
-      <div style={{ position: 'absolute', top: '15%', right: '12%', zIndex: 2, pointerEvents: 'none' }}>
-        {/* Origin dot */}
-        <div style={{
-          width: 5, height: 5, borderRadius: '50%',
-          background: '#00C8FF', boxShadow: '0 0 10px rgba(0,200,255,0.9), 0 0 20px rgba(0,200,255,0.5)',
-          position: 'relative',
+      {/* Holo rings */}
+      <div style={{ animation: ph(0.8, 1.8) }}>
+        <HoloRings size={300} color="#C4522A" style={{
+          position: 'absolute', bottom: -90, left: -90, opacity: 0.52, zIndex: 2,
         }} />
-        {/* Expanding rings */}
-        {[0, 1.4, 2.8].map((delay, i) => (
-          <div key={i} style={{
-            position: 'absolute',
-            top: '50%', left: '50%',
-            width: 12, height: 12,
-            marginTop: -6, marginLeft: -6,
-            borderRadius: '50%',
-            border: '1px solid rgba(0,200,255,0.5)',
-            animation: `radar-ping 3.5s ease-out ${delay}s infinite`,
-            transformOrigin: 'center',
-          }} />
-        ))}
+        <HoloRings size={200} color="#00C8FF" style={{
+          position: 'absolute', top: -50, right: -50, opacity: 0.44, zIndex: 2,
+        }} />
+        <HoloRings size={145} color="#A040E0" style={{
+          position: 'absolute', top: '30%', left: '30%', opacity: 0.36, zIndex: 2,
+        }} />
       </div>
 
-      {/* ── ARCHITECTURAL DIAGONAL LINES — precision angle marks ── */}
-      <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', overflow: 'hidden', zIndex: 1 }}>
-        {/* Primary diagonal — top-left to mid-right */}
+      {/* Accent scan line — runs once */}
+      <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', overflow: 'hidden', zIndex: 3 }}>
+        <div style={{
+          position: 'absolute', left: 0, right: 0, height: 2,
+          background: 'linear-gradient(90deg, transparent 0%, rgba(196,82,42,0.44) 10%, rgba(196,82,42,0.8) 30%, #C4522A 50%, rgba(196,82,42,0.8) 70%, rgba(196,82,42,0.44) 90%, transparent 100%)',
+          boxShadow: '0 0 12px rgba(196,82,42,0.55), 0 0 24px rgba(196,82,42,0.28)',
+          filter: 'blur(0.5px)',
+          animation: 'prismatic-scan 3s cubic-bezier(0.4,0,0.6,1) 0.3s 1 forwards',
+        }} />
+      </div>
+
+      {/* Holographic foil */}
+      <div style={{
+        position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 2,
+        background: 'linear-gradient(135deg, rgba(255,30,160,0.04) 0%, rgba(100,60,255,0.05) 25%, rgba(0,180,255,0.04) 50%, rgba(0,255,160,0.03) 75%, rgba(255,200,0,0.04) 100%)',
+        backgroundSize: '400% 400%',
+        animation: `holo-border 10s ease infinite, ${ph(1.2, 1.5)}`,
+      }} />
+
+      {/* Diagonal lines */}
+      <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', overflow: 'hidden', zIndex: 1, animation: ph(1.0, 1.4) }}>
         <div style={{
           position: 'absolute', top: -30, left: '5%',
           width: '70%', height: '0.5px',
           background: 'linear-gradient(to right, transparent, rgba(0,200,255,0.12) 20%, rgba(0,200,255,0.2) 50%, rgba(0,200,255,0.08) 80%, transparent)',
           transform: 'rotate(22deg)', transformOrigin: 'left center',
         }} />
-        {/* Secondary diagonal — shorter, lower */}
         <div style={{
           position: 'absolute', bottom: '28%', left: '55%',
           width: '55%', height: '0.5px',
           background: 'linear-gradient(to right, transparent, rgba(196,82,42,0.18) 30%, rgba(196,82,42,0.1) 70%, transparent)',
           transform: 'rotate(-14deg)', transformOrigin: 'left center',
         }} />
-        {/* Cross-hair tick intersection marker */}
-        <div style={{
-          position: 'absolute', top: '38%', left: '62%',
-          width: 16, height: 0.5,
-          background: 'rgba(0,200,255,0.4)',
-          transform: 'rotate(22deg)',
-        }} />
-        <div style={{
-          position: 'absolute', top: 'calc(38% - 8px)', left: '62.5%',
-          width: 0.5, height: 16,
-          background: 'rgba(0,200,255,0.4)',
-        }} />
+        <div style={{ position: 'absolute', top: '38%', left: '62%', width: 16, height: 0.5, background: 'rgba(0,200,255,0.4)', transform: 'rotate(22deg)' }} />
+        <div style={{ position: 'absolute', top: 'calc(38% - 8px)', left: '62.5%', width: 0.5, height: 16, background: 'rgba(0,200,255,0.4)' }} />
       </div>
 
-      {/* Corner brackets — bright cyan */}
-      <CornerBrackets size={18} thickness={1} color="#00C8FF" opacity={0.55} inset={10} />
+      {/* Radar ping */}
+      <div style={{ position: 'absolute', top: '15%', right: '12%', zIndex: 2, pointerEvents: 'none', animation: ph(1.4, 1.0) }}>
+        <div style={{ width: 5, height: 5, borderRadius: '50%', background: '#00C8FF', boxShadow: '0 0 10px rgba(0,200,255,0.9), 0 0 20px rgba(0,200,255,0.5)', position: 'relative' }} />
+        {[0, 1.4, 2.8].map((d, i) => (
+          <div key={i} style={{
+            position: 'absolute', top: '50%', left: '50%',
+            width: 12, height: 12, marginTop: -6, marginLeft: -6,
+            borderRadius: '50%', border: '1px solid rgba(0,200,255,0.5)',
+            animation: `radar-ping 3.5s ease-out ${d}s infinite`,
+          }} />
+        ))}
+      </div>
+
+      {/* Corner brackets */}
+      <div style={{ animation: ph(1.2, 1.0) }}>
+        <CornerBrackets size={18} thickness={1} color="#00C8FF" opacity={0.55} inset={10} />
+      </div>
 
       {/* SYSTEM HUD — top right */}
       <div style={{
         position: 'absolute', top: 'calc(env(safe-area-inset-top) + 10px)', right: 16, zIndex: 5,
         display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6,
-        animation: 'hud-slide-in 0.7s ease 0.3s both',
+        animation: ph(1.5, 1.1, 'right'),
         background: 'rgba(6,5,4,0.55)',
         backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)',
         border: '0.5px solid rgba(0,200,255,0.18)',
@@ -505,8 +495,8 @@ function LiveClock({ taskCount = 0, eventCount = 0 }) {
           ['STATUS', 'ONLINE',        '#00FF9D'],
           ['TASKS',  `${taskCount}`,  '#E05828'],
           ['EVENTS', `${eventCount}`, '#00C8FF'],
-        ].map(([k, v, c]) => (
-          <div key={k} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        ].map(([k, v, c], i) => (
+          <div key={k} style={{ display: 'flex', alignItems: 'center', gap: 8, animation: ph(1.7 + i * 0.15, 0.8, 'right') }}>
             <span style={{ fontFamily: '"DM Mono"', fontSize: '0.46rem', color: 'rgba(0,200,255,0.4)', letterSpacing: '0.14em' }}>{k}</span>
             <div style={{ width: 5, height: 5, borderRadius: '50%', background: c, boxShadow: `0 0 8px ${c}, 0 0 16px ${c}88` }} />
             <span style={{ fontFamily: '"DM Mono"', fontSize: '0.55rem', fontWeight: 700, color: c, letterSpacing: '0.06em', textShadow: `0 0 12px ${c}` }}>{v}</span>
@@ -516,11 +506,12 @@ function LiveClock({ taskCount = 0, eventCount = 0 }) {
 
       {/* Content */}
       <div className="relative px-6 pb-6" style={{ paddingTop: 'calc(env(safe-area-inset-top) + 40px)' }}>
-        {/* Date line — DM Mono precision */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+
+        {/* Date line */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8, animation: ph(0.5, 1.2, 'left') }}>
           <div style={{ width: 2, height: 10, background: '#C4522A', boxShadow: '0 0 6px #C4522A' }} />
           <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.62rem', color: '#7A7268', letterSpacing: '0.14em', textTransform: 'uppercase' }}>
-            <MatrixReveal text={format(now, "EEE · dd MMM yyyy")} delay={0.6} duration={1000} color="#7A7268" />
+            <MatrixReveal text={format(now, "EEE · dd MMM yyyy")} delay={0.9} duration={1400} color="#7A7268" />
           </p>
           <div style={{ width: 1, height: 8, background: 'rgba(0,200,255,0.3)' }} />
           <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.62rem', color: 'rgba(0,200,255,0.55)', letterSpacing: '0.12em' }}>
@@ -528,15 +519,14 @@ function LiveClock({ taskCount = 0, eventCount = 0 }) {
           </p>
         </div>
 
-        {/* Glitch-animated greeting */}
+        {/* Greeting */}
         <h1 style={{
           fontFamily: '"Playfair Display", serif', fontStyle: 'italic', fontWeight: 600,
           fontSize: 'clamp(1.65rem, 5.5vw, 2.6rem)', color: '#EDE8E0', lineHeight: 1.1,
           letterSpacing: '-0.02em', position: 'relative',
-          animation: 'title-ghost 16s ease-in-out infinite, chromatic-pulse 12s ease-in-out infinite 4s',
+          animation: `title-ghost 16s ease-in-out infinite, chromatic-pulse 12s ease-in-out infinite 4s`,
         }}>
-          <MatrixReveal text={`${greeting} Kirk.`} delay={0.1} duration={1800} color="#EDE8E0" />
-          {/* Blinking cyan cursor */}
+          <MatrixReveal text={`${greeting} Kirk.`} delay={0.3} duration={2400} color="#EDE8E0" />
           <span style={{
             display: 'inline-block', width: 2.5, height: '0.75em',
             background: '#00C8FF', marginLeft: 6, verticalAlign: 'middle',
@@ -544,29 +534,31 @@ function LiveClock({ taskCount = 0, eventCount = 0 }) {
             animation: 'cursor-blink 1.1s ease-in-out infinite',
           }} />
         </h1>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 6, marginBottom: 4 }}>
+
+        {/* Time + SIG9 label */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 6, marginBottom: 4, animation: ph(1.1, 1.0, 'left') }}>
           <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.75rem', color: '#EDE8E0', margin: 0, letterSpacing: '0.04em' }}>
             {format(now, "HH:mm")}
           </p>
           <div style={{ width: 1, height: 12, background: 'rgba(0,200,255,0.35)' }} />
           <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.52rem', color: 'rgba(0,200,255,0.5)', margin: 0, letterSpacing: '0.12em', textTransform: 'uppercase' }}>
-            <MatrixReveal text="SIG9 · LIVE" delay={1.0} duration={700} color="rgba(0,200,255,0.5)" />
+            <MatrixReveal text="SIG9 · LIVE" delay={1.4} duration={1000} color="rgba(0,200,255,0.5)" />
           </p>
         </div>
 
-        {/* Precision divider — electric cyan */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 0, marginBottom: 14 }}>
+        {/* Precision divider */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 0, marginBottom: 14, animation: ph(1.3, 0.9) }}>
           <div style={{ width: 5, height: 5, borderRadius: '50%', background: '#00C8FF', boxShadow: '0 0 8px rgba(0,200,255,1), 0 0 20px rgba(0,200,255,0.5)', flexShrink: 0 }} />
-          <div style={{ height: 0.5, flex: 1, background: 'linear-gradient(to right, rgba(0,200,255,0.8), rgba(0,200,255,0.15) 55%, transparent)' }} />
+          <div style={{ height: 0.5, flex: 1, background: 'linear-gradient(to right, rgba(0,200,255,0.8), rgba(0,200,255,0.15) 55%, transparent)', transformOrigin: 'left', animation: 'draw-line 1.2s cubic-bezier(0.22,1,0.36,1) 1.4s both' }} />
           {[0,1,2,3].map(i => (
             <div key={i} style={{ width: 0.5, height: i === 0 ? 8 : 4, background: `rgba(0,200,255,${0.65 - i*0.12})`, marginLeft: 11, flexShrink: 0 }} />
           ))}
           <div style={{ height: 0.5, width: 16, background: 'linear-gradient(to right, rgba(0,200,255,0.08), transparent)', marginLeft: 4 }} />
         </div>
 
-        {/* Exchange rate sparklines */}
+        {/* Exchange rates */}
         {(ratesHistory || ratesError) ? (
-          <div style={{ display: 'flex', gap: 8, marginTop: 4, flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: 8, marginTop: 4, flexWrap: 'wrap', animation: ph(1.6, 1.0) }}>
             {[['USD', 4], ['JPY', 0]].map(([ccy, dp]) => {
               const vals = ratesHistory?.[ccy]
               const latest = ratesHistory?.latest?.[ccy]
@@ -598,17 +590,16 @@ function LiveClock({ taskCount = 0, eventCount = 0 }) {
           <div style={{ marginTop: 4, fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', color: '#7A7470' }}>loading rates…</div>
         )}
 
-        {/* 3-day weather strip */}
+        {/* Weather strip */}
         {weather ? (
           <div style={{
-            marginTop: 14,
+            marginTop: 14, animation: ph(1.9, 1.1),
             display: 'flex', alignItems: 'stretch', gap: 0,
             background: 'rgba(0,0,0,0.25)',
             borderRadius: 12,
             border: '0.5px solid rgba(255,255,255,0.08)',
             overflow: 'hidden',
           }}>
-            {/* Current conditions */}
             <div style={{ flex: '0 0 auto', padding: '10px 14px', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 2, borderRight: '0.5px solid rgba(255,255,255,0.07)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                 <span style={{ fontSize: 22 }}>{wmo(weather.code).icon}</span>
@@ -621,8 +612,6 @@ function LiveClock({ taskCount = 0, eventCount = 0 }) {
                 FEELS {weather.feelsLike}° · WIND {weather.wind}km/h
               </div>
             </div>
-
-            {/* 3-day forecast */}
             <div style={{ flex: 1, display: 'flex' }}>
               {weather.days.map((day, i) => {
                 const cond = wmo(day.code)
@@ -632,6 +621,7 @@ function LiveClock({ taskCount = 0, eventCount = 0 }) {
                     flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
                     padding: '8px 4px', gap: 3,
                     borderRight: i < 2 ? '0.5px solid rgba(255,255,255,0.07)' : 'none',
+                    animation: ph(2.0 + i * 0.12, 0.9),
                   }}>
                     <div style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.5rem', color: '#7A7470', letterSpacing: '0.1em' }}>{label}</div>
                     <div style={{ fontSize: 18 }}>{cond.icon}</div>
@@ -1755,7 +1745,7 @@ export default function Dashboard() {
       <div className="p-5 md:p-6 max-w-3xl space-y-7">
 
         {/* Stats */}
-        <SectionShell color="#E05828" from="left" delay={0.3}>
+        <SectionShell color="#E05828" from="left" delay={2.4}>
           <SectionLabel color="#FF7040" seq="01">Overview</SectionLabel>
           <div className="grid grid-cols-3 gap-3">
             <StatCard icon={CheckSquare} label="Open Tasks"      value={openTasks.length}       color="#D4724A" onClick={() => navigate('/tasks')} />
@@ -1765,7 +1755,7 @@ export default function Dashboard() {
         </SectionShell>
 
         {/* Quick Add + Focus Moment */}
-        <SectionShell color="#B040D8" from="right" delay={0.75}>
+        <SectionShell color="#B040D8" from="right" delay={2.85}>
           <SectionLabel color="#CC60F0" seq="02">Actions</SectionLabel>
           <div className="space-y-3">
             <QuickAdd onAdd={(data) => addTask(data)} />
@@ -1774,7 +1764,7 @@ export default function Dashboard() {
         </SectionShell>
 
         {/* Missions */}
-        <SectionShell color="#D89820" from="left" delay={1.15}>
+        <SectionShell color="#D89820" from="left" delay={3.3}>
           <MissionsWidget onNavigateToTasks={(missionId) => {
             setMissionFilter(missionId)
             navigate('/tasks')
@@ -1783,7 +1773,7 @@ export default function Dashboard() {
 
         {/* Today */}
         {todayEvents.length > 0 && (
-          <SectionShell color="#20C880" from="right" delay={1.55}>
+          <SectionShell color="#20C880" from="right" delay={3.75}>
             <section>
               <SectionLabel color="#20E890" seq="04">Today</SectionLabel>
               <div className="space-y-2">
@@ -1805,7 +1795,7 @@ export default function Dashboard() {
         )}
 
         {/* Top tasks */}
-        <SectionShell color="#E04820" from="left" delay={1.95}>
+        <SectionShell color="#E04820" from="left" delay={4.2}>
         <section>
           <div className="flex items-center justify-between mb-2.5">
             <SectionLabel color="#FF6040" seq="05">Active Tasks</SectionLabel>
@@ -1831,7 +1821,7 @@ export default function Dashboard() {
         </SectionShell>
 
         {/* Upcoming */}
-        <SectionShell color="#8840CC" from="right" delay={2.35}>
+        <SectionShell color="#8840CC" from="right" delay={4.65}>
           <section>
             <div className="flex items-center justify-between mb-2.5">
               <SectionLabel color="#AA60EE" seq="06">Upcoming</SectionLabel>
