@@ -1620,10 +1620,18 @@ export default function Dashboard() {
     })
     .slice(0, 5)
 
-  const next5Events = [...allExpanded]
-    .filter(e => !isPast(parseISO(e.date)) || isToday(parseISO(e.date)))
-    .sort((a, b) => a.date.localeCompare(b.date) || (a.time || '').localeCompare(b.time || ''))
-    .slice(0, 5)
+  const next5Events = (() => {
+    const sorted = [...allExpanded]
+      .filter(e => !isPast(parseISO(e.date)) || isToday(parseISO(e.date)))
+      .sort((a, b) => a.date.localeCompare(b.date) || (a.time || '').localeCompare(b.time || ''))
+    // Deduplicate recurring events by title — keep only the soonest occurrence
+    const seenTitles = new Set()
+    return sorted.filter(e => {
+      if (seenTitles.has(e.title)) return false
+      seenTitles.add(e.title)
+      return true
+    }).slice(0, 5)
+  })()
 
   return (
     <div>
