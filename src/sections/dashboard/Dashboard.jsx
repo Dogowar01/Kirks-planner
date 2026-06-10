@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { format, isToday, isPast, parseISO, startOfDay, addDays, addMonths, isWithinInterval, startOfMonth, endOfMonth, differenceInDays } from 'date-fns'
-import { Bell, Plus, Calendar, CheckSquare, Briefcase, TrendingUp, Target, Pencil, Trash2, X, ChevronRight, Zap, ArrowRight, RotateCcw } from 'lucide-react'
+import { Bell, Plus, Calendar, CheckSquare, Briefcase, TrendingUp, Target, Pencil, Trash2, X, ChevronRight, Zap, ArrowRight, RotateCcw, Flame, Phone, Mail, Globe } from 'lucide-react'
 import { useStore } from '../../hooks/useStore'
 import { BUSINESSES } from '../../lib/constants'
 import CategoryBadge from '../../components/CategoryBadge'
@@ -1694,6 +1694,116 @@ function MissionsWidget({ onNavigateToTasks }) {
   )
 }
 
+// ─── Habit Strip ─────────────────────────────────────────────────────────────
+function HabitStrip({ onNavigate }) {
+  const { habits, habitLogs, toggleHabitLog } = useStore()
+  const today = format(new Date(), 'yyyy-MM-dd')
+  if (habits.length === 0) return null
+  const done = habits.filter(h => habitLogs.some(l => l.habitId === h.id && l.date === today)).length
+  return (
+    <section>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+        <SectionLabel color="#F09030" seq="00">Habits Today</SectionLabel>
+        <button onClick={onNavigate} style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', color: '#A09890', letterSpacing: '0.1em' }}>
+          ALL →
+        </button>
+      </div>
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+        {habits.map((h, i) => {
+          const isDone = habitLogs.some(l => l.habitId === h.id && l.date === today)
+          const col = h.color || '#F09030'
+          return (
+            <button key={h.id} onClick={() => toggleHabitLog(h.id, today)}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 6, padding: '8px 12px',
+                borderRadius: 10, border: 'none', cursor: 'pointer',
+                background: isDone ? `${col}20` : 'rgba(255,255,255,0.04)',
+                outline: isDone ? `1px solid ${col}60` : '1px solid rgba(255,255,255,0.07)',
+                boxShadow: isDone ? `0 0 14px ${col}30` : 'none',
+                transition: 'all 0.2s ease',
+                animation: `phase-in 0.8s cubic-bezier(0.22,1,0.36,1) ${0.1 + i * 0.06}s both`,
+              }}>
+              <span style={{ fontSize: '1rem' }}>{h.icon || '⚡'}</span>
+              <span style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.55rem', color: isDone ? col : '#6A6258', letterSpacing: '0.06em' }}>{h.name}</span>
+              {isDone && <span style={{ fontSize: '0.7rem' }}>✓</span>}
+            </button>
+          )
+        })}
+      </div>
+      <div style={{ marginTop: 10, height: 2, borderRadius: 1, background: 'rgba(255,255,255,0.04)' }}>
+        <div style={{
+          height: '100%', borderRadius: 1, transition: 'width 0.6s ease',
+          width: habits.length > 0 ? `${(done / habits.length) * 100}%` : '0%',
+          background: 'linear-gradient(90deg, #F09030, #FF6B00)',
+          boxShadow: '0 0 8px rgba(240,144,48,0.5)',
+        }} />
+      </div>
+    </section>
+  )
+}
+
+// ─── Quick Contacts ───────────────────────────────────────────────────────────
+function QuickContacts({ onNavigate }) {
+  const { contacts } = useStore()
+  const pinned = contacts.filter(c => c.pinned).slice(0, 5)
+  if (pinned.length === 0) return null
+  return (
+    <section>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+        <SectionLabel color="#00C8FF" seq="07">Quick Contacts</SectionLabel>
+        <button onClick={onNavigate} style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', color: '#A09890', letterSpacing: '0.1em' }}>
+          ALL →
+        </button>
+      </div>
+      <div style={{ display: 'flex', gap: 10, overflowX: 'auto', paddingBottom: 4 }}>
+        {pinned.map((c, i) => {
+          const initials = c.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()
+          const col = '#00C8FF'
+          return (
+            <div key={c.id} style={{
+              display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
+              flexShrink: 0, animation: `phase-in 0.8s cubic-bezier(0.22,1,0.36,1) ${0.1 + i * 0.08}s both`,
+            }}>
+              {/* Avatar */}
+              <div style={{
+                width: 46, height: 46, borderRadius: '50%', flexShrink: 0,
+                background: `linear-gradient(135deg, ${col}30, rgba(0,0,0,0.5))`,
+                border: `1.5px solid ${col}50`,
+                boxShadow: `0 0 14px ${col}30`,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}>
+                <span style={{ fontFamily: '"Playfair Display", serif', fontWeight: 600, fontSize: '0.9rem', color: col }}>{initials}</span>
+              </div>
+              <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.45rem', color: '#A09890', letterSpacing: '0.06em', textAlign: 'center', maxWidth: 52, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {c.name.split(' ')[0]}
+              </p>
+              {/* Action buttons */}
+              <div style={{ display: 'flex', gap: 4 }}>
+                {c.phone && (
+                  <a href={`tel:${c.phone}`} style={{
+                    width: 24, height: 24, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    background: 'rgba(62,200,138,0.15)', border: '0.5px solid rgba(62,200,138,0.4)',
+                  }}>
+                    <Phone size={10} color="#3EC88A" />
+                  </a>
+                )}
+                {c.email && (
+                  <a href={`mailto:${c.email}`} style={{
+                    width: 24, height: 24, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    background: 'rgba(0,200,255,0.12)', border: '0.5px solid rgba(0,200,255,0.35)',
+                  }}>
+                    <Mail size={10} color="#00C8FF" />
+                  </a>
+                )}
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    </section>
+  )
+}
+
 export default function Dashboard() {
   const navigate = useNavigate()
   const { tasks, events, projects, notes, addTask } = useStore()
@@ -1744,8 +1854,13 @@ export default function Dashboard() {
 
       <div className="p-5 md:p-6 max-w-3xl space-y-7">
 
+        {/* Habit strip */}
+        <SectionShell color="#F09030" from="left" delay={2.4}>
+          <HabitStrip onNavigate={() => navigate('/habits')} />
+        </SectionShell>
+
         {/* Stats */}
-        <SectionShell color="#E05828" from="left" delay={2.4}>
+        <SectionShell color="#E05828" from="right" delay={2.85}>
           <SectionLabel color="#FF7040" seq="01">Overview</SectionLabel>
           <div className="grid grid-cols-3 gap-3">
             <StatCard icon={CheckSquare} label="Open Tasks"      value={openTasks.length}       color="#D4724A" onClick={() => navigate('/tasks')} />
@@ -1755,7 +1870,7 @@ export default function Dashboard() {
         </SectionShell>
 
         {/* Quick Add + Focus Moment */}
-        <SectionShell color="#B040D8" from="right" delay={2.85}>
+        <SectionShell color="#B040D8" from="left" delay={3.3}>
           <SectionLabel color="#CC60F0" seq="02">Actions</SectionLabel>
           <div className="space-y-3">
             <QuickAdd onAdd={(data) => addTask(data)} />
@@ -1764,7 +1879,7 @@ export default function Dashboard() {
         </SectionShell>
 
         {/* Missions */}
-        <SectionShell color="#D89820" from="left" delay={3.3}>
+        <SectionShell color="#D89820" from="right" delay={3.75}>
           <MissionsWidget onNavigateToTasks={(missionId) => {
             setMissionFilter(missionId)
             navigate('/tasks')
@@ -1773,7 +1888,7 @@ export default function Dashboard() {
 
         {/* Today */}
         {todayEvents.length > 0 && (
-          <SectionShell color="#20C880" from="right" delay={3.75}>
+          <SectionShell color="#20C880" from="left" delay={4.2}>
             <section>
               <SectionLabel color="#20E890" seq="04">Today</SectionLabel>
               <div className="space-y-2">
@@ -1795,7 +1910,7 @@ export default function Dashboard() {
         )}
 
         {/* Top tasks */}
-        <SectionShell color="#E04820" from="left" delay={4.2}>
+        <SectionShell color="#E04820" from="right" delay={4.65}>
         <section>
           <div className="flex items-center justify-between mb-2.5">
             <SectionLabel color="#FF6040" seq="05">Active Tasks</SectionLabel>
@@ -1821,7 +1936,7 @@ export default function Dashboard() {
         </SectionShell>
 
         {/* Upcoming */}
-        <SectionShell color="#8840CC" from="right" delay={4.65}>
+        <SectionShell color="#8840CC" from="left" delay={5.1}>
           <section>
             <div className="flex items-center justify-between mb-2.5">
               <SectionLabel color="#AA60EE" seq="06">Upcoming</SectionLabel>
@@ -1853,6 +1968,11 @@ export default function Dashboard() {
                 </div>
             }
           </section>
+        </SectionShell>
+
+        {/* Quick Contacts */}
+        <SectionShell color="#00C8FF" from="right" delay={5.55}>
+          <QuickContacts onNavigate={() => navigate('/contacts')} />
         </SectionShell>
 
       </div>

@@ -28,6 +28,9 @@ function initStore() {
     finance:   storage.get(KEYS.finance)   || { entries: [], goals: { signal9: { monthly: 0 }, app: { monthly: 0 } } },
     settings:  storage.get(KEYS.settings)  || { displayName: 'Kirk', theme: 'dark', notificationsEnabled: false, firedReminders: [] },
     missions:  storage.get(KEYS.missions)  || [],
+    habits:    storage.get(KEYS.habits)    || [],
+    habitLogs: storage.get(KEYS.habitLogs) || [],
+    journal:   storage.get(KEYS.journal)   || [],
   }
 }
 
@@ -48,7 +51,10 @@ export function StoreProvider({ children }) {
       [KEYS.notes]:     'notes',
       [KEYS.finance]:   'finance',
       [KEYS.settings]:  'settings',
-      [KEYS.missions]:  'missions',
+      [KEYS.missions]:   'missions',
+      [KEYS.habits]:     'habits',
+      [KEYS.habitLogs]:  'habitLogs',
+      [KEYS.journal]:    'journal',
     }
     return map[key]
   }
@@ -173,6 +179,46 @@ export function StoreProvider({ children }) {
     persist(KEYS.missions, state.missions.filter(m => m.id !== id))
   }, [state.missions, persist])
 
+  // ── Habits ──
+  const addHabit = useCallback((data) => {
+    const item = { id: uuid(), color: '#C4522A', icon: '⚡', ...data, createdAt: new Date().toISOString() }
+    persist(KEYS.habits, [...state.habits, item])
+    return item
+  }, [state.habits, persist])
+
+  const updateHabit = useCallback((id, data) => {
+    persist(KEYS.habits, state.habits.map(h => h.id === id ? { ...h, ...data } : h))
+  }, [state.habits, persist])
+
+  const deleteHabit = useCallback((id) => {
+    persist(KEYS.habits, state.habits.filter(h => h.id !== id))
+    persist(KEYS.habitLogs, state.habitLogs.filter(l => l.habitId !== id))
+  }, [state.habits, state.habitLogs, persist])
+
+  const toggleHabitLog = useCallback((habitId, date) => {
+    const exists = state.habitLogs.find(l => l.habitId === habitId && l.date === date)
+    if (exists) {
+      persist(KEYS.habitLogs, state.habitLogs.filter(l => !(l.habitId === habitId && l.date === date)))
+    } else {
+      persist(KEYS.habitLogs, [...state.habitLogs, { id: uuid(), habitId, date, loggedAt: new Date().toISOString() }])
+    }
+  }, [state.habitLogs, persist])
+
+  // ── Journal ──
+  const addJournalEntry = useCallback((data) => {
+    const item = { id: uuid(), mood: 3, ...data, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }
+    persist(KEYS.journal, [...state.journal, item])
+    return item
+  }, [state.journal, persist])
+
+  const updateJournalEntry = useCallback((id, data) => {
+    persist(KEYS.journal, state.journal.map(e => e.id === id ? { ...e, ...data, updatedAt: new Date().toISOString() } : e))
+  }, [state.journal, persist])
+
+  const deleteJournalEntry = useCallback((id) => {
+    persist(KEYS.journal, state.journal.filter(e => e.id !== id))
+  }, [state.journal, persist])
+
   // ── Settings ──
   const updateSettings = useCallback((data) => {
     const next = { ...state.settings, ...data }
@@ -230,6 +276,8 @@ export function StoreProvider({ children }) {
     addNote, updateNote, deleteNote,
     addFinanceEntry, deleteFinanceEntry, setFinanceGoal,
     addMission, updateMission, deleteMission,
+    addHabit, updateHabit, deleteHabit, toggleHabitLog,
+    addJournalEntry, updateJournalEntry, deleteJournalEntry,
     updateSettings,
     exportData, importData, clearAllData,
   }

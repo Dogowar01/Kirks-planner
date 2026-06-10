@@ -1,17 +1,19 @@
 import { useState } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
-import { LayoutDashboard, CalendarDays, CheckSquare, BookOpen, Settings, MoreHorizontal, X, Wrench, ShieldCheck, BookMarked, Fuel, Users } from 'lucide-react'
+import { LayoutDashboard, CalendarDays, CheckSquare, BookOpen, Settings, MoreHorizontal, X, Wrench, ShieldCheck, BookMarked, Fuel, Users, Flame, PenLine } from 'lucide-react'
 
 const PRIMARY = [
   { to: '/dashboard', label: 'Home',     Icon: LayoutDashboard },
   { to: '/tasks',     label: 'Tasks',    Icon: CheckSquare },
+  { to: '/habits',    label: 'Habits',   Icon: Flame },
+  { to: '/journal',   label: 'Journal',  Icon: PenLine },
   { to: '/ledger',    label: 'Ledger',   Icon: BookMarked },
-  { to: '/notes',     label: 'Notes',    Icon: BookOpen },
-  { to: '/tools',     label: 'Tools',    Icon: Wrench },
-  { to: '/calendar',  label: 'Calendar', Icon: CalendarDays },
 ]
 
 const OVERFLOW = [
+  { to: '/notes',    label: 'Notes',    Icon: BookOpen },
+  { to: '/tools',    label: 'Tools',    Icon: Wrench },
+  { to: '/calendar', label: 'Calendar', Icon: CalendarDays },
   { to: '/vault',    label: 'Vault',    Icon: ShieldCheck },
   { to: '/fuel',     label: 'Fuel',     Icon: Fuel },
   { to: '/contacts', label: 'Contacts', Icon: Users },

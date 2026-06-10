@@ -298,7 +298,7 @@ function initials(name) {
 
 // ─── Contact card ─────────────────────────────────────────────────────────────
 
-function ContactCard({ contact, onEdit, onDelete, index = 0 }) {
+function ContactCard({ contact, onEdit, onDelete, onPin, index = 0 }) {
   const [open, setOpen] = useState(false)
   const cat = CATEGORIES[contact.category]
   const color = cat?.color || '#E06840'
@@ -322,6 +322,10 @@ function ContactCard({ contact, onEdit, onDelete, index = 0 }) {
           {contact.role && <p className="text-text-tertiary text-xs truncate">{contact.role}</p>}
         </div>
         <CategoryBadge category={contact.category} size="xs" />
+        <button onClick={() => onPin(contact)} title={contact.pinned ? 'Unpin' : 'Pin to dashboard'}
+          style={{ color: contact.pinned ? '#00C8FF' : '#4A4540', background: 'none', border: 'none', cursor: 'pointer', padding: 4, fontSize: '0.75rem' }}>
+          📌
+        </button>
         <button onClick={() => onEdit(contact)} className="p-1 text-text-tertiary hover:text-text-secondary text-xs">Edit</button>
         <button onClick={() => onDelete(contact.id)} className="p-1 text-text-tertiary hover:text-red-400">
           <Trash2 size={14}/>
@@ -405,7 +409,8 @@ export default function Contacts() {
             {filtered.map((c, i) => (
               <ContactCard key={c.id} contact={c} index={i}
                 onEdit={(c) => setEditContact(c)}
-                onDelete={(id) => setDeleteId(id)} />
+                onDelete={(id) => setDeleteId(id)}
+                onPin={(c) => updateContact(c.id, { pinned: !c.pinned })} />
             ))}
           </div>
       }

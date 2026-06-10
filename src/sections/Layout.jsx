@@ -1,11 +1,13 @@
 import { NavLink, Outlet } from 'react-router-dom'
-import { LayoutDashboard, CalendarDays, CheckSquare, Users, BookOpen, Settings, Wrench, ShieldCheck, BookMarked, Fuel } from 'lucide-react'
+import { LayoutDashboard, CalendarDays, CheckSquare, Users, BookOpen, Settings, Wrench, ShieldCheck, BookMarked, Fuel, Flame, PenLine } from 'lucide-react'
 import BottomNav from '../components/BottomNav'
 
 const NAV = [
   { to: '/dashboard', label: 'Dashboard', Icon: LayoutDashboard },
   { to: '/tasks',     label: 'Tasks',     Icon: CheckSquare },
   { to: '/ledger',    label: 'Ledger',    Icon: BookMarked },
+  { to: '/habits',    label: 'Habits',    Icon: Flame },
+  { to: '/journal',   label: 'Journal',   Icon: PenLine },
   { to: '/notes',     label: 'Notes',     Icon: BookOpen },
   { to: '/tools',     label: 'Tools',     Icon: Wrench },
   { to: '/calendar',  label: 'Calendar',  Icon: CalendarDays },

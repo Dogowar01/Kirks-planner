@@ -9,12 +9,15 @@ export const storage = {
 }
 
 export const KEYS = {
-  events:   'kirk_planner_v1_events',
-  tasks:    'kirk_planner_v1_tasks',
-  projects: 'kirk_planner_v1_projects',
-  contacts: 'kirk_planner_v1_contacts',
-  notes:    'kirk_planner_v1_notes',
-  finance:  'kirk_planner_v1_finance',
-  settings: 'kirk_planner_v1_settings',
-  missions: 'kirk_planner_v1_missions',
+  events:    'kirk_planner_v1_events',
+  tasks:     'kirk_planner_v1_tasks',
+  projects:  'kirk_planner_v1_projects',
+  contacts:  'kirk_planner_v1_contacts',
+  notes:     'kirk_planner_v1_notes',
+  finance:   'kirk_planner_v1_finance',
+  settings:  'kirk_planner_v1_settings',
+  missions:  'kirk_planner_v1_missions',
+  habits:    'kirk_planner_v1_habits',
+  habitLogs: 'kirk_planner_v1_habit_logs',
+  journal:   'kirk_planner_v1_journal',
 }
