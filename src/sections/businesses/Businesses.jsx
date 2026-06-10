@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { Plus, Trash2, ChevronDown, ChevronUp, ExternalLink, CheckSquare } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { Plus, Trash2, ChevronDown, ChevronUp, ExternalLink, CheckSquare, LayoutGrid } from 'lucide-react'
 import { useStore } from '../../hooks/useStore'
 import { BUSINESSES, STATUSES } from '../../lib/constants'
 import StatusBadge from '../../components/StatusBadge'
@@ -385,10 +386,16 @@ function BusinessSection({ bizId, biz }) {
 }
 
 export default function Businesses() {
+  const navigate = useNavigate()
   return (
     <SectionShell accent="#C4522A" bgImage={bgImg}>
     <div className="p-4 md:p-6 max-w-2xl space-y-10">
-      <h1 className="section-title">Businesses</h1>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <h1 className="section-title">Businesses</h1>
+        <button onClick={() => navigate('/hub')} style={{ display: 'flex', alignItems: 'center', gap: 4, fontFamily: '"DM Mono", monospace', fontSize: '0.44rem', letterSpacing: '0.14em', color: 'rgba(196,82,42,0.8)', background: 'rgba(196,82,42,0.1)', border: '0.5px solid rgba(196,82,42,0.35)', borderRadius: 6, padding: '5px 9px', cursor: 'pointer', textTransform: 'uppercase' }}>
+          <LayoutGrid size={11} strokeWidth={1.5} />HUB
+        </button>
+      </div>
       {Object.entries(BUSINESSES).map(([id, biz]) => (
         <BusinessSection key={id} bizId={id} biz={biz} />
       ))}

@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { format, parseISO, startOfMonth, endOfMonth, startOfYear, subMonths, eachMonthOfInterval } from 'date-fns'
-import { Plus, Trash2 } from 'lucide-react'
+import { Plus, Trash2, LayoutGrid } from 'lucide-react'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts'
 import { useStore } from '../../hooks/useStore'
 import Modal from '../../components/Modal'
@@ -224,6 +225,7 @@ function QuickEntryStrip({ onSave, onFullForm }) {
 }
 
 export default function Finance() {
+  const navigate = useNavigate()
   const { finance, addFinanceEntry, deleteFinanceEntry, setFinanceGoal } = useStore()
   const [tab, setTab] = useState('signal9')
   const [showAdd, setShowAdd] = useState(false)
@@ -271,6 +273,9 @@ export default function Finance() {
     <div className="p-4 md:p-6 max-w-2xl">
       <div className="flex items-center justify-between mb-4">
         <h1 className="section-title">Finance</h1>
+        <button onClick={() => navigate('/hub')} style={{ display: 'flex', alignItems: 'center', gap: 4, fontFamily: '"DM Mono", monospace', fontSize: '0.44rem', letterSpacing: '0.14em', color: 'rgba(212,160,23,0.8)', background: 'rgba(212,160,23,0.1)', border: '0.5px solid rgba(212,160,23,0.35)', borderRadius: 6, padding: '5px 9px', cursor: 'pointer', textTransform: 'uppercase' }}>
+          <LayoutGrid size={11} strokeWidth={1.5} />HUB
+        </button>
       </div>
 
       {/* Quick-add strip */}
