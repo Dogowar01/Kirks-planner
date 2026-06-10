@@ -1,9 +1,9 @@
 import { NavLink, Outlet } from 'react-router-dom'
-import { LayoutDashboard, CalendarDays, CheckSquare, Users, BookOpen, Settings, Wrench, ShieldCheck, BookMarked, Fuel, Flame, PenLine } from 'lucide-react'
-import BottomNav from '../components/BottomNav'
+import { LayoutDashboard, CalendarDays, CheckSquare, Users, BookOpen, Settings, Wrench, ShieldCheck, BookMarked, Fuel, Flame, PenLine, Grid3X3 } from 'lucide-react'
 
 const NAV = [
   { to: '/dashboard', label: 'Dashboard', Icon: LayoutDashboard },
+  { to: '/hub',       label: 'Hub',       Icon: Grid3X3 },
   { to: '/tasks',     label: 'Tasks',     Icon: CheckSquare },
   { to: '/ledger',    label: 'Ledger',    Icon: BookMarked },
   { to: '/habits',    label: 'Habits',    Icon: Flame },
@@ -81,10 +81,9 @@ export default function Layout() {
   return (
     <div className="flex min-h-screen" style={{ background: '#0D0C0B' }}>
       <SideNav />
-      <main className="flex-1 min-w-0 pb-20 md:pb-0 overflow-y-auto">
+      <main className="flex-1 min-w-0 overflow-y-auto">
         <Outlet />
       </main>
-      <BottomNav />
     </div>
   )
 }

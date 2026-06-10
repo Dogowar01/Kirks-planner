@@ -519,6 +519,22 @@ function LiveClock({ taskCount = 0, eventCount = 0 }) {
         >
           ◉ AMBIENT
         </button>
+        {/* Hub button */}
+        <button
+          onClick={() => navigate('/hub')}
+          style={{
+            fontFamily: '"DM Mono"', fontSize: '0.42rem', letterSpacing: '0.18em',
+            color: 'rgba(0,200,255,0.5)', background: 'rgba(0,200,255,0.06)',
+            border: '0.5px solid rgba(0,200,255,0.22)', borderRadius: 5,
+            padding: '4px 8px', cursor: 'pointer', textTransform: 'uppercase',
+            transition: 'all 0.2s',
+            animation: ph(2.25, 0.8, 'right'),
+          }}
+          onMouseEnter={e => { e.currentTarget.style.color = '#00C8FF'; e.currentTarget.style.borderColor = 'rgba(0,200,255,0.5)' }}
+          onMouseLeave={e => { e.currentTarget.style.color = 'rgba(0,200,255,0.5)'; e.currentTarget.style.borderColor = 'rgba(0,200,255,0.22)' }}
+        >
+          ◈ HUB
+        </button>
       </div>
 
       {/* Content */}
@@ -1727,6 +1743,101 @@ function MissionsWidget({ onNavigateToTasks }) {
   )
 }
 
+// ─── Daily Pulse ─────────────────────────────────────────────────────────────
+const FOCUS_MODES = {
+  creative: { label: 'Deep Creative', color: '#C4522A', emoji: '◎' },
+  writing:  { label: 'Writing Sprint', color: '#7C3AED', emoji: '✍' },
+  admin:    { label: 'Admin Block', color: '#3B82F6', emoji: '⊡' },
+  market:   { label: 'Market Prep', color: '#3EC88A', emoji: '▷' },
+  rest:     { label: 'Rest & Recover', color: '#F09030', emoji: '◷' },
+}
+
+function DailyPulseWidget({ navigate }) {
+  const { routine, routineLog, writing } = useStore()
+  const todayStr = format(new Date(), 'yyyy-MM-dd')
+
+  // Routine progress
+  const todayLog = routineLog.find(l => l.date === todayStr)
+  const routineDone = todayLog ? todayLog.completed.length : 0
+  const routineTotal = routine.length
+  const routinePct = routineTotal > 0 ? Math.round((routineDone / routineTotal) * 100) : 0
+
+  // Focus mode
+  const focusMode = (() => {
+    try { return JSON.parse(localStorage.getItem('s9_focus_mode')) } catch { return null }
+  })()
+  const mode = focusMode ? FOCUS_MODES[focusMode.id] : null
+
+  // Words today
+  const wordsToday = writing.filter(s => s.date === todayStr).reduce((sum, s) => sum + (s.words || 0), 0)
+
+  if (routineTotal === 0 && !mode && wordsToday === 0) return null
+
+  return (
+    <SectionShell color="#F5C842" from="left" delay={2.6}>
+      <SectionLabel color="#F5C842" seq="00">Daily Pulse</SectionLabel>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+
+        {/* Routine progress */}
+        {routineTotal > 0 && (
+          <button onClick={() => navigate('/routine')} style={{
+            display: 'flex', alignItems: 'center', gap: 12, background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', padding: 0,
+          }}>
+            <div style={{ flexShrink: 0 }}>
+              <svg width={38} height={38} style={{ transform: 'rotate(-90deg)' }}>
+                <circle cx={19} cy={19} r={15} fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth={3} />
+                <circle cx={19} cy={19} r={15} fill="none" stroke={routinePct === 100 ? '#3EC88A' : '#F5C842'}
+                  strokeWidth={3} strokeDasharray={2 * Math.PI * 15}
+                  strokeDashoffset={2 * Math.PI * 15 * (1 - routinePct / 100)}
+                  strokeLinecap="round"
+                  style={{ transition: 'stroke-dashoffset 0.6s ease', filter: `drop-shadow(0 0 4px ${routinePct === 100 ? '#3EC88A' : '#F5C842'}80)` }} />
+              </svg>
+            </div>
+            <div style={{ flex: 1 }}>
+              <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.5rem', color: '#4A4540', letterSpacing: '0.14em', marginBottom: 2 }}>MORNING ROUTINE</p>
+              <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.68rem', color: routinePct === 100 ? '#3EC88A' : '#F5C842', fontWeight: 600 }}>
+                {routinePct === 100 ? '✓ Complete' : `${routineDone} / ${routineTotal} steps`}
+              </p>
+            </div>
+            <span style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.42rem', color: '#3A3530', letterSpacing: '0.12em' }}>OPEN →</span>
+          </button>
+        )}
+
+        {/* Focus mode */}
+        {mode && (
+          <button onClick={() => navigate('/focus')} style={{
+            display: 'flex', alignItems: 'center', gap: 10, background: `${mode.color}08`,
+            border: `0.5px solid ${mode.color}30`, borderRadius: 8, padding: '8px 10px',
+            cursor: 'pointer', textAlign: 'left',
+          }}>
+            <span style={{ fontSize: '1.1rem' }}>{mode.emoji}</span>
+            <div style={{ flex: 1 }}>
+              <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.38rem', color: '#4A4540', letterSpacing: '0.14em', marginBottom: 2 }}>FOCUS MODE ACTIVE</p>
+              <p style={{ fontFamily: '"Playfair Display", serif', fontStyle: 'italic', fontSize: '0.85rem', color: mode.color }}>{mode.label}</p>
+            </div>
+            <span style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.42rem', color: '#3A3530', letterSpacing: '0.12em' }}>CHANGE →</span>
+          </button>
+        )}
+
+        {/* Words today */}
+        {wordsToday > 0 && (
+          <button onClick={() => navigate('/writing')} style={{
+            display: 'flex', alignItems: 'center', gap: 10, background: 'none', border: 'none', cursor: 'pointer', padding: 0, textAlign: 'left',
+          }}>
+            <span style={{ fontFamily: '"Playfair Display", serif', fontStyle: 'italic', fontWeight: 700, fontSize: '1.3rem', color: '#7C3AED', lineHeight: 1 }}>
+              {wordsToday.toLocaleString()}
+            </span>
+            <div>
+              <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.38rem', color: '#4A4540', letterSpacing: '0.14em' }}>WORDS WRITTEN TODAY</p>
+              <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.42rem', color: '#4A4540', letterSpacing: '0.1em' }}>TAP TO VIEW TRACKER →</p>
+            </div>
+          </button>
+        )}
+      </div>
+    </SectionShell>
+  )
+}
+
 // ─── Habit Strip ─────────────────────────────────────────────────────────────
 function HabitStrip({ onNavigate }) {
   const { habits, habitLogs, toggleHabitLog } = useStore()
@@ -1899,6 +2010,9 @@ export default function Dashboard() {
         <SectionShell color="#F09030" from="left" delay={2.4}>
           <HabitStrip onNavigate={() => navigate('/habits')} />
         </SectionShell>
+
+        {/* Daily Pulse: Routine + Focus + Writing */}
+        <DailyPulseWidget navigate={navigate} />
 
         {/* Stats */}
         <SectionShell color="#E05828" from="right" delay={2.85}>

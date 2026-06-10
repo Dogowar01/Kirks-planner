@@ -28,9 +28,14 @@ function initStore() {
     finance:   storage.get(KEYS.finance)   || { entries: [], goals: { signal9: { monthly: 0 }, app: { monthly: 0 } } },
     settings:  storage.get(KEYS.settings)  || { displayName: 'Kirk', theme: 'dark', notificationsEnabled: false, firedReminders: [] },
     missions:  storage.get(KEYS.missions)  || [],
-    habits:    storage.get(KEYS.habits)    || [],
-    habitLogs: storage.get(KEYS.habitLogs) || [],
-    journal:   storage.get(KEYS.journal)   || [],
+    habits:        storage.get(KEYS.habits)        || [],
+    habitLogs:     storage.get(KEYS.habitLogs)     || [],
+    journal:       storage.get(KEYS.journal)       || [],
+    writing:       storage.get(KEYS.writing)       || [],
+    weeklyReviews: storage.get(KEYS.weeklyReviews) || [],
+    routine:       storage.get(KEYS.routine)       || [],
+    routineLog:    storage.get(KEYS.routineLog)    || [],
+    reading:       storage.get(KEYS.reading)       || [],
   }
 }
 
@@ -52,9 +57,14 @@ export function StoreProvider({ children }) {
       [KEYS.finance]:   'finance',
       [KEYS.settings]:  'settings',
       [KEYS.missions]:   'missions',
-      [KEYS.habits]:     'habits',
-      [KEYS.habitLogs]:  'habitLogs',
-      [KEYS.journal]:    'journal',
+      [KEYS.habits]:        'habits',
+      [KEYS.habitLogs]:     'habitLogs',
+      [KEYS.journal]:       'journal',
+      [KEYS.writing]:       'writing',
+      [KEYS.weeklyReviews]: 'weeklyReviews',
+      [KEYS.routine]:       'routine',
+      [KEYS.routineLog]:    'routineLog',
+      [KEYS.reading]:       'reading',
     }
     return map[key]
   }
@@ -219,6 +229,63 @@ export function StoreProvider({ children }) {
     persist(KEYS.journal, state.journal.filter(e => e.id !== id))
   }, [state.journal, persist])
 
+  // ── Writing Sessions ──
+  const addWritingSession = useCallback((data) => {
+    const item = { id: uuid(), words: 0, note: '', ...data, createdAt: new Date().toISOString() }
+    persist(KEYS.writing, [...state.writing, item])
+    return item
+  }, [state.writing, persist])
+
+  const deleteWritingSession = useCallback((id) => {
+    persist(KEYS.writing, state.writing.filter(s => s.id !== id))
+  }, [state.writing, persist])
+
+  // ── Weekly Reviews ──
+  const addWeeklyReview = useCallback((data) => {
+    const item = { id: uuid(), ...data, createdAt: new Date().toISOString() }
+    persist(KEYS.weeklyReviews, [...state.weeklyReviews, item])
+    return item
+  }, [state.weeklyReviews, persist])
+
+  const deleteWeeklyReview = useCallback((id) => {
+    persist(KEYS.weeklyReviews, state.weeklyReviews.filter(r => r.id !== id))
+  }, [state.weeklyReviews, persist])
+
+  // ── Routine Steps ──
+  const addRoutineStep = useCallback((data) => {
+    const item = { id: uuid(), emoji: '✦', ...data, createdAt: new Date().toISOString() }
+    persist(KEYS.routine, [...state.routine, item])
+    return item
+  }, [state.routine, persist])
+
+  const updateRoutineStep = useCallback((id, data) => {
+    persist(KEYS.routine, state.routine.map(s => s.id === id ? { ...s, ...data } : s))
+  }, [state.routine, persist])
+
+  const deleteRoutineStep = useCallback((id) => {
+    persist(KEYS.routine, state.routine.filter(s => s.id !== id))
+  }, [state.routine, persist])
+
+  const setRoutineLog = useCallback((date, completed) => {
+    const existing = state.routineLog.filter(l => l.date !== date)
+    persist(KEYS.routineLog, [...existing, { date, completed }])
+  }, [state.routineLog, persist])
+
+  // ── Reading Log ──
+  const addBook = useCallback((data) => {
+    const item = { id: uuid(), type: 'pleasure', status: 'want', rating: 0, note: '', ...data, createdAt: new Date().toISOString() }
+    persist(KEYS.reading, [...state.reading, item])
+    return item
+  }, [state.reading, persist])
+
+  const updateBook = useCallback((id, data) => {
+    persist(KEYS.reading, state.reading.map(b => b.id === id ? { ...b, ...data } : b))
+  }, [state.reading, persist])
+
+  const deleteBook = useCallback((id) => {
+    persist(KEYS.reading, state.reading.filter(b => b.id !== id))
+  }, [state.reading, persist])
+
   // ── Settings ──
   const updateSettings = useCallback((data) => {
     const next = { ...state.settings, ...data }
@@ -278,6 +345,10 @@ export function StoreProvider({ children }) {
     addMission, updateMission, deleteMission,
     addHabit, updateHabit, deleteHabit, toggleHabitLog,
     addJournalEntry, updateJournalEntry, deleteJournalEntry,
+    addWritingSession, deleteWritingSession,
+    addWeeklyReview, deleteWeeklyReview,
+    addRoutineStep, updateRoutineStep, deleteRoutineStep, setRoutineLog,
+    addBook, updateBook, deleteBook,
     updateSettings,
     exportData, importData, clearAllData,
   }
