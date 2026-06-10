@@ -307,6 +307,78 @@ function LiveClock({ taskCount = 0, eventCount = 0 }) {
         animation: 'orb-drift 15s ease-in-out 5s infinite reverse',
       }} />
 
+      {/* ── GHOST TYPOGRAPHY — massive italic "SIGNAL9" behind everything ── */}
+      <div style={{
+        position: 'absolute', inset: 0, display: 'flex', alignItems: 'center',
+        justifyContent: 'center', pointerEvents: 'none', overflow: 'hidden',
+        zIndex: 1,
+      }}>
+        <span style={{
+          fontFamily: '"Playfair Display", serif', fontStyle: 'italic', fontWeight: 900,
+          fontSize: 'clamp(90px, 32vw, 200px)',
+          color: 'transparent',
+          WebkitTextStroke: '1px rgba(196,82,42,0.07)',
+          letterSpacing: '-0.06em', userSelect: 'none',
+          whiteSpace: 'nowrap',
+          animation: 'ghost-drift 22s ease-in-out infinite',
+        }}>
+          SIGNAL9
+        </span>
+      </div>
+
+      {/* ── RADAR PING — top-right corner ── */}
+      <div style={{ position: 'absolute', top: '15%', right: '12%', zIndex: 2, pointerEvents: 'none' }}>
+        {/* Origin dot */}
+        <div style={{
+          width: 5, height: 5, borderRadius: '50%',
+          background: '#00C8FF', boxShadow: '0 0 10px rgba(0,200,255,0.9), 0 0 20px rgba(0,200,255,0.5)',
+          position: 'relative',
+        }} />
+        {/* Expanding rings */}
+        {[0, 1.4, 2.8].map((delay, i) => (
+          <div key={i} style={{
+            position: 'absolute',
+            top: '50%', left: '50%',
+            width: 12, height: 12,
+            marginTop: -6, marginLeft: -6,
+            borderRadius: '50%',
+            border: '1px solid rgba(0,200,255,0.5)',
+            animation: `radar-ping 3.5s ease-out ${delay}s infinite`,
+            transformOrigin: 'center',
+          }} />
+        ))}
+      </div>
+
+      {/* ── ARCHITECTURAL DIAGONAL LINES — precision angle marks ── */}
+      <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', overflow: 'hidden', zIndex: 1 }}>
+        {/* Primary diagonal — top-left to mid-right */}
+        <div style={{
+          position: 'absolute', top: -30, left: '5%',
+          width: '70%', height: '0.5px',
+          background: 'linear-gradient(to right, transparent, rgba(0,200,255,0.12) 20%, rgba(0,200,255,0.2) 50%, rgba(0,200,255,0.08) 80%, transparent)',
+          transform: 'rotate(22deg)', transformOrigin: 'left center',
+        }} />
+        {/* Secondary diagonal — shorter, lower */}
+        <div style={{
+          position: 'absolute', bottom: '28%', left: '55%',
+          width: '55%', height: '0.5px',
+          background: 'linear-gradient(to right, transparent, rgba(196,82,42,0.18) 30%, rgba(196,82,42,0.1) 70%, transparent)',
+          transform: 'rotate(-14deg)', transformOrigin: 'left center',
+        }} />
+        {/* Cross-hair tick intersection marker */}
+        <div style={{
+          position: 'absolute', top: '38%', left: '62%',
+          width: 16, height: 0.5,
+          background: 'rgba(0,200,255,0.4)',
+          transform: 'rotate(22deg)',
+        }} />
+        <div style={{
+          position: 'absolute', top: 'calc(38% - 8px)', left: '62.5%',
+          width: 0.5, height: 16,
+          background: 'rgba(0,200,255,0.4)',
+        }} />
+      </div>
+
       {/* Corner brackets — bright cyan */}
       <CornerBrackets size={18} thickness={1} color="#00C8FF" opacity={0.55} inset={10} />
 

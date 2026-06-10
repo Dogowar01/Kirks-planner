@@ -92,6 +92,51 @@
   100% { opacity: 1; transform: translateY(0); }
 }
 
+@keyframes radar-ping {
+  0%   { transform: scale(0.3); opacity: 0.9; }
+  100% { transform: scale(4.5); opacity: 0; }
+}
+
+@keyframes card-shimmer {
+  0%, 65%, 100% { transform: translateX(-120%) skewX(-15deg); opacity: 0; }
+  68%            { opacity: 1; }
+  85%            { transform: translateX(220%) skewX(-15deg); opacity: 0; }
+}
+
+@keyframes diagonal-march {
+  0%   { background-position: 0 0; }
+  100% { background-position: 60px 60px; }
+}
+
+@keyframes ghost-drift {
+  0%, 100% { transform: rotate(-8deg) translateX(0) translateY(-8%); opacity: 0.028; }
+  50%       { transform: rotate(-8deg) translateX(10px) translateY(-5%); opacity: 0.04; }
+}
+
+@keyframes fuel-bar-fill {
+  0%   { width: 0; }
+  100% { width: var(--fuel-pct, 60%); }
+}
+
+@keyframes neon-flicker {
+  0%, 96%, 100% { opacity: 1; }
+  97%            { opacity: 0.5; }
+  98%            { opacity: 1; }
+  99%            { opacity: 0.7; }
+}
+
+@keyframes count-up-glow {
+  0%   { text-shadow: 0 0 40px currentColor; }
+  100% { text-shadow: 0 0 8px currentColor; }
+}
+
+@keyframes sweep-line {
+  0%   { top: -4px; opacity: 0; }
+  5%   { opacity: 0.6; }
+  95%  { opacity: 0.6; }
+  100% { top: 100%; opacity: 0; }
+}
+
 @layer base {
   html { font-family: 'DM Sans', sans-serif; }
 
@@ -168,15 +213,25 @@
     pointer-events: none;
     z-index: 1;
   }
-  /* Film grain texture */
+  /* Periodic holographic shimmer */
   .card::after {
     content: '';
     position: absolute;
-    inset: 0;
+    top: 0; bottom: 0;
+    left: 0;
+    width: 35%;
+    background: linear-gradient(
+      105deg,
+      transparent 0%,
+      rgba(255,255,255,0.025) 40%,
+      rgba(0,200,255,0.05) 50%,
+      rgba(255,255,255,0.025) 60%,
+      transparent 100%
+    );
     pointer-events: none;
-    opacity: 0.035;
-    z-index: 0;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
+    z-index: 2;
+    animation: card-shimmer 9s ease-in-out infinite;
+    will-change: transform;
   }
   /* Hover: neon edge glow + chamfer accent */
   .card:hover {
