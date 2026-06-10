@@ -164,7 +164,7 @@ export default function Review() {
 
   return (
     <SectionShell accent={ACCENT} bgImage={bgImg}>
-      <PageHeader subtitle="REFLECTION" title="Weekly Review" accent={ACCENT}>
+      <PageHeader subtitle="REFLECTION" title="Weekly Review" accent={ACCENT} showBack>
         <button onClick={() => setShowAdd(true)} style={{
           background: 'rgba(62,200,138,0.1)', border: '0.5px solid rgba(62,200,138,0.45)',
           color: ACCENT, borderRadius: 8, padding: '8px 14px', cursor: 'pointer',

@@ -172,7 +172,7 @@ export default function Reading() {
 
   return (
     <SectionShell accent={ACCENT} bgImage={bgImg}>
-      <PageHeader subtitle="READING LOG" title="Reading" accent={ACCENT}>
+      <PageHeader subtitle="READING LOG" title="Reading" accent={ACCENT} showBack>
         <button onClick={() => setShowAdd(true)} style={{
           background: 'rgba(59,130,246,0.1)', border: '0.5px solid rgba(59,130,246,0.45)',
           color: ACCENT, borderRadius: 8, padding: '8px 14px', cursor: 'pointer',

@@ -192,7 +192,7 @@ export default function Tasks() {
 
   return (
     <SectionShell accent="#F09030" bgImage={bgImg}>
-      <PageHeader subtitle="TASK MANAGER" title="Tasks" accent="#F09030">
+      <PageHeader subtitle="TASK MANAGER" title="Tasks" accent="#F09030" showBack>
         <button onClick={() => setShowModal(true)} style={{
           background: 'rgba(240,144,48,0.12)', border: '0.5px solid rgba(240,144,48,0.5)',
           color: '#F09030', borderRadius: 8, padding: '8px 14px', cursor: 'pointer',

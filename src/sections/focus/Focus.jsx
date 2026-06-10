@@ -192,7 +192,7 @@ export default function Focus() {
 
   return (
     <SectionShell accent={ACCENT} bgImage={bgImg}>
-      <PageHeader subtitle="FOCUS MODE" title="Focus" accent={ACCENT} />
+      <PageHeader subtitle="FOCUS MODE" title="Focus" accent={ACCENT} showBack />
 
       <div className="p-4 md:p-6 max-w-2xl">
 

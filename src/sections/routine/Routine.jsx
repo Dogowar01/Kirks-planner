@@ -142,7 +142,7 @@ export default function Routine() {
 
   return (
     <SectionShell accent={ACCENT} bgImage={bgImg}>
-      <PageHeader subtitle="DAILY RITUAL" title="Morning Routine" accent={ACCENT}>
+      <PageHeader subtitle="DAILY RITUAL" title="Morning Routine" accent={ACCENT} showBack>
         <div style={{ display: 'flex', gap: 8 }}>
           <button onClick={() => setIsEditing(e => !e)} style={{
             background: isEditing ? 'rgba(245,200,66,0.15)' : 'rgba(255,255,255,0.04)',

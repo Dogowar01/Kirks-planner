@@ -125,7 +125,7 @@ export default function Journal() {
   return (
     <SectionShell accent="#8B5CF6" bgImage={bgImg}>
       {!activeEntry && (
-        <PageHeader subtitle="PRIVATE JOURNAL" title="Journal" accent="#8B5CF6">
+        <PageHeader subtitle="PRIVATE JOURNAL" title="Journal" accent="#8B5CF6" showBack>
           <button onClick={newEntry} style={{
             background: 'rgba(139,92,246,0.12)', border: '0.5px solid rgba(139,92,246,0.5)',
             color: '#8B5CF6', borderRadius: 8, padding: '8px 14px', cursor: 'pointer',

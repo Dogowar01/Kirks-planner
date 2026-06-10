@@ -156,7 +156,7 @@ export default function Writing() {
 
   return (
     <SectionShell accent={ACCENT} bgImage={bgImg}>
-      <PageHeader subtitle="WRITING TRACKER" title="Writing" accent={ACCENT}>
+      <PageHeader subtitle="WRITING TRACKER" title="Writing" accent={ACCENT} showBack>
         <button onClick={() => setShowAdd(true)} style={{
           background: 'rgba(124,58,237,0.12)', border: '0.5px solid rgba(124,58,237,0.5)',
           color: ACCENT, borderRadius: 8, padding: '8px 14px', cursor: 'pointer',

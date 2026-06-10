@@ -369,7 +369,7 @@ export default function Calendar() {
 
   return (
     <SectionShell accent="#3EC88A" bgImage={bgImg}>
-      <PageHeader subtitle="SCHEDULE" title="Calendar" accent="#3EC88A">
+      <PageHeader subtitle="SCHEDULE" title="Calendar" accent="#3EC88A" showBack>
         <button onClick={hasBinNights ? removeBinNights : addBinNights} style={{
           background: 'rgba(62,200,138,0.1)', border: '0.5px solid rgba(62,200,138,0.35)',
           color: '#3EC88A', borderRadius: 8, padding: '8px 12px', cursor: 'pointer',

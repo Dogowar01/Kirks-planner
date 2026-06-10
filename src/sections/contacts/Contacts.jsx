@@ -404,7 +404,7 @@ export default function Contacts() {
 
   return (
     <SectionShell accent="#E06840" bgImage={bgImg}>
-      <PageHeader subtitle="CONTACTS" title="Contacts" accent="#E06840">
+      <PageHeader subtitle="CONTACTS" title="Contacts" accent="#E06840" showBack>
         <button onClick={() => setShowModal(true)} style={{
           background: 'rgba(224,104,64,0.12)', border: '0.5px solid rgba(224,104,64,0.5)',
           color: '#E06840', borderRadius: 8, padding: '8px 14px', cursor: 'pointer',

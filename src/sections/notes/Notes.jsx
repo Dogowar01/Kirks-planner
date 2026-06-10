@@ -131,7 +131,7 @@ export default function Notes() {
   return (
     <SectionShell accent="#B87FD8" bgImage={bgImg}>
       {!activeNote && (
-        <PageHeader subtitle="NOTE SYSTEM" title="Notes" accent="#B87FD8">
+        <PageHeader subtitle="NOTE SYSTEM" title="Notes" accent="#B87FD8" showBack>
           <button onClick={createNote} style={{
             background: 'rgba(184,127,216,0.12)', border: '0.5px solid rgba(184,127,216,0.5)',
             color: '#B87FD8', borderRadius: 8, padding: '8px 14px', cursor: 'pointer',

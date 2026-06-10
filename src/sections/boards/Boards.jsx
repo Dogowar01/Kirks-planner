@@ -181,7 +181,7 @@ export default function Boards() {
 
   return (
     <SectionShell accent={ACCENT} bgImage={bgImg}>
-      <PageHeader subtitle="PROJECT TRACKER" title="Boards" accent={ACCENT}>
+      <PageHeader subtitle="PROJECT TRACKER" title="Boards" accent={ACCENT} showBack>
         <button onClick={() => setShowAdd(true)} style={{
           background: 'rgba(160,64,224,0.12)', border: '0.5px solid rgba(160,64,224,0.5)',
           color: ACCENT, borderRadius: 8, padding: '8px 14px', cursor: 'pointer',
