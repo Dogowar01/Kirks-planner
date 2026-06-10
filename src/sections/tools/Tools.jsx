@@ -1296,6 +1296,8 @@ const TOOLS = [
   { id: 'countdown',  label: 'Countdown Timers',     icon: '⏳',  desc: 'Days to any event' },
   { id: 'pen',        label: 'Pen Dose Calculator',  icon: '💉',  desc: 'Mounjaro · Ozempic · Compounded' },
   { id: 'maps',       label: 'Maps & Directions',    icon: '📍',  desc: 'Search locations, get directions' },
+  { id: 'currency',   label: 'Currency Converter',   icon: '💱',  desc: 'Live exchange rates' },
+  { id: 'breathe',    label: 'Breathing Timer',       icon: '🫁',  desc: 'Box · 4-7-8 · Wim Hof' },
 ]
 
 export default function Tools() {
@@ -1361,11 +1363,209 @@ export default function Tools() {
             {active === 'countdown' && <CountdownTimer />}
             {active === 'pen'       && <PenCalculator />}
             {active === 'maps'      && <MapsSearch />}
+            {active === 'currency'  && <CurrencyConverter />}
+            {active === 'breathe'   && <BreathingTimer />}
           </>
         )}
 
       </div>
     </SectionShell>
+  )
+}
+
+// ─── CURRENCY CONVERTER ───────────────────────────────────────────────────────
+
+const CURRENCIES = [
+  { code: 'AUD', name: 'Australian Dollar', flag: '🇦🇺' },
+  { code: 'USD', name: 'US Dollar',         flag: '🇺🇸' },
+  { code: 'EUR', name: 'Euro',              flag: '🇪🇺' },
+  { code: 'GBP', name: 'British Pound',     flag: '🇬🇧' },
+  { code: 'JPY', name: 'Japanese Yen',      flag: '🇯🇵' },
+  { code: 'CAD', name: 'Canadian Dollar',   flag: '🇨🇦' },
+  { code: 'NZD', name: 'New Zealand Dollar',flag: '🇳🇿' },
+  { code: 'CHF', name: 'Swiss Franc',       flag: '🇨🇭' },
+  { code: 'CNY', name: 'Chinese Yuan',      flag: '🇨🇳' },
+  { code: 'SGD', name: 'Singapore Dollar',  flag: '🇸🇬' },
+  { code: 'HKD', name: 'Hong Kong Dollar',  flag: '🇭🇰' },
+  { code: 'INR', name: 'Indian Rupee',      flag: '🇮🇳' },
+  { code: 'MXN', name: 'Mexican Peso',      flag: '🇲🇽' },
+  { code: 'BRL', name: 'Brazilian Real',    flag: '🇧🇷' },
+  { code: 'THB', name: 'Thai Baht',         flag: '🇹🇭' },
+]
+
+const TARGET_CODES = ['USD','EUR','GBP','JPY','NZD','SGD','CAD','CHF']
+
+function CurrencyConverter() {
+  const [base, setBase] = useState('AUD')
+  const [amount, setAmount] = useState('1')
+  const [rates, setRates] = useState(null)
+  const [loading, setLoading] = useState(false)
+  const [updated, setUpdated] = useState(null)
+  const accent = '#00C8FF'
+
+  useEffect(() => {
+    setLoading(true)
+    fetch(`https://api.frankfurter.dev/v1/latest?base=${base}`)
+      .then(r => r.json())
+      .then(d => { setRates(d.rates); setUpdated(d.date); setLoading(false) })
+      .catch(() => setLoading(false))
+  }, [base])
+
+  const num = parseFloat(amount) || 0
+  const targets = CURRENCIES.filter(c => c.code !== base && TARGET_CODES.includes(c.code))
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      {/* Base currency + amount */}
+      <div style={{ background: 'rgba(0,200,255,0.06)', border: '0.5px solid rgba(0,200,255,0.2)', borderRadius: 12, padding: '16px' }}>
+        <div style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.48rem', color: 'rgba(0,200,255,0.6)', letterSpacing: '0.18em', marginBottom: 10 }}>CONVERT FROM</div>
+        <div style={{ display: 'flex', gap: 10 }}>
+          <select value={base} onChange={e => setBase(e.target.value)} style={{ background: 'rgba(13,12,11,0.95)', border: '1px solid rgba(0,200,255,0.25)', borderRadius: 8, color: '#EDE8E0', fontFamily: '"DM Mono", monospace', fontSize: '0.8rem', padding: '10px 12px', outline: 'none', colorScheme: 'dark' }}>
+            {CURRENCIES.map(c => <option key={c.code} value={c.code}>{c.flag} {c.code}</option>)}
+          </select>
+          <input type="number" value={amount} onChange={e => setAmount(e.target.value)} min="0" style={{ flex: 1, background: 'rgba(13,12,11,0.95)', border: '1px solid rgba(0,200,255,0.25)', borderRadius: 8, color: '#EDE8E0', fontFamily: '"Share Tech Mono","DM Mono",monospace', fontSize: '1.4rem', padding: '8px 14px', outline: 'none', textAlign: 'right' }} />
+        </div>
+      </div>
+
+      {/* Results */}
+      {loading && <div style={{ textAlign: 'center', fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', color: 'rgba(0,200,255,0.4)', padding: '1rem', letterSpacing: '0.15em' }}>FETCHING RATES…</div>}
+      {rates && !loading && (
+        <>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+            {targets.map(c => {
+              const rate = rates[c.code]
+              if (!rate) return null
+              const converted = (num * rate).toLocaleString('en-AU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+              return (
+                <div key={c.code} style={{ background: 'rgba(14,12,11,0.85)', border: '0.5px solid rgba(255,255,255,0.07)', borderRadius: 10, padding: '12px 14px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                    <span style={{ fontSize: '1.1rem' }}>{c.flag}</span>
+                    <span style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.52rem', color: 'rgba(160,140,120,0.5)', letterSpacing: '0.1em' }}>{c.code}</span>
+                  </div>
+                  <div style={{ fontFamily: '"Share Tech Mono","DM Mono",monospace', fontSize: '1.1rem', color: accent, textShadow: `0 0 10px ${accent}50`, fontWeight: 700 }}>{converted}</div>
+                  <div style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.42rem', color: 'rgba(160,140,120,0.35)', marginTop: 2 }}>1 {base} = {rate.toFixed(4)} {c.code}</div>
+                </div>
+              )
+            })}
+          </div>
+          {updated && <div style={{ textAlign: 'center', fontFamily: '"DM Mono", monospace', fontSize: '0.42rem', color: 'rgba(160,140,120,0.3)', letterSpacing: '0.1em' }}>Rates as of {updated} · Frankfurter API</div>}
+        </>
+      )}
+    </div>
+  )
+}
+
+// ─── BREATHING TIMER ──────────────────────────────────────────────────────────
+
+const BREATHE_MODES = [
+  { id: 'box',    label: 'Box Breathing',  desc: '4 · 4 · 4 · 4',    phases: [['Inhale',4],['Hold',4],['Exhale',4],['Hold',4]], color: '#00C8FF' },
+  { id: '478',    label: '4-7-8',           desc: '4 · 7 · 8',         phases: [['Inhale',4],['Hold',7],['Exhale',8]], color: '#A855F7' },
+  { id: 'calm',   label: 'Calm',            desc: '4 · 6',             phases: [['Inhale',4],['Exhale',6]], color: '#3EC88A' },
+  { id: 'wim',    label: 'Wim Hof',         desc: '2 · 0 · 4',         phases: [['Inhale',2],['Exhale',0.5],['Hold',15]], color: '#F97316' },
+]
+
+function BreathingTimer() {
+  const [modeId, setModeId] = useState('box')
+  const [running, setRunning] = useState(false)
+  const [phaseIdx, setPhaseIdx] = useState(0)
+  const [timeLeft, setTimeLeft] = useState(null)
+  const [cycles, setCycles] = useState(0)
+  const intervalRef = useRef(null)
+
+  const mode = BREATHE_MODES.find(m => m.id === modeId)
+
+  const start = () => {
+    setPhaseIdx(0)
+    setTimeLeft(mode.phases[0][1])
+    setCycles(0)
+    setRunning(true)
+  }
+
+  const stop = () => {
+    setRunning(false)
+    clearInterval(intervalRef.current)
+    setTimeLeft(null)
+    setPhaseIdx(0)
+  }
+
+  useEffect(() => {
+    if (!running) return
+    clearInterval(intervalRef.current)
+    intervalRef.current = setInterval(() => {
+      setTimeLeft(t => {
+        if (t <= 0.1) {
+          setPhaseIdx(prev => {
+            const next = (prev + 1) % mode.phases.length
+            if (next === 0) setCycles(c => c + 1)
+            setTimeLeft(mode.phases[next][1])
+            return next
+          })
+          return mode.phases[(phaseIdx + 1) % mode.phases.length][1]
+        }
+        return +(t - 0.1).toFixed(2)
+      })
+    }, 100)
+    return () => clearInterval(intervalRef.current)
+  }, [running, phaseIdx, mode])
+
+  useEffect(() => { stop() }, [modeId])
+
+  const phase = mode.phases[phaseIdx]
+  const phaseDur = phase ? phase[1] : 1
+  const progress = timeLeft !== null ? 1 - (timeLeft / phaseDur) : 0
+  const circleSize = 180
+  const r = 72
+  const circ = 2 * Math.PI * r
+  const accent = mode.color
+
+  const scaleVal = running && phase
+    ? phase[0] === 'Inhale' ? 1 + progress * 0.28
+    : phase[0] === 'Exhale' ? 1.28 - progress * 0.28
+    : 1.28
+    : 1
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 20 }}>
+      {/* Mode selector */}
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, justifyContent: 'center' }}>
+        {BREATHE_MODES.map(m => (
+          <button key={m.id} onClick={() => setModeId(m.id)} style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.55rem', letterSpacing: '0.08em', padding: '6px 12px', borderRadius: 8, cursor: 'pointer', border: `1px solid ${modeId === m.id ? m.color : 'rgba(255,255,255,0.1)'}`, background: modeId === m.id ? `${m.color}20` : 'transparent', color: modeId === m.id ? m.color : 'rgba(160,140,120,0.6)', transition: 'all 0.2s' }}>
+            {m.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Circle */}
+      <div style={{ position: 'relative', width: circleSize, height: circleSize }}>
+        {/* Breathing blob */}
+        <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ width: 80, height: 80, borderRadius: '50%', background: `radial-gradient(circle, ${accent}50, ${accent}20)`, boxShadow: `0 0 30px ${accent}60, 0 0 60px ${accent}30`, transform: `scale(${scaleVal})`, transition: 'transform 0.1s linear, box-shadow 0.3s' }} />
+        </div>
+        {/* SVG ring */}
+        <svg width={circleSize} height={circleSize} style={{ position: 'absolute', inset: 0, transform: 'rotate(-90deg)' }}>
+          <circle cx={circleSize/2} cy={circleSize/2} r={r} fill="none" stroke={`${accent}15`} strokeWidth="3" />
+          <circle cx={circleSize/2} cy={circleSize/2} r={r} fill="none" stroke={accent} strokeWidth="3"
+            strokeDasharray={circ} strokeDashoffset={circ * (1 - progress)}
+            style={{ transition: 'stroke-dashoffset 0.1s linear', filter: `drop-shadow(0 0 6px ${accent})` }} />
+        </svg>
+        {/* Phase label */}
+        <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 4 }}>
+          <span style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', color: accent, letterSpacing: '0.15em', textTransform: 'uppercase' }}>{running && phase ? phase[0] : mode.desc}</span>
+          {running && timeLeft !== null && <span style={{ fontFamily: '"Share Tech Mono","DM Mono",monospace', fontSize: '1.6rem', color: '#EDE8E0', fontWeight: 700, textShadow: `0 0 12px ${accent}60` }}>{Math.ceil(timeLeft)}</span>}
+        </div>
+      </div>
+
+      {/* Cycle count */}
+      {cycles > 0 && <div style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.55rem', color: `${accent}70`, letterSpacing: '0.15em' }}>CYCLES COMPLETE: {cycles}</div>}
+
+      {/* Controls */}
+      <div style={{ display: 'flex', gap: 10 }}>
+        {!running
+          ? <button onClick={start} style={{ background: `${accent}20`, border: `1px solid ${accent}50`, color: accent, borderRadius: 10, padding: '10px 28px', cursor: 'pointer', fontFamily: '"DM Mono", monospace', fontSize: '0.7rem', letterSpacing: '0.12em', boxShadow: `0 0 16px ${accent}30` }}>BEGIN</button>
+          : <button onClick={stop}  style={{ background: 'rgba(255,77,106,0.1)', border: '1px solid rgba(255,77,106,0.4)', color: '#FF4D6A', borderRadius: 10, padding: '10px 28px', cursor: 'pointer', fontFamily: '"DM Mono", monospace', fontSize: '0.7rem', letterSpacing: '0.12em' }}>STOP</button>
+        }
+      </div>
+    </div>
   )
 }
 

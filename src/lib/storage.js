@@ -25,4 +25,8 @@ export const KEYS = {
   routine:       'kirk_planner_v1_routine',
   routineLog:    'kirk_planner_v1_routine_log',
   reading:       'kirk_planner_v1_reading',
+  sleep:         'kirk_planner_v1_sleep',
+  subscriptions: 'kirk_planner_v1_subscriptions',
+  mood:          'kirk_planner_v1_mood',
+  shopping:      'kirk_planner_v1_shopping',
 }

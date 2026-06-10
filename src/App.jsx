@@ -21,6 +21,10 @@ import Review from './sections/review/Review'
 import Routine from './sections/routine/Routine'
 import Reading from './sections/reading/Reading'
 import Focus from './sections/focus/Focus'
+import Sleep from './sections/sleep/Sleep'
+import Subscriptions from './sections/subscriptions/Subscriptions'
+import Mood from './sections/mood/Mood'
+import Shopping from './sections/shopping/Shopping'
 import BootScreen, { shouldShowBoot } from './components/BootScreen'
 import { useNotifications } from './hooks/useNotifications'
 
@@ -61,8 +65,12 @@ export default function App() {
             <Route path="review"    element={<Review />} />
             <Route path="routine"   element={<Routine />} />
             <Route path="reading"   element={<Reading />} />
-            <Route path="focus"     element={<Focus />} />
-            <Route path="settings"  element={<Settings />} />
+            <Route path="focus"         element={<Focus />} />
+            <Route path="sleep"         element={<Sleep />} />
+            <Route path="subscriptions" element={<Subscriptions />} />
+            <Route path="mood"          element={<Mood />} />
+            <Route path="shopping"      element={<Shopping />} />
+            <Route path="settings"      element={<Settings />} />
           </Route>
         </Routes>
       </HashRouter>

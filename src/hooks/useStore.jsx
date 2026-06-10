@@ -36,6 +36,10 @@ function initStore() {
     routine:       storage.get(KEYS.routine)       || [],
     routineLog:    storage.get(KEYS.routineLog)    || [],
     reading:       storage.get(KEYS.reading)       || [],
+    sleep:         storage.get(KEYS.sleep)         || [],
+    subscriptions: storage.get(KEYS.subscriptions) || [],
+    mood:          storage.get(KEYS.mood)           || [],
+    shopping:      storage.get(KEYS.shopping)       || [],
   }
 }
 
@@ -65,6 +69,10 @@ export function StoreProvider({ children }) {
       [KEYS.routine]:       'routine',
       [KEYS.routineLog]:    'routineLog',
       [KEYS.reading]:       'reading',
+      [KEYS.sleep]:         'sleep',
+      [KEYS.subscriptions]: 'subscriptions',
+      [KEYS.mood]:          'mood',
+      [KEYS.shopping]:      'shopping',
     }
     return map[key]
   }
@@ -286,6 +294,50 @@ export function StoreProvider({ children }) {
     persist(KEYS.reading, state.reading.filter(b => b.id !== id))
   }, [state.reading, persist])
 
+  // ── Sleep ──
+  const addSleepLog = useCallback((data) => {
+    const next = [{ id: uuid(), ...data, createdAt: new Date().toISOString() }, ...state.sleep]
+    persist(KEYS.sleep, next)
+  }, [state.sleep, persist])
+  const deleteSleepLog = useCallback((id) => {
+    persist(KEYS.sleep, state.sleep.filter(s => s.id !== id))
+  }, [state.sleep, persist])
+
+  // ── Subscriptions ──
+  const addSubscription = useCallback((data) => {
+    const next = [...state.subscriptions, { id: uuid(), ...data, createdAt: new Date().toISOString() }]
+    persist(KEYS.subscriptions, next)
+  }, [state.subscriptions, persist])
+  const updateSubscription = useCallback((id, data) => {
+    const next = state.subscriptions.map(s => s.id === id ? { ...s, ...data } : s)
+    persist(KEYS.subscriptions, next)
+  }, [state.subscriptions, persist])
+  const deleteSubscription = useCallback((id) => {
+    persist(KEYS.subscriptions, state.subscriptions.filter(s => s.id !== id))
+  }, [state.subscriptions, persist])
+
+  // ── Mood ──
+  const addMoodLog = useCallback((data) => {
+    const next = [{ id: uuid(), ...data, createdAt: new Date().toISOString() }, ...state.mood]
+    persist(KEYS.mood, next)
+  }, [state.mood, persist])
+  const deleteMoodLog = useCallback((id) => {
+    persist(KEYS.mood, state.mood.filter(m => m.id !== id))
+  }, [state.mood, persist])
+
+  // ── Shopping ──
+  const addShoppingList = useCallback((data) => {
+    const next = [...state.shopping, { id: uuid(), ...data, items: [], createdAt: new Date().toISOString() }]
+    persist(KEYS.shopping, next)
+  }, [state.shopping, persist])
+  const updateShoppingList = useCallback((id, data) => {
+    const next = state.shopping.map(l => l.id === id ? { ...l, ...data } : l)
+    persist(KEYS.shopping, next)
+  }, [state.shopping, persist])
+  const deleteShoppingList = useCallback((id) => {
+    persist(KEYS.shopping, state.shopping.filter(l => l.id !== id))
+  }, [state.shopping, persist])
+
   // ── Settings ──
   const updateSettings = useCallback((data) => {
     const next = { ...state.settings, ...data }
@@ -349,6 +401,10 @@ export function StoreProvider({ children }) {
     addWeeklyReview, deleteWeeklyReview,
     addRoutineStep, updateRoutineStep, deleteRoutineStep, setRoutineLog,
     addBook, updateBook, deleteBook,
+    addSleepLog, deleteSleepLog,
+    addSubscription, updateSubscription, deleteSubscription,
+    addMoodLog, deleteMoodLog,
+    addShoppingList, updateShoppingList, deleteShoppingList,
     updateSettings,
     exportData, importData, clearAllData,
   }

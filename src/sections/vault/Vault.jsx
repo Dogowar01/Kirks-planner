@@ -557,11 +557,114 @@ function ChangePinModal({ vault, onClose }) {
   )
 }
 
+// ─── Password Generator ───────────────────────────────────────
+function PasswordGenerator({ onClose }) {
+  const [length, setLength] = useState(20)
+  const [useUpper, setUseUpper] = useState(true)
+  const [useLower, setUseLower] = useState(true)
+  const [useNums, setUseNums] = useState(true)
+  const [useSymbols, setUseSymbols] = useState(true)
+  const [password, setPassword] = useState('')
+  const [copied, setCopied] = useState(false)
+
+  const generate = useCallback(() => {
+    const upper = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+    const lower = 'abcdefghijklmnopqrstuvwxyz'
+    const nums  = '0123456789'
+    const syms  = '!@#$%^&*()-_=+[]{}|;:,.<>?'
+    let pool = ''
+    if (useUpper) pool += upper
+    if (useLower) pool += lower
+    if (useNums)  pool += nums
+    if (useSymbols) pool += syms
+    if (!pool) { setPassword('Enable at least one character type'); return }
+    let pw = ''
+    const arr = new Uint32Array(length)
+    crypto.getRandomValues(arr)
+    for (let i = 0; i < length; i++) pw += pool[arr[i] % pool.length]
+    setPassword(pw)
+    setCopied(false)
+  }, [length, useUpper, useLower, useNums, useSymbols])
+
+  useEffect(() => { generate() }, [generate])
+
+  const copy = () => {
+    if (!password) return
+    navigator.clipboard.writeText(password)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
+  const Toggle = ({ label, on, set }) => (
+    <button onClick={() => set(v => !v)} style={{
+      flex: 1, padding: '8px 4px', borderRadius: 8, cursor: 'pointer',
+      border: `1px solid ${on ? PLUM_BORDER : 'rgba(255,255,255,0.08)'}`,
+      background: on ? PLUM_DIM : 'transparent',
+      fontFamily: '"DM Mono", monospace', fontSize: '0.5rem', letterSpacing: '0.1em',
+      color: on ? PLUM : 'rgba(160,140,120,0.4)', transition: 'all 0.15s',
+    }}>{label}</button>
+  )
+
+  return (
+    <div style={{ padding: '16px', borderTop: '0.5px solid rgba(255,255,255,0.06)', animation: 'phase-in 0.4s cubic-bezier(0.22,1,0.36,1) both' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+        <span style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.55rem', letterSpacing: '0.18em', color: PLUM }}>PASSWORD GENERATOR</span>
+        <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'rgba(160,140,120,0.5)', cursor: 'pointer', padding: 4 }}><X size={14} /></button>
+      </div>
+
+      {/* Generated password display */}
+      <div style={{ position: 'relative', marginBottom: 12 }}>
+        <div style={{
+          background: 'rgba(13,12,11,0.95)', border: `1px solid ${PLUM_BORDER}`,
+          borderRadius: 10, padding: '12px 48px 12px 14px',
+          fontFamily: '"DM Mono", monospace', fontSize: '0.82rem',
+          color: '#EDE8E0', letterSpacing: '0.06em', wordBreak: 'break-all',
+          lineHeight: 1.5, minHeight: 44,
+          boxShadow: `0 0 16px ${PLUM}22`,
+        }}>{password}</div>
+        <button onClick={copy} style={{
+          position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)',
+          background: 'none', border: 'none', cursor: 'pointer',
+          color: copied ? '#4ADE80' : PLUM, transition: 'color 0.2s',
+        }}>{copied ? <Check size={16} /> : <Copy size={16} />}</button>
+      </div>
+
+      {/* Length slider */}
+      <div style={{ marginBottom: 14 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+          <span style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.48rem', color: 'rgba(160,140,120,0.5)', letterSpacing: '0.12em' }}>LENGTH</span>
+          <span style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.65rem', color: PLUM, fontWeight: 700 }}>{length}</span>
+        </div>
+        <input type="range" min={8} max={64} value={length} onChange={e => setLength(+e.target.value)}
+          style={{ width: '100%', accentColor: PLUM, cursor: 'pointer' }} />
+      </div>
+
+      {/* Toggles */}
+      <div style={{ display: 'flex', gap: 6, marginBottom: 14 }}>
+        <Toggle label="A–Z" on={useUpper} set={setUseUpper} />
+        <Toggle label="a–z" on={useLower} set={setUseLower} />
+        <Toggle label="0–9" on={useNums}  set={setUseNums} />
+        <Toggle label="!@#" on={useSymbols} set={setUseSymbols} />
+      </div>
+
+      {/* Generate button */}
+      <button onClick={generate} style={{
+        width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+        background: PLUM_DIM, border: `0.5px solid ${PLUM_BORDER}`, borderRadius: 10,
+        padding: '12px', color: PLUM, fontFamily: '"DM Mono", monospace',
+        fontSize: '0.62rem', letterSpacing: '0.15em', cursor: 'pointer',
+        boxShadow: `0 0 12px ${PLUM}25`,
+      }}><RefreshCw size={13} /> GENERATE NEW</button>
+    </div>
+  )
+}
+
 // ─── Vault Screen (Unlocked) ──────────────────────────────────
 function VaultScreen({ vault }) {
   const [modal, setModal]     = useState(null)  // null | 'add' | { entry }
   const [bioAvail, setBioAvail] = useState(false)
   const [bioStatus, setBioStatus] = useState('')
+  const [showGen, setShowGen] = useState(false)
   const { entries, isBioEnrolled, removeBio, enrollBio, lock } = vault
 
   useEffect(() => { vault.bioAvailable().then(setBioAvail) }, [vault])
@@ -632,7 +735,16 @@ function VaultScreen({ vault }) {
           style={{ background: 'rgba(255,255,255,0.07)', border: '0.5px solid rgba(255,255,255,0.14)', borderRadius: 14, padding: '14px 18px', color: '#B8B0A8', cursor: 'pointer', minWidth: 52, minHeight: 52, display: 'flex', alignItems: 'center', justifyContent: 'center', touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent' }}>
           <Lock size={18} />
         </button>
+        <button
+          onClick={() => setShowGen(v => !v)}
+          title="Password Generator"
+          style={{ background: showGen ? PLUM_DIM : 'rgba(255,255,255,0.07)', border: showGen ? `0.5px solid ${PLUM_BORDER}` : '0.5px solid rgba(255,255,255,0.14)', borderRadius: 14, padding: '14px 18px', color: showGen ? PLUM : '#B8B0A8', cursor: 'pointer', minWidth: 52, minHeight: 52, display: 'flex', alignItems: 'center', justifyContent: 'center', touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent', transition: 'all 0.2s' }}>
+          <RefreshCw size={18} />
+        </button>
       </div>
+
+      {/* Password Generator panel */}
+      {showGen && <PasswordGenerator onClose={() => setShowGen(false)} />}
 
       {/* Biometric enrolment strip */}
       {bioAvail && (

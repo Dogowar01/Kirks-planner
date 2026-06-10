@@ -7,7 +7,7 @@ import {
   FileText, BookOpen, BarChart2, StickyNote,
   CheckSquare, Kanban, CalendarDays,
   BookMarked, Fuel, Users, ShieldCheck,
-  Wrench, Settings,
+  Wrench, Settings, Moon, CreditCard, Smile, ShoppingCart,
 } from 'lucide-react'
 
 const ACCENT = '#C4522A'
@@ -18,7 +18,9 @@ const SECTIONS = [
     items: [
       { to: '/dashboard', label: 'Dashboard',      desc: 'Overview & live command centre', color: '#C4522A', Icon: LayoutDashboard },
       { to: '/habits',    label: 'Habits',          desc: 'Daily streaks & consistency',    color: '#F09030', Icon: Flame },
-      { to: '/journal',   label: 'Journal',         desc: 'Reflections & mood tracking',    color: '#8B5CF6', Icon: PenLine },
+      { to: '/journal',   label: 'Journal',         desc: 'Reflections & daily writing',    color: '#8B5CF6', Icon: PenLine },
+      { to: '/mood',      label: 'Mood & Energy',   desc: 'Daily check-in & trends',        color: '#EC4899', Icon: Smile },
+      { to: '/sleep',     label: 'Sleep Tracker',   desc: 'Log sleep & track quality',      color: '#6366F1', Icon: Moon },
       { to: '/routine',   label: 'Morning Routine', desc: 'Daily startup sequence',         color: '#F5C842', Icon: Sun },
       { to: '/focus',     label: 'Focus Mode',      desc: 'Work mode selector & timer',     color: '#00C8FF', Icon: Target },
       { to: '/ambient',   label: 'Ambient Clock',   desc: 'Fullscreen time display',        color: '#C4522A', Icon: Clock },
@@ -44,10 +46,12 @@ const SECTIONS = [
   {
     group: 'Life & Money',
     items: [
-      { to: '/ledger',   label: 'Ledger',        desc: 'Income, expenses & finance',  color: '#3EC88A', Icon: BookMarked },
-      { to: '/fuel',     label: 'Fuel Tracker',  desc: 'Vehicle fill logs & costs',   color: '#F09030', Icon: Fuel },
-      { to: '/contacts', label: 'Contacts',      desc: 'People & quick dial',         color: '#EC4899', Icon: Users },
-      { to: '/vault',    label: 'Vault',         desc: 'Secure credential storage',   color: '#6366F1', Icon: ShieldCheck },
+      { to: '/ledger',        label: 'Ledger',        desc: 'Income, expenses & finance',  color: '#3EC88A', Icon: BookMarked },
+      { to: '/subscriptions', label: 'Subscriptions', desc: 'Track recurring costs',        color: '#10B981', Icon: CreditCard },
+      { to: '/shopping',      label: 'Shopping',      desc: 'Lists & groceries',            color: '#F97316', Icon: ShoppingCart },
+      { to: '/fuel',          label: 'Fuel Tracker',  desc: 'Vehicle fill logs & costs',   color: '#F09030', Icon: Fuel },
+      { to: '/contacts',      label: 'Contacts',      desc: 'People & quick dial',         color: '#EC4899', Icon: Users },
+      { to: '/vault',         label: 'Vault',         desc: 'Secure credential storage',   color: '#6366F1', Icon: ShieldCheck },
     ],
   },
   {
