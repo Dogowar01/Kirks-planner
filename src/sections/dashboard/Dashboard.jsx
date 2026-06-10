@@ -502,6 +502,22 @@ function LiveClock({ taskCount = 0, eventCount = 0 }) {
             <span style={{ fontFamily: '"DM Mono"', fontSize: '0.55rem', fontWeight: 700, color: c, letterSpacing: '0.06em', textShadow: `0 0 12px ${c}` }}>{v}</span>
           </div>
         ))}
+        {/* Ambient mode button */}
+        <button
+          onClick={() => navigate('/ambient')}
+          style={{
+            marginTop: 6, fontFamily: '"DM Mono"', fontSize: '0.42rem', letterSpacing: '0.18em',
+            color: 'rgba(196,82,42,0.45)', background: 'rgba(196,82,42,0.06)',
+            border: '0.5px solid rgba(196,82,42,0.2)', borderRadius: 5,
+            padding: '4px 8px', cursor: 'pointer', textTransform: 'uppercase',
+            transition: 'all 0.2s',
+            animation: ph(2.1, 0.8, 'right'),
+          }}
+          onMouseEnter={e => { e.currentTarget.style.color = '#C4522A'; e.currentTarget.style.borderColor = 'rgba(196,82,42,0.5)' }}
+          onMouseLeave={e => { e.currentTarget.style.color = 'rgba(196,82,42,0.45)'; e.currentTarget.style.borderColor = 'rgba(196,82,42,0.2)' }}
+        >
+          ◉ AMBIENT
+        </button>
       </div>
 
       {/* Content */}
@@ -1593,16 +1609,32 @@ function MissionsWidget({ onNavigateToTasks }) {
                     </div>
                   </div>
 
-                  {/* Row 2: progress + days */}
+                  {/* Row 2: progress ring + bar + days */}
                   <div className="flex items-center gap-3 mt-3">
-                    <div className="flex-1" style={{ height: 3, background: 'rgba(255,255,255,0.06)', borderRadius: 2 }}>
+                    {/* Circular progress ring */}
+                    {total > 0 && (() => {
+                      const r = 13, circ = 2 * Math.PI * r
+                      const ringColor = pct === 100 ? '#2D9E5A' : color
+                      return (
+                        <svg width="32" height="32" style={{ flexShrink: 0, transform: 'rotate(-90deg)' }}>
+                          <circle cx="16" cy="16" r={r} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="2.5" />
+                          <circle cx="16" cy="16" r={r} fill="none" stroke={ringColor}
+                            strokeWidth="2.5"
+                            strokeDasharray={circ}
+                            strokeDashoffset={circ * (1 - pct / 100)}
+                            strokeLinecap="round"
+                            style={{ transition: 'stroke-dashoffset 0.6s ease', filter: `drop-shadow(0 0 3px ${ringColor}90)` }} />
+                        </svg>
+                      )
+                    })()}
+                    <div className="flex-1" style={{ height: 2, background: 'rgba(255,255,255,0.06)', borderRadius: 2 }}>
                       <div style={{ height: '100%', width: `${pct}%`, borderRadius: 2,
                         background: pct === 100 ? '#2D9E5A' : color,
                         boxShadow: pct > 0 ? `0 0 6px ${color}80` : 'none',
                         transition: 'width 0.4s ease' }} />
                     </div>
                     <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.55rem', color: '#A09890', flexShrink: 0 }}>
-                      {total > 0 ? `${done}/${total} tasks` : 'no linked tasks'}
+                      {total > 0 ? `${pct}% · ${done}/${total}` : 'no tasks'}
                     </p>
                     {days && (
                       <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.55rem', color: days.color, flexShrink: 0 }}>

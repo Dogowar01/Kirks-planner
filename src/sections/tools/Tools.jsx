@@ -6,21 +6,50 @@ import bgImg from '../../assets/art-architectural.jpg'
 import { useStore } from '../../hooks/useStore'
 
 // ─── World Clocks ────────────────────────────────────────────────────────────
-const CITIES = [
-  { name: 'Orlando',     tz: 'America/New_York',    lat: 28.54,  lon: -81.38 },
-  { name: 'Tokyo',       tz: 'Asia/Tokyo',           lat: 35.68,  lon: 139.69 },
-  { name: 'Los Angeles', tz: 'America/Los_Angeles',  lat: 34.05,  lon: -118.24 },
+const CITY_OPTIONS = [
+  { name: 'Orlando',       tz: 'America/New_York',       lat: 28.54,   lon: -81.38  },
+  { name: 'New York',      tz: 'America/New_York',       lat: 40.71,   lon: -74.01  },
+  { name: 'Los Angeles',   tz: 'America/Los_Angeles',    lat: 34.05,   lon: -118.24 },
+  { name: 'Chicago',       tz: 'America/Chicago',        lat: 41.88,   lon: -87.63  },
+  { name: 'Denver',        tz: 'America/Denver',         lat: 39.74,   lon: -104.98 },
+  { name: 'London',        tz: 'Europe/London',          lat: 51.51,   lon: -0.13   },
+  { name: 'Paris',         tz: 'Europe/Paris',           lat: 48.85,   lon: 2.35    },
+  { name: 'Berlin',        tz: 'Europe/Berlin',          lat: 52.52,   lon: 13.40   },
+  { name: 'Amsterdam',     tz: 'Europe/Amsterdam',       lat: 52.37,   lon: 4.90    },
+  { name: 'Dubai',         tz: 'Asia/Dubai',             lat: 25.20,   lon: 55.27   },
+  { name: 'Mumbai',        tz: 'Asia/Kolkata',           lat: 19.08,   lon: 72.88   },
+  { name: 'Singapore',     tz: 'Asia/Singapore',         lat: 1.35,    lon: 103.82  },
+  { name: 'Tokyo',         tz: 'Asia/Tokyo',             lat: 35.68,   lon: 139.69  },
+  { name: 'Seoul',         tz: 'Asia/Seoul',             lat: 37.57,   lon: 126.98  },
+  { name: 'Sydney',        tz: 'Australia/Sydney',       lat: -33.87,  lon: 151.21  },
+  { name: 'Melbourne',     tz: 'Australia/Melbourne',    lat: -37.81,  lon: 144.96  },
+  { name: 'Auckland',      tz: 'Pacific/Auckland',       lat: -36.85,  lon: 174.76  },
+  { name: 'São Paulo',     tz: 'America/Sao_Paulo',      lat: -23.55,  lon: -46.63  },
+  { name: 'Toronto',       tz: 'America/Toronto',        lat: 43.65,   lon: -79.38  },
+  { name: 'Cape Town',     tz: 'Africa/Johannesburg',    lat: -33.93,  lon: 18.42   },
 ]
+const DEFAULT_CITIES = ['Orlando', 'Tokyo', 'Los Angeles']
+const CLOCKS_KEY = 's9_world_clocks'
 const NIXIE_DIGITS = '0123456789'
 
-function useWorldData() {
+function useWorldCities() {
+  const [selected, setSelected] = useState(() => {
+    try { const s = JSON.parse(localStorage.getItem(CLOCKS_KEY)); return Array.isArray(s) && s.length ? s : DEFAULT_CITIES } catch { return DEFAULT_CITIES }
+  })
+  function save(names) { setSelected(names); localStorage.setItem(CLOCKS_KEY, JSON.stringify(names)) }
+  function add(name) { if (!selected.includes(name) && selected.length < 6) save([...selected, name]) }
+  function remove(name) { save(selected.filter(n => n !== name)) }
+  return { selected, add, remove }
+}
+
+function useWorldData(cities) {
   const [times, setTimes] = useState({})
   const [temps, setTemps] = useState({})
 
   useEffect(() => {
     const tick = () => {
       const now = {}
-      CITIES.forEach(c => {
+      cities.forEach(c => {
         const d = new Date()
         const time = new Intl.DateTimeFormat('en-GB', {
           timeZone: c.tz, hour: '2-digit', minute: '2-digit', hour12: false,
@@ -35,16 +64,16 @@ function useWorldData() {
     tick()
     const id = setInterval(tick, 1000)
     return () => clearInterval(id)
-  }, [])
+  }, [cities])
 
   useEffect(() => {
-    CITIES.forEach(c => {
+    cities.forEach(c => {
       fetch(`https://api.open-meteo.com/v1/forecast?latitude=${c.lat}&longitude=${c.lon}&current_weather=true`, { cache: 'no-store' })
         .then(r => r.json())
         .then(j => setTemps(t => ({ ...t, [c.name]: Math.round(j.current_weather?.temperature ?? '—') })))
         .catch(() => {})
     })
-  }, [])
+  }, [cities])
 
   return { times, temps }
 }
@@ -186,12 +215,57 @@ function NixieClock({ time, day, temp, city, bootDelay = 0 }) {
 }
 
 function WorldClocks() {
-  const { times, temps } = useWorldData()
+  const { selected, add, remove } = useWorldCities()
+  const [showPicker, setShowPicker] = useState(false)
+  const activeCities = CITY_OPTIONS.filter(c => selected.includes(c.name))
+  const { times, temps } = useWorldData(activeCities)
+
   return (
     <div className="card" style={{ background: '#0a0905', borderColor: '#1e1a0a' }}>
-      <p className="section-label mb-4">[ World Clocks ]</p>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+        <p className="section-label">[ World Clocks ]</p>
+        <button onClick={() => setShowPicker(p => !p)}
+          style={{
+            fontFamily: '"DM Mono", monospace', fontSize: '0.48rem', letterSpacing: '0.14em',
+            color: showPicker ? '#FF8C35' : 'rgba(255,140,53,0.4)',
+            background: showPicker ? 'rgba(255,140,53,0.1)' : 'transparent',
+            border: `0.5px solid ${showPicker ? 'rgba(255,140,53,0.4)' : 'rgba(255,140,53,0.15)'}`,
+            borderRadius: 6, padding: '4px 8px', cursor: 'pointer', transition: 'all 0.2s',
+          }}>
+          {showPicker ? '✕ DONE' : '+ CITY'}
+        </button>
+      </div>
+
+      {/* City picker */}
+      {showPicker && (
+        <div style={{ marginBottom: 16, padding: '10px 12px', background: 'rgba(255,140,53,0.04)', border: '0.5px solid rgba(255,140,53,0.12)', borderRadius: 8 }}>
+          <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.44rem', color: 'rgba(255,140,53,0.5)', letterSpacing: '0.14em', textTransform: 'uppercase', marginBottom: 8 }}>
+            Add / Remove · {selected.length}/6 selected
+          </p>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
+            {CITY_OPTIONS.map(c => {
+              const isActive = selected.includes(c.name)
+              return (
+                <button key={c.name}
+                  onClick={() => isActive ? remove(c.name) : add(c.name)}
+                  style={{
+                    fontFamily: '"DM Mono", monospace', fontSize: '0.45rem', letterSpacing: '0.06em',
+                    padding: '4px 8px', borderRadius: 5, cursor: 'pointer', transition: 'all 0.15s',
+                    background: isActive ? 'rgba(255,140,53,0.18)' : 'rgba(255,255,255,0.03)',
+                    border: `0.5px solid ${isActive ? 'rgba(255,140,53,0.5)' : 'rgba(255,255,255,0.07)'}`,
+                    color: isActive ? '#FF8C35' : '#5C5650',
+                    opacity: !isActive && selected.length >= 6 ? 0.4 : 1,
+                  }}>
+                  {isActive ? '✓ ' : ''}{c.name}
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      )}
+
       <div style={{ display: 'flex', justifyContent: 'space-around', flexWrap: 'wrap', gap: 16 }}>
-        {CITIES.map((c, i) => {
+        {activeCities.map((c, i) => {
           const { time = '', day = '' } = times[c.name] || {}
           return (
             <NixieClock key={c.name} city={c.name} time={time} day={day} temp={temps[c.name]} bootDelay={i * 0.4} />

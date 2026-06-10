@@ -224,6 +224,86 @@ function LandingView({ transactions, onOpen, onBack }) {
   );
 }
 
+// ─── MONTHLY CHART ────────────────────────────────────────────────────────────
+
+function MonthlyChart({ bizTxns, accent, secondary }) {
+  const months = useMemo(() => {
+    const result = []
+    const now = new Date()
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+      const label = d.toLocaleDateString('en-AU', { month: 'short' }).toUpperCase()
+      const txns = bizTxns.filter(tx => getMonthKey(tx.date) === key)
+      const income = txns.filter(t => t.type === 'in').reduce((s, t) => s + t.amount, 0)
+      const expense = txns.filter(t => t.type === 'out').reduce((s, t) => s + t.amount, 0)
+      result.push({ key, label, income, expense })
+    }
+    return result
+  }, [bizTxns])
+
+  const maxVal = Math.max(...months.flatMap(m => [m.income, m.expense]), 1)
+  const chartH = 70, barW = 10, gap = 4, colW = barW * 2 + gap + 8
+  const totalW = months.length * colW
+
+  return (
+    <div style={{ padding: '14px 16px 10px', borderBottom: `1px solid ${accent}20`, animation: ph(0.4, 0.9) }}>
+      <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.48rem', letterSpacing: '0.18em', textTransform: 'uppercase', color: `${accent}60`, marginBottom: 10 }}>
+        Monthly Overview · last 6 months
+      </p>
+      <div style={{ display: 'flex', alignItems: 'flex-end', gap: 0, overflowX: 'auto' }}>
+        <svg width={totalW} height={chartH + 18} style={{ overflow: 'visible', flexShrink: 0 }}>
+          {months.map((m, i) => {
+            const x = i * colW
+            const incH = Math.max(2, (m.income / maxVal) * chartH)
+            const expH = Math.max(2, (m.expense / maxVal) * chartH)
+            return (
+              <g key={m.key}>
+                {/* Income bar */}
+                <rect
+                  x={x} y={chartH - incH} width={barW} height={incH} rx={2}
+                  fill={secondary} opacity={0.75}
+                  style={{ filter: `drop-shadow(0 0 3px ${secondary}80)` }}
+                >
+                  <animate attributeName="height" from="0" to={incH} dur="0.6s" begin={`${i * 0.08}s`} fill="freeze" />
+                  <animate attributeName="y" from={chartH} to={chartH - incH} dur="0.6s" begin={`${i * 0.08}s`} fill="freeze" />
+                </rect>
+                {/* Expense bar */}
+                <rect
+                  x={x + barW + gap} y={chartH - expH} width={barW} height={expH} rx={2}
+                  fill="#FF4D6A" opacity={0.65}
+                  style={{ filter: 'drop-shadow(0 0 3px rgba(255,77,106,0.7))' }}
+                >
+                  <animate attributeName="height" from="0" to={expH} dur="0.6s" begin={`${i * 0.08}s`} fill="freeze" />
+                  <animate attributeName="y" from={chartH} to={chartH - expH} dur="0.6s" begin={`${i * 0.08}s`} fill="freeze" />
+                </rect>
+                {/* Month label */}
+                <text x={x + barW} y={chartH + 12} textAnchor="middle"
+                  style={{ fontFamily: '"DM Mono", monospace', fontSize: '7px', fill: '#5C5650', letterSpacing: '0.05em' }}>
+                  {m.label}
+                </text>
+              </g>
+            )
+          })}
+          {/* Baseline */}
+          <line x1={0} y1={chartH} x2={totalW} y2={chartH} stroke={`${accent}25`} strokeWidth="0.5" />
+        </svg>
+        {/* Legend */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 5, paddingLeft: 16, paddingBottom: 18, flexShrink: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+            <div style={{ width: 8, height: 8, borderRadius: 2, background: secondary, opacity: 0.75 }} />
+            <span style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.42rem', color: '#5C5650', letterSpacing: '0.1em' }}>IN</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+            <div style={{ width: 8, height: 8, borderRadius: 2, background: '#FF4D6A', opacity: 0.65 }} />
+            <span style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.42rem', color: '#5C5650', letterSpacing: '0.1em' }}>OUT</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ─── LIST VIEW ────────────────────────────────────────────────────────────────
 
 function ListView({ activeBiz, transactions, categories, onBack, onAdd, onEdit, onDelete, onExport, onToggleCat, catView }) {
@@ -328,6 +408,9 @@ function ListView({ activeBiz, transactions, categories, onBack, onAdd, onEdit, 
             </div>
           ))}
         </div>
+
+        {/* Monthly chart */}
+        <MonthlyChart bizTxns={bizTxns} accent={accent} secondary={secondary} />
 
         {/* Cat editor */}
         {catView && (

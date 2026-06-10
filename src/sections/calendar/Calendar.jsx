@@ -230,8 +230,105 @@ const BIN_SEEDS = [
   },
 ]
 
+function WeekView({ events, onDayClick, onEventClick }) {
+  const [weekStart, setWeekStart] = useState(() => startOfWeek(new Date(), { weekStartsOn: 1 }))
+  const days = eachDayOfInterval({ start: weekStart, end: addDays(weekStart, 6) })
+  const expanded = expandRecurring(events, weekStart, addDays(weekStart, 6))
+
+  function eventsOnDay(day) {
+    return expanded.filter(e => isSameDay(parseISO(e.date), day))
+      .sort((a, b) => (a.time || '').localeCompare(b.time || ''))
+  }
+
+  return (
+    <div>
+      {/* Week nav */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
+        <button onClick={() => setWeekStart(d => addDays(d, -7))} className="btn-ghost p-2"><ChevronLeft size={16} /></button>
+        <div style={{ flex: 1, textAlign: 'center' }}>
+          <span style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', color: '#A09890', letterSpacing: '0.12em' }}>
+            {format(weekStart, 'd MMM')} – {format(addDays(weekStart, 6), 'd MMM yyyy')}
+          </span>
+        </div>
+        <button onClick={() => setWeekStart(startOfWeek(new Date(), { weekStartsOn: 1 }))}
+          style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.5rem', color: '#3EC88A', letterSpacing: '0.1em',
+            background: 'rgba(62,200,138,0.08)', border: '0.5px solid rgba(62,200,138,0.3)', borderRadius: 6, padding: '4px 8px', cursor: 'pointer' }}>
+          NOW
+        </button>
+        <button onClick={() => setWeekStart(d => addDays(d, 7))} className="btn-ghost p-2"><ChevronRight size={16} /></button>
+      </div>
+
+      {/* 7 columns */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 4 }}>
+        {days.map((day, i) => {
+          const dayEvs = eventsOnDay(day)
+          const todayDay = isToday(day)
+          return (
+            <div key={i}
+              onClick={() => onDayClick(format(day, 'yyyy-MM-dd'))}
+              style={{
+                minHeight: 120, borderRadius: 10, cursor: 'pointer',
+                background: todayDay ? 'rgba(196,82,42,0.08)' : 'rgba(14,12,11,0.96)',
+                border: todayDay ? '0.5px solid rgba(196,82,42,0.4)' : '0.5px solid rgba(62,200,138,0.1)',
+                padding: '8px 5px', display: 'flex', flexDirection: 'column', gap: 3,
+                transition: 'background 0.15s',
+              }}
+              onMouseEnter={e => { if (!todayDay) e.currentTarget.style.background = 'rgba(62,200,138,0.05)' }}
+              onMouseLeave={e => { if (!todayDay) e.currentTarget.style.background = 'rgba(14,12,11,0.96)' }}
+            >
+              {/* Day label */}
+              <div style={{ textAlign: 'center', marginBottom: 4 }}>
+                <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.42rem', color: '#5C5650', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+                  {format(day, 'EEE')}
+                </p>
+                <span style={{
+                  display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                  width: todayDay ? 22 : 'auto', height: todayDay ? 22 : 'auto',
+                  borderRadius: todayDay ? '50%' : 0,
+                  background: todayDay ? '#C4522A' : 'none',
+                  fontFamily: '"DM Mono", monospace', fontSize: '0.75rem',
+                  color: todayDay ? '#fff' : '#C8BFB5', fontWeight: todayDay ? 700 : 400,
+                }}>
+                  {format(day, 'd')}
+                </span>
+              </div>
+
+              {/* Events */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 2, overflow: 'hidden' }}>
+                {dayEvs.slice(0, 4).map((ev, ei) => {
+                  const col = CATEGORIES[ev.category]?.color || '#3EC88A'
+                  return (
+                    <div key={ei}
+                      onClick={e => { e.stopPropagation(); onEventClick(ev) }}
+                      style={{
+                        background: `${col}22`, border: `0.5px solid ${col}50`,
+                        borderLeft: `2px solid ${col}`, borderRadius: 4,
+                        padding: '2px 4px', cursor: 'pointer',
+                      }}>
+                      <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.38rem', color: '#EDE8E0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', lineHeight: 1.3 }}>
+                        {ev.time ? <span style={{ color: col, marginRight: 2 }}>{ev.time.slice(0, 5)}</span> : null}
+                        {ev.title}
+                      </p>
+                    </div>
+                  )
+                })}
+                {dayEvs.length > 4 && (
+                  <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.35rem', color: '#5C5650', textAlign: 'center' }}>
+                    +{dayEvs.length - 4}
+                  </p>
+                )}
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
 export default function Calendar() {
   const { events, addEvent, updateEvent, deleteEvent } = useStore()
+  const [viewMode, setViewMode] = useState('month')
   const [month, setMonth] = useState(new Date())
   const [selected, setSelected] = useState(null)
   const [showAdd, setShowAdd] = useState(false)
@@ -296,8 +393,10 @@ export default function Calendar() {
 
       {/* Month nav */}
       <div className="flex items-center gap-3 mb-4">
-        <button onClick={() => setMonth(m => subMonths(m, 1))} className="btn-ghost p-2"><ChevronLeft size={16}/></button>
-        <button onClick={() => setMonth(new Date())} className="flex-1 text-center">
+        {viewMode === 'month' && (
+          <button onClick={() => setMonth(m => subMonths(m, 1))} className="btn-ghost p-2"><ChevronLeft size={16}/></button>
+        )}
+        <button onClick={() => viewMode === 'month' && setMonth(new Date())} className="flex-1 text-center">
           <span style={{ fontFamily: '"Playfair Display", serif', fontStyle: 'italic', fontWeight: 600, fontSize: '1.4rem', color: '#EDE8E0', letterSpacing: '-0.01em' }}>
             {format(month, 'MMMM')}
           </span>
@@ -305,9 +404,36 @@ export default function Calendar() {
             {format(month, 'yyyy')}
           </span>
         </button>
-        <button onClick={() => setMonth(m => addMonths(m, 1))} className="btn-ghost p-2"><ChevronRight size={16}/></button>
+        {viewMode === 'month' && (
+          <button onClick={() => setMonth(m => addMonths(m, 1))} className="btn-ghost p-2"><ChevronRight size={16}/></button>
+        )}
+        {/* View toggle */}
+        <div style={{ display: 'flex', background: 'rgba(14,12,11,0.8)', border: '0.5px solid rgba(62,200,138,0.2)', borderRadius: 8, overflow: 'hidden' }}>
+          {['month', 'week'].map(v => (
+            <button key={v} onClick={() => setViewMode(v)}
+              style={{
+                fontFamily: '"DM Mono", monospace', fontSize: '0.48rem', letterSpacing: '0.12em',
+                textTransform: 'uppercase', padding: '6px 10px', border: 'none', cursor: 'pointer',
+                background: viewMode === v ? 'rgba(62,200,138,0.15)' : 'transparent',
+                color: viewMode === v ? '#3EC88A' : '#5C5650',
+                transition: 'all 0.2s',
+              }}>
+              {v}
+            </button>
+          ))}
+        </div>
       </div>
 
+      {/* Week view */}
+      {viewMode === 'week' && (
+        <WeekView
+          events={events}
+          onDayClick={date => { setAddDate(date); setShowAdd(true) }}
+          onEventClick={ev => setEditEvent(ev._recurring ? null : ev)}
+        />
+      )}
+
+      {viewMode === 'month' && (<>
       {/* Category legend */}
       <div className="flex gap-3 flex-wrap mb-4">
         {Object.entries(CATEGORIES).map(([k,v]) => (
@@ -478,6 +604,7 @@ export default function Calendar() {
             </div>
         }
       </div>
+      </>)}
 
       {(showAdd || addDate) && !editEvent && (
         <Modal title="Add Event" onClose={() => { setShowAdd(false); setAddDate(null) }}>

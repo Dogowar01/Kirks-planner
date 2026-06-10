@@ -1,0 +1,164 @@
+import { useState, useEffect } from 'react'
+import { format } from 'date-fns'
+import { useNavigate } from 'react-router-dom'
+import HoloRings from '../../components/HoloRings'
+
+const WMO_ICONS = {
+  0:'☀️',1:'🌤️',2:'⛅',3:'☁️',45:'🌫️',48:'🌫️',51:'🌦️',53:'🌦️',55:'🌧️',
+  61:'🌧️',63:'🌧️',65:'🌧️',71:'🌨️',73:'❄️',75:'❄️',80:'🌦️',81:'🌧️',82:'⛈️',
+  95:'⛈️',96:'⛈️',99:'⛈️',
+}
+
+function useAmbientWeather() {
+  const [data, setData] = useState(() => {
+    try { const c = JSON.parse(localStorage.getItem('s9_weather_cache') || 'null'); return c?.data || null } catch { return null }
+  })
+  return data
+}
+
+function useAmbientClock() {
+  const [now, setNow] = useState(new Date())
+  useEffect(() => { const id = setInterval(() => setNow(new Date()), 1000); return () => clearInterval(id) }, [])
+  return now
+}
+
+const GREETINGS = [
+  { start: 5,  end: 11, text: 'Good morning,' },
+  { start: 11, end: 17, text: 'Good afternoon,' },
+  { start: 17, end: 21, text: 'Good evening,' },
+  { start: 21, end: 24, text: 'Good night,' },
+  { start: 0,  end: 5,  text: 'Still up,' },
+]
+
+function greeting(now) {
+  const h = now.getHours()
+  return (GREETINGS.find(g => h >= g.start && h < g.end) || GREETINGS[0]).text
+}
+
+export default function Ambient() {
+  const navigate = useNavigate()
+  const now = useAmbientClock()
+  const weather = useAmbientWeather()
+  const [show, setShow] = useState(false)
+
+  useEffect(() => { setTimeout(() => setShow(true), 100) }, [])
+
+  // Read pinned countdown
+  const pinned = (() => {
+    try {
+      const id = JSON.parse(localStorage.getItem('s9_settings_v1') || 'null')?.pinnedCountdownId
+      if (!id) return null
+      const events = JSON.parse(localStorage.getItem('s9_countdowns') || '[]')
+      const ev = events.find(e => e.id === id)
+      if (!ev) return null
+      const ms = new Date(ev.date).getTime() - Date.now()
+      if (ms <= 0) return null
+      return {
+        label: ev.label,
+        d: Math.floor(ms / 86400000),
+        h: Math.floor((ms % 86400000) / 3600000),
+      }
+    } catch { return null }
+  })()
+
+  const timeStr = format(now, 'HH:mm')
+  const secStr  = format(now, 'ss')
+  const dateStr = format(now, 'EEEE · d MMMM yyyy')
+  const wIcon   = weather ? (WMO_ICONS[weather.code] || '—') : null
+
+  return (
+    <div
+      onClick={() => navigate(-1)}
+      style={{
+        position: 'fixed', inset: 0, zIndex: 9998,
+        background: '#080706',
+        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+        cursor: 'pointer', overflow: 'hidden',
+        opacity: show ? 1 : 0, transition: 'opacity 1s ease',
+      }}>
+
+      {/* Architectural grid */}
+      <div style={{
+        position: 'absolute', inset: 0, pointerEvents: 'none',
+        backgroundImage: `linear-gradient(rgba(196,82,42,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(196,82,42,0.025) 1px, transparent 1px)`,
+        backgroundSize: '48px 48px',
+      }} />
+
+      {/* HoloRings — large ambient layers */}
+      <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
+        <HoloRings color="#C4522A" size={Math.min(window.innerWidth * 0.9, 600)} style={{ opacity: 0.15, position: 'absolute' }} />
+        <HoloRings color="#00C8FF" size={Math.min(window.innerWidth * 0.6, 400)} style={{ opacity: 0.10, position: 'absolute' }} />
+        <HoloRings color="#8B5CF6" size={Math.min(window.innerWidth * 0.35, 240)} style={{ opacity: 0.08, position: 'absolute' }} />
+      </div>
+
+      {/* Vignette edges */}
+      <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', background: 'radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.7) 100%)' }} />
+
+      {/* Centre content */}
+      <div style={{ textAlign: 'center', position: 'relative', zIndex: 2, animation: 'phase-in 1.5s ease both' }}>
+
+        {/* Greeting */}
+        <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.7rem', color: 'rgba(196,82,42,0.5)', letterSpacing: '0.3em', textTransform: 'uppercase', marginBottom: 16 }}>
+          {greeting(now)} Kirk
+        </p>
+
+        {/* Large time */}
+        <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: 4 }}>
+          <span style={{
+            fontFamily: '"Playfair Display", serif', fontStyle: 'italic', fontWeight: 600,
+            fontSize: 'clamp(5rem, 22vw, 11rem)',
+            color: '#EDE8E0',
+            textShadow: '0 0 60px rgba(196,82,42,0.2)',
+            lineHeight: 0.9,
+            letterSpacing: '-0.03em',
+          }}>{timeStr}</span>
+          <span style={{
+            fontFamily: '"DM Mono", monospace', fontWeight: 400,
+            fontSize: 'clamp(1.2rem, 4vw, 2.5rem)',
+            color: 'rgba(196,82,42,0.6)',
+            alignSelf: 'flex-end', paddingBottom: '0.15em',
+          }}>{secStr}</span>
+        </div>
+
+        {/* Date */}
+        <p style={{ fontFamily: '"DM Mono", monospace', fontSize: 'clamp(0.55rem, 1.8vw, 0.8rem)', color: '#5C5650', letterSpacing: '0.22em', textTransform: 'uppercase', marginTop: 18 }}>
+          {dateStr}
+        </p>
+
+        {/* Weather + pinned countdown row */}
+        <div style={{ display: 'flex', gap: 32, justifyContent: 'center', alignItems: 'center', marginTop: 28 }}>
+          {weather && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, animation: 'phase-in 1s ease 0.4s both' }}>
+              <span style={{ fontSize: 'clamp(1.2rem, 3vw, 1.8rem)' }}>{wIcon}</span>
+              <div style={{ textAlign: 'left' }}>
+                <p style={{ fontFamily: '"Playfair Display", serif', fontWeight: 600, fontSize: 'clamp(1.4rem, 4vw, 2rem)', color: '#C8BFB5', lineHeight: 1 }}>{weather.temp}°</p>
+                <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.48rem', color: '#4A4540', letterSpacing: '0.12em' }}>FEELS {weather.feelsLike}°</p>
+              </div>
+            </div>
+          )}
+          {pinned && (
+            <div style={{ animation: 'phase-in 1s ease 0.6s both', textAlign: 'center' }}>
+              <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.42rem', color: 'rgba(192,132,252,0.5)', letterSpacing: '0.2em', marginBottom: 4 }}>{pinned.label.toUpperCase()}</p>
+              <p style={{ fontFamily: '"Playfair Display", serif', fontStyle: 'italic', fontWeight: 600, fontSize: 'clamp(1.3rem, 4vw, 2rem)', color: '#C084FC', lineHeight: 1 }}>
+                {pinned.d}<span style={{ fontSize: '0.5em', opacity: 0.6 }}>d</span> {pinned.h}<span style={{ fontSize: '0.5em', opacity: 0.6 }}>h</span>
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Tap to exit hint */}
+      <p style={{
+        position: 'absolute', bottom: 28, fontFamily: '"DM Mono", monospace',
+        fontSize: '0.38rem', color: 'rgba(196,82,42,0.2)', letterSpacing: '0.2em',
+        animation: 'phase-in 1s ease 2s both',
+      }}>TAP ANYWHERE TO EXIT</p>
+
+      {/* Bottom accent line */}
+      <div style={{
+        position: 'absolute', bottom: 0, left: '10%', right: '10%', height: 1,
+        background: 'linear-gradient(90deg, transparent, rgba(196,82,42,0.3), transparent)',
+      }} />
+    </div>
+  )
+}

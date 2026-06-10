@@ -13,6 +13,8 @@ import Ledger from './sections/ledger/Ledger'
 import FuelTracker from './sections/fuel/FuelTracker'
 import Habits from './sections/habits/Habits'
 import Journal from './sections/journal/Journal'
+import Ambient from './sections/ambient/Ambient'
+import Boards from './sections/boards/Boards'
 import BootScreen, { shouldShowBoot } from './components/BootScreen'
 import { useNotifications } from './hooks/useNotifications'
 
@@ -31,8 +33,9 @@ export default function App() {
         <NotificationEngine />
         <Routes>
           {/* Full-screen standalone routes */}
-          <Route path="/ledger" element={<Ledger />} />
-          <Route path="/fuel"   element={<FuelTracker />} />
+          <Route path="/ledger"  element={<Ledger />} />
+          <Route path="/fuel"    element={<FuelTracker />} />
+          <Route path="/ambient" element={<Ambient />} />
 
           {/* Standard routes inside Layout */}
           <Route path="/" element={<Layout />}>
@@ -46,6 +49,7 @@ export default function App() {
             <Route path="vault"     element={<Vault />} />
             <Route path="habits"    element={<Habits />} />
             <Route path="journal"   element={<Journal />} />
+            <Route path="boards"    element={<Boards />} />
             <Route path="settings"  element={<Settings />} />
           </Route>
         </Routes>
