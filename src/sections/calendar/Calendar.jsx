@@ -271,25 +271,25 @@ export default function Calendar() {
     .slice(0, 14)
 
   return (
-    <SectionShell accent="#6A7A5A" bgImage={bgImg}>
-      <PageHeader subtitle="SCHEDULE" title="Calendar" accent="#6A7A5A">
+    <SectionShell accent="#3EC88A" bgImage={bgImg}>
+      <PageHeader subtitle="SCHEDULE" title="Calendar" accent="#3EC88A">
         <button onClick={hasBinNights ? removeBinNights : addBinNights} style={{
-          background: 'rgba(106,122,90,0.1)', border: '0.5px solid rgba(106,122,90,0.35)',
-          color: '#8A9A7A', borderRadius: 8, padding: '8px 12px', cursor: 'pointer',
+          background: 'rgba(62,200,138,0.1)', border: '0.5px solid rgba(62,200,138,0.35)',
+          color: '#3EC88A', borderRadius: 8, padding: '8px 12px', cursor: 'pointer',
           fontFamily: '"DM Mono", monospace', fontSize: '0.55rem', letterSpacing: '0.1em',
         }}>🗑️</button>
         <button onClick={() => setShowSearch(true)} style={{
-          background: 'rgba(106,122,90,0.1)', border: '0.5px solid rgba(106,122,90,0.35)',
-          color: '#8A9A7A', borderRadius: 8, padding: '8px 12px', cursor: 'pointer',
+          background: 'rgba(62,200,138,0.1)', border: '0.5px solid rgba(62,200,138,0.35)',
+          color: '#3EC88A', borderRadius: 8, padding: '8px 12px', cursor: 'pointer',
           fontFamily: '"DM Mono", monospace', fontSize: '0.55rem', letterSpacing: '0.1em',
           display: 'flex', alignItems: 'center', gap: 5,
         }}><Search size={13} /></button>
         <button onClick={() => setShowAdd(true)} style={{
-          background: 'rgba(106,122,90,0.15)', border: '0.5px solid rgba(106,122,90,0.5)',
-          color: '#8ABA7A', borderRadius: 8, padding: '8px 14px', cursor: 'pointer',
+          background: 'rgba(106,122,90,0.15)', border: '0.5px solid rgba(62,200,138,0.5)',
+          color: '#5ADAA0', borderRadius: 8, padding: '8px 14px', cursor: 'pointer',
           display: 'flex', alignItems: 'center', gap: 6,
           fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', letterSpacing: '0.12em',
-          boxShadow: '0 0 12px rgba(106,122,90,0.1)',
+          boxShadow: '0 0 12px rgba(62,200,138,0.1)',
         }}><Plus size={14} strokeWidth={2} /> ADD</button>
       </PageHeader>
     <div className="p-4 md:p-6 max-w-3xl">

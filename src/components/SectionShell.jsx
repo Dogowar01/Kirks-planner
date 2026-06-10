@@ -41,39 +41,74 @@ export default function SectionShell({ accent, bgImage, children, className = ''
         opacity: 0.055,
       }} />
 
-      {/* Colour gradient overlay — boosted for visible colour wash */}
+      {/* Primary atmospheric colour wash — top bloom */}
       <div style={{
-        position: 'fixed',
-        inset: 0,
-        zIndex: 1,
+        position: 'fixed', inset: 0, zIndex: 1, pointerEvents: 'none',
         background: [
-          `radial-gradient(ellipse 110% 50% at 50% -5%, ${accent}48 0%, ${accent}18 45%, transparent 70%)`,
-          `radial-gradient(ellipse 55% 30% at 0% 20%, ${accent}20 0%, transparent 60%)`,
-          `radial-gradient(ellipse 55% 30% at 100% 20%, ${accent}18 0%, transparent 60%)`,
+          `radial-gradient(ellipse 120% 60% at 50% -8%, ${accent}65 0%, ${accent}28 40%, transparent 68%)`,
+          `radial-gradient(ellipse 70% 40% at -5% 30%, ${accent}35 0%, transparent 65%)`,
+          `radial-gradient(ellipse 70% 40% at 105% 25%, ${accent}30 0%, transparent 65%)`,
         ].join(', '),
-        pointerEvents: 'none',
       }} />
 
-      {/* Top accent bar — animated power-on sweep */}
-      <div style={{ position: 'relative', zIndex: 2, height: 2, overflow: 'hidden' }}>
-        {/* Sweeping fill bar */}
+      {/* Vivid atmospheric orbs — large drifting colour blobs */}
+      <div style={{ position: 'fixed', inset: 0, zIndex: 1, pointerEvents: 'none', overflow: 'hidden' }}>
+        {/* Primary accent orb — top right */}
+        <div style={{
+          position: 'absolute', top: '-10%', right: '-8%',
+          width: '55vw', height: '55vw', maxWidth: 480, maxHeight: 480,
+          background: `radial-gradient(circle, ${accent}40 0%, ${accent}18 40%, transparent 70%)`,
+          borderRadius: '50%', filter: 'blur(40px)',
+          animation: 'orb-drift 18s ease-in-out infinite',
+        }} />
+        {/* Purple chromatic counterpoint — bottom left */}
+        <div style={{
+          position: 'absolute', bottom: '5%', left: '-12%',
+          width: '50vw', height: '50vw', maxWidth: 420, maxHeight: 420,
+          background: 'radial-gradient(circle, rgba(120,60,220,0.32) 0%, rgba(80,20,180,0.14) 45%, transparent 70%)',
+          borderRadius: '50%', filter: 'blur(48px)',
+          animation: 'orb-drift 24s ease-in-out infinite 4s',
+        }} />
+        {/* Cyan accent — mid right */}
+        <div style={{
+          position: 'absolute', top: '45%', right: '-5%',
+          width: '30vw', height: '30vw', maxWidth: 280, maxHeight: 280,
+          background: 'radial-gradient(circle, rgba(0,200,255,0.18) 0%, transparent 70%)',
+          borderRadius: '50%', filter: 'blur(32px)',
+          animation: 'orb-drift 14s ease-in-out infinite 8s',
+        }} />
+      </div>
+
+      {/* Top accent bar — animated power-on sweep with glow */}
+      <div style={{ position: 'relative', zIndex: 2, height: 3, overflow: 'visible' }}>
         <div style={{
           position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
-          background: `linear-gradient(90deg, ${accent}ff 0%, ${accent}dd 30%, ${accent}88 65%, transparent 100%)`,
-          boxShadow: `0 0 16px 1px ${accent}aa, 0 0 4px ${accent}ff`,
+          background: `linear-gradient(90deg, ${accent} 0%, ${accent}ee 25%, ${accent}88 60%, transparent 100%)`,
+          boxShadow: `0 0 24px 2px ${accent}bb, 0 0 6px ${accent}, 0 2px 16px ${accent}55`,
           transformOrigin: 'left',
           animation: 'power-bar-sweep 1.0s cubic-bezier(0.22,1,0.36,1) both',
         }} />
-        {/* Left anchor tick */}
-        <div style={{ position: 'absolute', left: 0, top: -3, width: 2, height: 8, background: `linear-gradient(to bottom, ${accent}, transparent)` }} />
-        {/* Diminishing ticks */}
+        <div style={{ position: 'absolute', left: 0, top: -4, width: 2, height: 10, background: `linear-gradient(to bottom, ${accent}, transparent)` }} />
         {[12, 28, 52].map((pct, i) => (
           <div key={i} style={{
-            position: 'absolute', left: `${pct}%`, top: -2, width: 0.5, height: 5,
-            background: `linear-gradient(to bottom, ${accent}${['cc','99','66'][i]}, transparent)`,
+            position: 'absolute', left: `${pct}%`, top: -3, width: 1, height: 7,
+            background: `linear-gradient(to bottom, ${accent}${['ff','aa','66'][i]}, transparent)`,
           }} />
         ))}
       </div>
+
+      {/* Architectural corner brackets */}
+      {[['top','left'],['top','right']].map(([v, h]) => (
+        <div key={v+h} style={{
+          position: 'fixed', [v]: 14, [h]: 14,
+          width: 14, height: 14, zIndex: 2, pointerEvents: 'none',
+          animation: 'corner-blink 4s ease-in-out infinite',
+          animationDelay: h === 'right' ? '2s' : '0s',
+        }}>
+          <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 1, background: `${accent}80` }} />
+          <div style={{ position: 'absolute', top: 0, bottom: 0, [h]: 0, width: 1, background: `${accent}80` }} />
+        </div>
+      ))}
 
       {/* Content */}
       <div style={{ position: 'relative', zIndex: 2, paddingTop: 'max(env(safe-area-inset-top), 12px)' }}>

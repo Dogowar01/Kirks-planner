@@ -1108,12 +1108,12 @@ export default function Tools() {
   const tool = TOOLS.find(t => t.id === active)
 
   return (
-    <SectionShell accent="#2A7A6F" bgImage={bgImg}>
-      <PageHeader subtitle="UTILITIES" title={active ? (tool?.label || 'Tools') : 'Tools'} accent="#2A7A6F">
+    <SectionShell accent="#00C8FF" bgImage={bgImg}>
+      <PageHeader subtitle="UTILITIES" title={active ? (tool?.label || 'Tools') : 'Tools'} accent="#00C8FF">
         {active && (
           <button onClick={() => setActive(null)} style={{
-            background: 'rgba(42,122,111,0.1)', border: '0.5px solid rgba(42,122,111,0.4)',
-            color: '#5ABCB0', borderRadius: 8, padding: '8px 14px', cursor: 'pointer',
+            background: 'rgba(0,200,255,0.1)', border: '0.5px solid rgba(0,200,255,0.4)',
+            color: '#00C8FF', borderRadius: 8, padding: '8px 14px', cursor: 'pointer',
             fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', letterSpacing: '0.12em',
           }}>‹ BACK</button>
         )}

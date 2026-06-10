@@ -181,11 +181,11 @@ export default function Tasks() {
   const done = tasks.filter(t => t.done)
 
   return (
-    <SectionShell accent="#D4780A" bgImage={bgImg}>
-      <PageHeader subtitle="TASK MANAGER" title="Tasks" accent="#D4780A">
+    <SectionShell accent="#F09030" bgImage={bgImg}>
+      <PageHeader subtitle="TASK MANAGER" title="Tasks" accent="#F09030">
         <button onClick={() => setShowModal(true)} style={{
-          background: 'rgba(212,120,10,0.12)', border: '0.5px solid rgba(212,120,10,0.5)',
-          color: '#D4780A', borderRadius: 8, padding: '8px 14px', cursor: 'pointer',
+          background: 'rgba(240,144,48,0.12)', border: '0.5px solid rgba(240,144,48,0.5)',
+          color: '#F09030', borderRadius: 8, padding: '8px 14px', cursor: 'pointer',
           display: 'flex', alignItems: 'center', gap: 6,
           fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', letterSpacing: '0.12em',
           boxShadow: '0 0 12px rgba(212,120,10,0.1)',

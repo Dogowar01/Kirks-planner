@@ -181,35 +181,39 @@
 }
 
 @layer components {
-  /* Cards — architectural dark material with precision top-edge accent */
+  /* Cards — vivid glassmorphism with neon accent glow */
   .card {
     @apply rounded-card p-4;
-    background: color-mix(in srgb, var(--section-card-tint, #1a1714) 55%, rgba(11,10,9,0.98));
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    border: 0.5px solid var(--section-card-border, rgba(255,255,255,0.10));
+    background: linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--section-accent, #C4522A) 22%, rgba(14,13,11,0.88)) 0%,
+      color-mix(in srgb, var(--section-accent, #C4522A) 8%, rgba(10,9,8,0.82)) 100%
+    );
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid color-mix(in srgb, var(--section-accent, #C4522A) 45%, transparent);
     box-shadow:
-      inset 3px 0 0 color-mix(in srgb, var(--section-accent, rgba(255,255,255,0.06)) 55%, transparent),
-      inset 0 1px 0 rgba(255,255,255,0.05),
-      0 2px 16px rgba(0,0,0,0.4),
-      0 1px 0 rgba(0,0,0,0.6);
+      inset 3px 0 0 color-mix(in srgb, var(--section-accent, rgba(255,255,255,0.06)) 75%, transparent),
+      inset 0 1px 0 rgba(255,255,255,0.08),
+      0 4px 24px rgba(0,0,0,0.5),
+      0 0 48px -6px color-mix(in srgb, var(--section-accent, transparent) 40%, transparent);
     position: relative;
     overflow: hidden;
-    transition: border-color 0.2s, box-shadow 0.2s;
+    transition: border-color 0.18s, box-shadow 0.18s, transform 0.18s;
   }
-  /* Top-edge precision accent line */
+  /* Top-edge precision accent line — brighter */
   .card::before {
     content: '';
     position: absolute;
     top: 0; left: 0; right: 0;
-    height: 1px;
+    height: 1.5px;
     background: linear-gradient(
       90deg,
-      var(--section-accent, rgba(255,255,255,0.12)) 0px,
-      color-mix(in srgb, var(--section-accent, rgba(255,255,255,0.12)) 50%, transparent) 80px,
-      transparent 200px
+      color-mix(in srgb, var(--section-accent, rgba(255,255,255,0.12)) 90%, white) 0px,
+      color-mix(in srgb, var(--section-accent, rgba(255,255,255,0.12)) 60%, transparent) 120px,
+      transparent 260px
     );
-    opacity: 0.65;
+    opacity: 0.9;
     pointer-events: none;
     z-index: 1;
   }
@@ -219,13 +223,13 @@
     position: absolute;
     top: 0; bottom: 0;
     left: 0;
-    width: 35%;
+    width: 40%;
     background: linear-gradient(
       105deg,
       transparent 0%,
-      rgba(255,255,255,0.025) 40%,
-      rgba(0,200,255,0.05) 50%,
-      rgba(255,255,255,0.025) 60%,
+      rgba(255,255,255,0.04) 38%,
+      rgba(200,180,255,0.08) 50%,
+      rgba(255,255,255,0.04) 62%,
       transparent 100%
     );
     pointer-events: none;
@@ -233,19 +237,21 @@
     animation: card-shimmer 9s ease-in-out infinite;
     will-change: transform;
   }
-  /* Hover: neon edge glow + chamfer accent */
+  /* Hover — bigger glow spread, slight lift */
   .card:hover {
-    border-color: color-mix(in srgb, var(--section-accent, rgba(255,255,255,0.2)) 65%, rgba(255,255,255,0.12));
+    border-color: color-mix(in srgb, var(--section-accent, rgba(255,255,255,0.2)) 80%, white);
     box-shadow:
-      inset 3px 0 0 color-mix(in srgb, var(--section-accent, rgba(255,255,255,0.06)) 70%, transparent),
-      inset 0 1px 0 rgba(255,255,255,0.07),
-      0 0 0 1px color-mix(in srgb, var(--section-accent, transparent) 12%, transparent),
-      0 4px 24px rgba(0,0,0,0.6),
-      0 0 32px -4px color-mix(in srgb, var(--section-accent, transparent) 45%, transparent);
-    transform: translateY(-1px);
-  }
-  .card {
-    transition: border-color 0.18s, box-shadow 0.18s, transform 0.18s;
+      inset 4px 0 0 color-mix(in srgb, var(--section-accent, rgba(255,255,255,0.06)) 100%, transparent),
+      inset 0 1px 0 rgba(255,255,255,0.12),
+      0 0 0 1px color-mix(in srgb, var(--section-accent, transparent) 20%, transparent),
+      0 8px 32px rgba(0,0,0,0.6),
+      0 0 60px -4px color-mix(in srgb, var(--section-accent, transparent) 65%, transparent);
+    transform: translateY(-2px);
+    background: linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--section-accent, #C4522A) 30%, rgba(14,13,11,0.88)) 0%,
+      color-mix(in srgb, var(--section-accent, #C4522A) 12%, rgba(10,9,8,0.82)) 100%
+    );
   }
 
   .card-elevated {
@@ -270,12 +276,23 @@
 
   .btn-primary {
     @apply btn text-white;
-    background: var(--section-accent, #C4522A);
-    box-shadow: 0 0 16px -4px color-mix(in srgb, var(--section-accent, #C4522A) 50%, transparent);
+    background: linear-gradient(135deg,
+      color-mix(in srgb, var(--section-accent, #C4522A) 100%, white 20%) 0%,
+      var(--section-accent, #C4522A) 100%
+    );
+    box-shadow:
+      0 0 20px -2px color-mix(in srgb, var(--section-accent, #C4522A) 65%, transparent),
+      0 0 48px -8px color-mix(in srgb, var(--section-accent, #C4522A) 45%, transparent),
+      inset 0 1px 0 rgba(255,255,255,0.18);
+    border: 1px solid color-mix(in srgb, var(--section-accent, #C4522A) 60%, white);
   }
   .btn-primary:hover {
-    filter: brightness(1.1);
-    box-shadow: 0 0 22px -4px color-mix(in srgb, var(--section-accent, #C4522A) 70%, transparent);
+    filter: brightness(1.15);
+    box-shadow:
+      0 0 30px -2px color-mix(in srgb, var(--section-accent, #C4522A) 80%, transparent),
+      0 0 64px -8px color-mix(in srgb, var(--section-accent, #C4522A) 60%, transparent),
+      inset 0 1px 0 rgba(255,255,255,0.22);
+    transform: translateY(-1px);
   }
 
   .btn-danger {

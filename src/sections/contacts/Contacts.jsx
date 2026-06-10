@@ -365,11 +365,11 @@ export default function Contacts() {
   }).sort((a,b) => a.name.localeCompare(b.name))
 
   return (
-    <SectionShell accent="#C8BFB5" bgImage={bgImg}>
-      <PageHeader subtitle="CONTACTS" title="Contacts" accent="#C8BFB5">
+    <SectionShell accent="#E06840" bgImage={bgImg}>
+      <PageHeader subtitle="CONTACTS" title="Contacts" accent="#E06840">
         <button onClick={() => setShowModal(true)} style={{
-          background: 'rgba(200,191,181,0.1)', border: '0.5px solid rgba(200,191,181,0.45)',
-          color: '#C8BFB5', borderRadius: 8, padding: '8px 14px', cursor: 'pointer',
+          background: 'rgba(224,104,64,0.12)', border: '0.5px solid rgba(224,104,64,0.5)',
+          color: '#E06840', borderRadius: 8, padding: '8px 14px', cursor: 'pointer',
           display: 'flex', alignItems: 'center', gap: 6,
           fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', letterSpacing: '0.12em',
         }}><Plus size={14} strokeWidth={2} /> ADD</button>

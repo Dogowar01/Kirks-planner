@@ -598,33 +598,39 @@ function LiveClock({ taskCount = 0, eventCount = 0 }) {
 
 function StatCard({ icon: Icon, label, value, color, onClick }) {
   return (
-    <button onClick={onClick} className="card text-left w-full transition-all duration-150 group"
-      style={{ padding: '12px 12px 10px', position: 'relative', overflow: 'hidden' }}>
+    <button onClick={onClick} style={{
+      position: 'relative', overflow: 'hidden', textAlign: 'left',
+      padding: '14px 12px 12px', borderRadius: 10, cursor: 'pointer',
+      background: `linear-gradient(135deg, ${color}30 0%, ${color}12 60%, rgba(80,20,180,0.08) 100%)`,
+      border: `1px solid ${color}55`,
+      boxShadow: `0 0 40px ${color}22, 0 0 0 0.5px ${color}30 inset, inset 0 1px 0 rgba(255,255,255,0.1)`,
+      backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
+      transition: 'all 0.18s', width: '100%',
+    }}
+    onMouseEnter={e => { e.currentTarget.style.boxShadow = `0 0 60px ${color}45, 0 0 0 1px ${color}60 inset, inset 0 1px 0 rgba(255,255,255,0.14)`; e.currentTarget.style.transform = 'translateY(-2px)' }}
+    onMouseLeave={e => { e.currentTarget.style.boxShadow = `0 0 40px ${color}22, 0 0 0 0.5px ${color}30 inset, inset 0 1px 0 rgba(255,255,255,0.1)`; e.currentTarget.style.transform = '' }}>
       {/* Watermark icon */}
-      <div style={{ position: 'absolute', bottom: 8, right: 8, opacity: 0.12, pointerEvents: 'none' }}>
-        <Icon size={22} style={{ color }} strokeWidth={1} />
+      <div style={{ position: 'absolute', bottom: 8, right: 8, opacity: 0.2, pointerEvents: 'none' }}>
+        <Icon size={26} style={{ color }} strokeWidth={1} />
       </div>
+      {/* Top accent line */}
+      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 1.5, background: `linear-gradient(to right, ${color}, ${color}44, transparent)` }} />
       {/* Neon number */}
       <p style={{
         fontFamily: '"DM Mono", monospace', fontWeight: 700,
-        fontSize: '1.9rem', lineHeight: 1, letterSpacing: '-0.02em',
-        color, textShadow: `0 0 16px ${color}88, 0 0 40px ${color}40`,
-        marginBottom: 6,
+        fontSize: '2.1rem', lineHeight: 1, letterSpacing: '-0.02em',
+        color, textShadow: `0 0 20px ${color}cc, 0 0 50px ${color}66, 0 0 80px ${color}33`,
+        marginBottom: 8,
       }}>
         {String(value).padStart(2, '0')}
       </p>
       {/* Label */}
       <p style={{
-        fontFamily: '"DM Mono", monospace', fontSize: '0.45rem',
-        color: 'rgba(160,150,140,0.7)', letterSpacing: '0.18em', textTransform: 'uppercase',
+        fontFamily: '"DM Mono", monospace', fontSize: '0.44rem',
+        color: `${color}aa`, letterSpacing: '0.18em', textTransform: 'uppercase',
       }}>
         {label}
       </p>
-      {/* Bottom accent line */}
-      <div style={{
-        position: 'absolute', bottom: 0, left: 0, right: 0, height: 1,
-        background: `linear-gradient(to right, ${color}55, transparent)`,
-      }} />
     </button>
   )
 }
@@ -1043,15 +1049,15 @@ function SectionShell({ color, children, style }) {
       {/* Clipped shell */}
       <div style={{
         '--section-accent': color,
-        '--section-card-tint': color + '14',
-        '--section-card-border': color + '28',
+        '--section-card-tint': color + '22',
+        '--section-card-border': color + '50',
         position: 'relative',
         padding: '16px 14px 18px',
-        background: `linear-gradient(155deg, ${color}16 0%, ${color}08 50%, rgba(0,200,255,0.025) 100%)`,
-        border: `0.5px solid ${color}30`,
-        boxShadow: `0 0 60px ${color}0e, inset 0 1px 0 ${color}22`,
+        background: `linear-gradient(155deg, ${color}2E 0%, ${color}14 45%, rgba(80,20,180,0.06) 100%)`,
+        border: `1px solid ${color}55`,
+        boxShadow: `0 0 80px ${color}18, 0 0 30px ${color}10, inset 0 1px 0 ${color}40`,
         clipPath: 'polygon(0 0, calc(100% - 22px) 0, 100% 22px, 100% 100%, 0 100%)',
-        filter: `drop-shadow(0 0 20px ${color}28) drop-shadow(0 3px 10px rgba(0,0,0,0.6))`,
+        filter: `drop-shadow(0 0 32px ${color}40) drop-shadow(0 4px 14px rgba(0,0,0,0.7))`,
         ...style,
       }}>
         {/* Animated power-on bar */}
@@ -1640,8 +1646,8 @@ export default function Dashboard() {
       <div className="p-5 md:p-6 max-w-3xl space-y-7">
 
         {/* Stats */}
-        <SectionShell color="#C4522A">
-          <SectionLabel color="#D4724A" seq="01">Overview</SectionLabel>
+        <SectionShell color="#E05828">
+          <SectionLabel color="#FF7040" seq="01">Overview</SectionLabel>
           <div className="grid grid-cols-3 gap-3">
             <StatCard icon={CheckSquare} label="Open Tasks"      value={openTasks.length}       color="#D4724A" onClick={() => navigate('/tasks')} />
             <StatCard icon={Calendar}    label="Events (7d)"     value={upcomingEvents.length}   color="#D4724A" onClick={() => navigate('/calendar')} />
@@ -1650,8 +1656,8 @@ export default function Dashboard() {
         </SectionShell>
 
         {/* Quick Add + Focus Moment */}
-        <SectionShell color="#9A58A8">
-          <SectionLabel color="#B878C8" seq="02">Actions</SectionLabel>
+        <SectionShell color="#B040D8">
+          <SectionLabel color="#CC60F0" seq="02">Actions</SectionLabel>
           <div className="space-y-3">
             <QuickAdd onAdd={(data) => addTask(data)} />
             <FocusMomentButton />
@@ -1659,7 +1665,7 @@ export default function Dashboard() {
         </SectionShell>
 
         {/* Missions */}
-        <SectionShell color="#A07828">
+        <SectionShell color="#D89820">
           <MissionsWidget onNavigateToTasks={(missionId) => {
             setMissionFilter(missionId)
             navigate('/tasks')
@@ -1668,9 +1674,9 @@ export default function Dashboard() {
 
         {/* Today */}
         {todayEvents.length > 0 && (
-          <SectionShell color="#267A68">
+          <SectionShell color="#20C880">
             <section>
-              <SectionLabel color="#38A88E" seq="04">Today</SectionLabel>
+              <SectionLabel color="#20E890" seq="04">Today</SectionLabel>
               <div className="space-y-2">
                 {todayEvents.map(ev => (
                   <button key={ev.id} onClick={() => navigate('/calendar')}
@@ -1690,10 +1696,10 @@ export default function Dashboard() {
         )}
 
         {/* Top tasks */}
-        <SectionShell color="#8A3A20">
+        <SectionShell color="#E04820">
         <section>
           <div className="flex items-center justify-between mb-2.5">
-            <SectionLabel color="#B85A38" seq="05">Active Tasks</SectionLabel>
+            <SectionLabel color="#FF6040" seq="05">Active Tasks</SectionLabel>
             <button onClick={() => navigate('/tasks')} style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', color: '#A09890', letterSpacing: '0.1em' }}>
               ALL →
             </button>
@@ -1716,10 +1722,10 @@ export default function Dashboard() {
         </SectionShell>
 
         {/* Upcoming */}
-        <SectionShell color="#6A3A88">
+        <SectionShell color="#8840CC">
           <section>
             <div className="flex items-center justify-between mb-2.5">
-              <SectionLabel color="#9060B8" seq="06">Upcoming</SectionLabel>
+              <SectionLabel color="#AA60EE" seq="06">Upcoming</SectionLabel>
               <button onClick={() => navigate('/calendar')} style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', color: '#A09890', letterSpacing: '0.1em' }}>
                 CALENDAR →
               </button>
