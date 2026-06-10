@@ -1308,10 +1308,11 @@ export default function Tools() {
       <PageHeader subtitle="UTILITIES" title={active ? (tool?.label || 'Tools') : 'Tools'} accent="#00C8FF" showBack>
         {active && (
           <button onClick={() => setActive(null)} style={{
-            background: 'rgba(0,200,255,0.1)', border: '0.5px solid rgba(0,200,255,0.4)',
-            color: '#00C8FF', borderRadius: 8, padding: '8px 14px', cursor: 'pointer',
-            fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', letterSpacing: '0.12em',
-          }}>‹ BACK</button>
+            background: 'rgba(0,200,255,0.08)', border: '0.5px solid rgba(0,200,255,0.3)',
+            color: 'rgba(0,200,255,0.7)', borderRadius: 6, padding: '5px 9px', cursor: 'pointer',
+            fontFamily: '"DM Mono", monospace', fontSize: '0.44rem', letterSpacing: '0.14em',
+            textTransform: 'uppercase',
+          }}>⊠ CLOSE</button>
         )}
       </PageHeader>
       <div className="p-4 md:p-6 max-w-2xl">
