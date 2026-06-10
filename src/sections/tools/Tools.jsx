@@ -11,6 +11,7 @@ const CITIES = [
   { name: 'Tokyo',       tz: 'Asia/Tokyo',           lat: 35.68,  lon: 139.69 },
   { name: 'Los Angeles', tz: 'America/Los_Angeles',  lat: 34.05,  lon: -118.24 },
 ]
+const NIXIE_DIGITS = '0123456789'
 
 function useWorldData() {
   const [times, setTimes] = useState({})
@@ -49,62 +50,127 @@ function useWorldData() {
 }
 
 // Nixie tube digit — each character gets its own glowing tube
-function NixieTube({ char, colon }) {
+function NixieTube({ char, colon, bootColor }) {
+  // bootColor: null = normal amber, 'cathode' = cold green-white discharge
+  const isCathode = !!bootColor
+  const digitColor = isCathode ? 'rgba(180,255,200,0.9)' : '#FF8C35'
+  const digitShadow = isCathode
+    ? '0 0 4px rgba(100,255,150,0.9), 0 0 10px rgba(0,255,100,0.6), 0 0 22px rgba(0,200,80,0.3)'
+    : '0 0 6px #FF6B00, 0 0 14px #FF4400, 0 0 28px #FF220066'
+  const glowBg = isCathode
+    ? 'radial-gradient(ellipse at 50% 60%, rgba(0,255,100,0.12) 0%, transparent 70%)'
+    : 'radial-gradient(ellipse at 50% 60%, rgba(255,80,0,0.18) 0%, transparent 70%)'
+  const colonColor = isCathode ? 'rgba(100,255,150,0.8)' : '#FF6B00'
+  const colonShadow = isCathode ? '0 0 6px rgba(0,255,100,0.8)' : '0 0 6px #FF6B00, 0 0 12px #FF4400'
+
   if (colon) return (
     <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: 5, padding: '0 1px', paddingBottom: 6 }}>
-      <div style={{ width: 4, height: 4, borderRadius: '50%', background: '#FF6B00', boxShadow: '0 0 6px #FF6B00, 0 0 12px #FF4400' }} />
-      <div style={{ width: 4, height: 4, borderRadius: '50%', background: '#FF6B00', boxShadow: '0 0 6px #FF6B00, 0 0 12px #FF4400' }} />
+      <div style={{ width: 4, height: 4, borderRadius: '50%', background: colonColor, boxShadow: colonShadow }} />
+      <div style={{ width: 4, height: 4, borderRadius: '50%', background: colonColor, boxShadow: colonShadow }} />
     </div>
   )
   return (
     <div style={{
       position: 'relative',
       width: 32, height: 46,
-      background: 'radial-gradient(ellipse at 50% 30%, #1a0f00 0%, #0d0800 100%)',
+      background: isCathode
+        ? 'radial-gradient(ellipse at 50% 30%, #001a08 0%, #000c04 100%)'
+        : 'radial-gradient(ellipse at 50% 30%, #1a0f00 0%, #0d0800 100%)',
       borderRadius: 5,
-      border: '1px solid #3a2800',
-      boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.8), 0 0 8px rgba(255,100,0,0.15)',
+      border: isCathode ? '1px solid #0a2a14' : '1px solid #3a2800',
+      boxShadow: isCathode
+        ? 'inset 0 1px 3px rgba(0,0,0,0.8), 0 0 10px rgba(0,255,100,0.12)'
+        : 'inset 0 1px 3px rgba(0,0,0,0.8), 0 0 8px rgba(255,100,0,0.15)',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       overflow: 'hidden',
+      transition: 'background 0.4s, border-color 0.4s, box-shadow 0.4s',
     }}>
-      {/* Glass sheen */}
       <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '45%', background: 'linear-gradient(180deg,rgba(255,255,255,0.04) 0%,transparent 100%)', borderRadius: '5px 5px 0 0', pointerEvents: 'none' }} />
-      {/* Glow halo behind digit */}
-      <div style={{ position: 'absolute', inset: 0, background: `radial-gradient(ellipse at 50% 60%, rgba(255,80,0,0.18) 0%, transparent 70%)`, pointerEvents: 'none' }} />
+      <div style={{ position: 'absolute', inset: 0, background: glowBg, pointerEvents: 'none', transition: 'background 0.4s' }} />
       <span style={{
         fontFamily: '"Share Tech Mono","DM Mono",monospace',
-        fontSize: '1.6rem',
-        fontWeight: 400,
-        color: '#FF8C35',
-        textShadow: '0 0 6px #FF6B00, 0 0 14px #FF4400, 0 0 28px #FF220066',
-        lineHeight: 1,
-        position: 'relative',
-        zIndex: 1,
-        letterSpacing: 0,
+        fontSize: '1.6rem', fontWeight: 400,
+        color: digitColor,
+        textShadow: digitShadow,
+        lineHeight: 1, position: 'relative', zIndex: 1, letterSpacing: 0,
+        transition: 'color 0.3s, text-shadow 0.3s',
       }}>{char}</span>
     </div>
   )
 }
 
-function NixieClock({ time, day, temp, city }) {
-  // time is "HH:MM" or ''
-  const chars = time ? time.split('') : ['–', '–', ':', '–', '–']
+function NixieClock({ time, day, temp, city, bootDelay = 0 }) {
+  const [bootChars, setBootChars] = useState(['–', '–', ':', '–', '–'])
+  const [resolvedMask, setResolvedMask] = useState([false, false, false, false, false]) // which positions are resolved
+  const [booting, setBooting] = useState(true)
+  const hasBootedRef = useRef(false)
+  const timeRef = useRef(time)
+  timeRef.current = time
+
+  useEffect(() => {
+    if (hasBootedRef.current) return
+    const startId = setTimeout(() => {
+      hasBootedRef.current = true
+      const realChars = timeRef.current ? timeRef.current.split('') : ['0','0',':','0','0']
+
+      // Scramble phase
+      const scrambleId = setInterval(() => {
+        setBootChars(prev => prev.map((ch, i) => {
+          if (ch === ':') return ':'
+          if (resolvedMask[i]) return realChars[i] // keep resolved
+          return NIXIE_DIGITS[Math.floor(Math.random() * 10)]
+        }))
+      }, 50)
+
+      // Resolve each digit left→right
+      const resolvedSoFar = [false, false, false, false, false]
+      realChars.forEach((ch, i) => {
+        if (ch === ':') { resolvedSoFar[i] = true; return }
+        setTimeout(() => {
+          resolvedSoFar[i] = true
+          setResolvedMask([...resolvedSoFar])
+          setBootChars(prev => {
+            const next = [...prev]; next[i] = ch; return next
+          })
+        }, 300 + i * 280)
+      })
+
+      // End boot
+      setTimeout(() => {
+        clearInterval(scrambleId)
+        setBooting(false)
+      }, 300 + realChars.length * 280 + 200)
+
+    }, bootDelay * 1000)
+
+    return () => clearTimeout(startId)
+  }, [])
+
+  const displayChars = booting ? bootChars : (time ? time.split('') : ['–', '–', ':', '–', '–'])
+
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
+    <div style={{
+      display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8,
+      animation: `phase-in 0.6s cubic-bezier(0.22,1,0.36,1) ${bootDelay}s both`,
+    }}>
       {/* City label */}
       <p style={{ fontFamily: '"DM Mono",monospace', fontSize: '0.58rem', color: '#A09890', letterSpacing: '0.2em', textTransform: 'uppercase' }}>{city}</p>
 
       {/* Tube row */}
       <div style={{
         background: 'linear-gradient(180deg,#111008 0%,#0a0805 100%)',
-        borderRadius: 8,
-        padding: '8px 10px 10px',
+        borderRadius: 8, padding: '8px 10px 10px',
         border: '1px solid #2a1f00',
         boxShadow: '0 4px 20px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,150,0,0.08)',
         display: 'flex', alignItems: 'flex-end', gap: 3,
       }}>
-        {chars.map((ch, i) => (
-          <NixieTube key={i} char={ch} colon={ch === ':'} />
+        {displayChars.map((ch, i) => (
+          <NixieTube
+            key={i}
+            char={ch}
+            colon={ch === ':'}
+            bootColor={booting && !resolvedMask[i] && ch !== ':' ? 'cathode' : null}
+          />
         ))}
       </div>
 
@@ -125,10 +191,10 @@ function WorldClocks() {
     <div className="card" style={{ background: '#0a0905', borderColor: '#1e1a0a' }}>
       <p className="section-label mb-4">[ World Clocks ]</p>
       <div style={{ display: 'flex', justifyContent: 'space-around', flexWrap: 'wrap', gap: 16 }}>
-        {CITIES.map(c => {
+        {CITIES.map((c, i) => {
           const { time = '', day = '' } = times[c.name] || {}
           return (
-            <NixieClock key={c.name} city={c.name} time={time} day={day} temp={temps[c.name]} />
+            <NixieClock key={c.name} city={c.name} time={time} day={day} temp={temps[c.name]} bootDelay={i * 0.4} />
           )
         })}
       </div>
@@ -154,6 +220,16 @@ function Calculator() {
   const [shift, setShift] = useState(false)
   const [gstBreak, setGstBreak] = useState(null)
   const [hasResult, setHasResult] = useState(false)
+  // Boot sequence: 0=dark, 1=all-8s flash, 2=zero clear, 3=ready
+  const [bootPhase, setBootPhase] = useState(0)
+  const bootedRef = useRef(false)
+  useEffect(() => {
+    if (bootedRef.current) return
+    bootedRef.current = true
+    setTimeout(() => setBootPhase(1), 120)
+    setTimeout(() => setBootPhase(2), 650)
+    setTimeout(() => setBootPhase(3), 1050)
+  }, [])
 
   const numVal = () => { const n = parseFloat(display); return isNaN(n) ? 0 : n }
 
@@ -239,16 +315,23 @@ function Calculator() {
     }),
   })
 
-  const B = ({ k, sub, t='num', rs, cs, fs }) => (
+  const B = ({ k, sub, t='num', rs, cs, fs }) => {
+    const rowNum = typeof rs === 'string' ? parseInt(rs) : (rs || 1)
+    const colNum = cs || 1
+    const btnDelay = 0.85 + (rowNum - 1) * 0.09 + (colNum - 1) * 0.025
+    return (
     <button
       onPointerDown={e => { e.currentTarget.style.transform='translateY(2px)'; e.currentTarget.style.filter='brightness(0.85)' }}
       onPointerUp={e => { e.currentTarget.style.transform=''; e.currentTarget.style.filter=''; press(k) }}
       onPointerLeave={e => { e.currentTarget.style.transform=''; e.currentTarget.style.filter='' }}
-      style={{ ...bStyle(t), gridRow: rs, gridColumn: cs, fontSize: fs || (t==='fn'?'0.62rem':'0.95rem') }}>
+      style={{
+        ...bStyle(t), gridRow: rs, gridColumn: cs, fontSize: fs || (t==='fn'?'0.62rem':'0.95rem'),
+        animation: `phase-in 0.55s cubic-bezier(0.22,1,0.36,1) ${btnDelay}s both`,
+      }}>
       <span style={{ lineHeight:1 }}>{k}</span>
       {sub && <span style={{ fontSize:'0.45rem', marginTop:2, opacity:0.6, letterSpacing:'0.1em' }}>{sub}</span>}
     </button>
-  )
+  )}
 
   // corner bracket decoration for display
   const Corner = ({ pos }) => {
@@ -274,6 +357,7 @@ function Calculator() {
       maxWidth: 360,
       margin: '0 auto',
       userSelect: 'none',
+      animation: 'phase-in 0.8s cubic-bezier(0.22,1,0.36,1) 0.05s both',
     }}>
 
       {/* ── HUD top bar ── */}
@@ -319,14 +403,32 @@ function Calculator() {
 
         {/* Main number */}
         <div style={{ textAlign:'right', minHeight:48 }}>
-          <span style={{
-            fontFamily:'"Share Tech Mono",monospace',
-            fontSize: display.length>12?'1.3rem':display.length>9?'1.7rem':display.length>6?'2rem':'2.6rem',
-            color: CYAN,
-            textShadow:`0 0 12px ${CYAN_GLOW}, 0 0 30px ${CYAN}44`,
-            letterSpacing:'0.06em',
-            lineHeight:1,
-          }}>{fmt(display)}</span>
+          {bootPhase === 0 ? (
+            <span style={{ fontFamily:'"Share Tech Mono",monospace', fontSize:'2.6rem', color:'transparent', lineHeight:1 }}>0</span>
+          ) : bootPhase === 1 ? (
+            <span style={{
+              fontFamily:'"Share Tech Mono",monospace', fontSize:'2.6rem', lineHeight:1, letterSpacing:'0.06em',
+              color:'rgba(0,255,180,0.7)',
+              textShadow:'0 0 8px rgba(0,255,180,0.8), 0 0 20px rgba(0,255,180,0.4)',
+              animation:'phase-in 0.2s ease both',
+            }}>8,888,888</span>
+          ) : bootPhase === 2 ? (
+            <span style={{
+              fontFamily:'"Share Tech Mono",monospace', fontSize:'2.6rem', lineHeight:1, letterSpacing:'0.06em',
+              color:`${CYAN}60`,
+              textShadow:`0 0 6px ${CYAN}40`,
+              animation:'phase-in 0.25s ease both',
+            }}>0</span>
+          ) : (
+            <span style={{
+              fontFamily:'"Share Tech Mono",monospace',
+              fontSize: display.length>12?'1.3rem':display.length>9?'1.7rem':display.length>6?'2rem':'2.6rem',
+              color: CYAN,
+              textShadow:`0 0 12px ${CYAN_GLOW}, 0 0 30px ${CYAN}44`,
+              letterSpacing:'0.06em', lineHeight:1,
+              animation: bootPhase === 3 ? 'phase-in 0.3s ease both' : 'none',
+            }}>{fmt(display)}</span>
+          )}
         </div>
 
         {/* HISTORY divider */}
