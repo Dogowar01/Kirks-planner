@@ -258,7 +258,7 @@ function LockScreen({ vault, onReset }) {
 }
 
 // ─── Entry Card ──────────────────────────────────────────────
-function EntryCard({ entry, onEdit }) {
+function EntryCard({ entry, onEdit, index = 0 }) {
   const [revealed, setRevealed] = useState(false)
   const [copied, setCopied]     = useState(false)
 
@@ -276,30 +276,41 @@ function EntryCard({ entry, onEdit }) {
     'ACCOUNT':    '#60A5FA',
     'NOTE':       '#F59E0B',
   }
+  const typeColor = TYPE_COLORS[entry.type] || PLUM
+  const anim = index % 2 === 0
+    ? `phase-in-left 0.7s cubic-bezier(0.22,1,0.36,1) ${0.1 + index * 0.055}s both`
+    : `phase-in-right 0.7s cubic-bezier(0.22,1,0.36,1) ${0.1 + index * 0.055}s both`
 
   return (
     <div
       onClick={() => onEdit(entry)}
       style={{
-        background: 'rgba(255,255,255,0.03)',
-        border: '0.5px solid rgba(255,255,255,0.08)',
-        borderRadius: 12, padding: '14px 16px',
-        cursor: 'pointer', transition: 'border-color 0.15s',
+        background: `linear-gradient(135deg, ${typeColor}12 0%, rgba(13,12,11,0.88) 100%)`,
+        border: `1px solid ${typeColor}30`,
+        borderRadius: 12, overflow: 'hidden',
+        cursor: 'pointer', transition: 'border-color 0.15s, box-shadow 0.15s',
         marginBottom: 10,
-      }}
-      onMouseEnter={e => e.currentTarget.style.borderColor = PLUM_BORDER}
-      onMouseLeave={e => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'}>
+        clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%)',
+        backdropFilter: 'blur(8px)',
+        boxShadow: `0 0 20px ${typeColor}08`,
+        animation: anim,
+        display: 'flex',
+      }}>
+      {/* Left accent stripe */}
+      <div style={{ width: 3, flexShrink: 0, background: typeColor, boxShadow: `0 0 8px ${typeColor}80` }} />
+      <div style={{ flex: 1, padding: '14px 16px' }}>
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 6 }}>
-        <span style={{ fontFamily: '"DM Mono", monospace', fontSize: 13, color: '#EDE8E0', fontWeight: 500 }}>
+        <span style={{ fontFamily: '"Playfair Display", serif', fontStyle: 'italic', fontSize: 14, color: '#EDE8E0', fontWeight: 600 }}>
           {entry.label}
         </span>
         <span style={{
           fontSize: 9, fontFamily: '"DM Mono", monospace', letterSpacing: '0.12em',
           padding: '2px 6px', borderRadius: 4,
-          background: `${TYPE_COLORS[entry.type] || PLUM}22`,
-          color: TYPE_COLORS[entry.type] || PLUM,
-          border: `0.5px solid ${TYPE_COLORS[entry.type] || PLUM}44`,
+          background: `${typeColor}22`,
+          color: typeColor,
+          border: `0.5px solid ${typeColor}44`,
+          textShadow: `0 0 8px ${typeColor}80`,
         }}>
           {entry.type}
         </span>
@@ -322,12 +333,12 @@ function EntryCard({ entry, onEdit }) {
         <div style={{ display: 'flex', gap: 8, marginLeft: 8, flexShrink: 0 }} onClick={e => e.stopPropagation()}>
           <button
             onClick={() => setRevealed(r => !r)}
-            style={{ background: 'rgba(255,255,255,0.08)', border: '0.5px solid rgba(255,255,255,0.14)', borderRadius: 10, padding: '10px 14px', color: '#B8B0A8', cursor: 'pointer', minWidth: 44, minHeight: 44, display: 'flex', alignItems: 'center', justifyContent: 'center', touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent' }}>
+            style={{ background: `${typeColor}12`, border: `0.5px solid ${typeColor}35`, borderRadius: 10, padding: '10px 14px', color: typeColor, cursor: 'pointer', minWidth: 44, minHeight: 44, display: 'flex', alignItems: 'center', justifyContent: 'center', touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent' }}>
             {revealed ? <EyeOff size={15} /> : <Eye size={15} />}
           </button>
           <button
             onClick={handleCopy}
-            style={{ background: copied ? 'rgba(74,222,128,0.15)' : 'rgba(255,255,255,0.08)', border: `0.5px solid ${copied ? 'rgba(74,222,128,0.4)' : 'rgba(255,255,255,0.14)'}`, borderRadius: 10, padding: '10px 14px', color: copied ? '#4ADE80' : '#B8B0A8', cursor: 'pointer', minWidth: 44, minHeight: 44, display: 'flex', alignItems: 'center', justifyContent: 'center', touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent' }}>
+            style={{ background: copied ? 'rgba(74,222,128,0.15)' : `${typeColor}08`, border: `0.5px solid ${copied ? 'rgba(74,222,128,0.4)' : typeColor+'30'}`, borderRadius: 10, padding: '10px 14px', color: copied ? '#4ADE80' : '#B8B0A8', cursor: 'pointer', minWidth: 44, minHeight: 44, display: 'flex', alignItems: 'center', justifyContent: 'center', touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent' }}>
             {copied ? <Check size={15} /> : <Copy size={15} />}
           </button>
         </div>
@@ -338,6 +349,7 @@ function EntryCard({ entry, onEdit }) {
           {entry.notes}
         </p>
       )}
+      </div>
     </div>
   )
 }
@@ -662,8 +674,8 @@ function VaultScreen({ vault }) {
             </p>
           </div>
         ) : (
-          entries.map(e => (
-            <EntryCard key={e.id} entry={e} onEdit={() => setModal(e)} />
+          entries.map((e, i) => (
+            <EntryCard key={e.id} entry={e} index={i} onEdit={() => setModal(e)} />
           ))
         )}
       </div>

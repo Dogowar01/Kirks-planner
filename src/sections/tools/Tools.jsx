@@ -1125,17 +1125,27 @@ export default function Tools() {
           <>
             <div className="mb-2" />
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-              {TOOLS.map(t => (
+              {TOOLS.map((t, i) => {
+                const col = '#00C8FF'
+                const anim = i % 2 === 0
+                  ? `phase-in-left 0.65s cubic-bezier(0.22,1,0.36,1) ${0.1 + i * 0.05}s both`
+                  : `phase-in-right 0.65s cubic-bezier(0.22,1,0.36,1) ${0.1 + i * 0.05}s both`
+                return (
                 <button key={t.id} onClick={() => setActive(t.id)}
                   className="card text-left flex flex-col gap-2 hover:border-white/10 transition-all"
-                  style={{ padding: '16px 14px' }}>
-                  <span style={{ fontSize: '1.8rem', lineHeight: 1 }}>{t.icon}</span>
-                  <div>
-                    <p style={{ fontSize: '0.85rem', fontWeight: 500, color: '#EDE8E0', lineHeight: 1.3 }}>{t.label}</p>
-                    <p style={{ fontFamily: '"DM Mono",monospace', fontSize: '0.55rem', color: 'var(--section-muted)', marginTop: 3, letterSpacing: '0.04em' }}>{t.desc}</p>
+                  style={{ padding: 0, overflow: 'hidden', animation: anim }}>
+                  <div style={{ display: 'flex', alignItems: 'stretch' }}>
+                    <div style={{ width: 3, flexShrink: 0, background: col, boxShadow: `0 0 8px ${col}80` }} />
+                    <div style={{ flex: 1, padding: '14px 12px', display: 'flex', flexDirection: 'column', gap: 6 }}>
+                      <span style={{ fontSize: '1.5rem', lineHeight: 1 }}>{t.icon}</span>
+                      <div>
+                        <p style={{ fontSize: '0.85rem', fontWeight: 500, color: '#EDE8E0', lineHeight: 1.3 }}>{t.label}</p>
+                        <p style={{ fontFamily: '"DM Mono",monospace', fontSize: '0.55rem', color: 'var(--section-muted)', marginTop: 3, letterSpacing: '0.04em' }}>{t.desc}</p>
+                      </div>
+                    </div>
                   </div>
                 </button>
-              ))}
+              )})}
             </div>
           </>
         )}

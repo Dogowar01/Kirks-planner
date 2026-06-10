@@ -413,9 +413,16 @@ export default function Calendar() {
             {format(selected, 'EEEE, d MMMM')}
           </p>
           <div className="space-y-2">
-            {eventsOnDay(selected).map(ev => (
-              <div key={ev.id} className="card flex items-start gap-3">
-                <div className="w-1 h-full min-h-[32px] rounded-full shrink-0" style={{ backgroundColor: CATEGORIES[ev.category]?.color }} />
+            {eventsOnDay(selected).map((ev, i) => {
+              const col = CATEGORIES[ev.category]?.color || '#3EC88A'
+              const anim = i % 2 === 0
+                ? `phase-in-left 0.65s cubic-bezier(0.22,1,0.36,1) ${i * 0.06}s both`
+                : `phase-in-right 0.65s cubic-bezier(0.22,1,0.36,1) ${i * 0.06}s both`
+              return (
+              <div key={ev.id} className="card" style={{ padding: 0, overflow: 'hidden', animation: anim }}>
+                <div style={{ display: 'flex', alignItems: 'stretch' }}>
+                  <div style={{ width: 3, flexShrink: 0, background: col, boxShadow: `0 0 8px ${col}80` }} />
+                  <div style={{ flex: 1, padding: '10px 14px', display: 'flex', alignItems: 'flex-start', gap: 10 }}>
                 <div className="flex-1 min-w-0">
                   <p className="text-text-primary text-sm font-medium">{ev.title}</p>
                   {ev.time && <p className="text-text-tertiary text-xs font-mono">{ev.time}{ev.endTime ? ` – ${ev.endTime}` : ''}</p>}
@@ -430,8 +437,10 @@ export default function Calendar() {
                     </>
                   )}
                 </div>
+                  </div>
+                </div>
               </div>
-            ))}
+            )})}
           </div>
         </div>
       )}
@@ -442,20 +451,30 @@ export default function Calendar() {
         {upcoming.length === 0
           ? <p className="text-text-tertiary text-sm">No upcoming events.</p>
           : <div className="space-y-2">
-              {upcoming.map(ev => (
-                <div key={ev.id} className="card flex items-center gap-3">
+              {upcoming.map((ev, i) => {
+                const col = CATEGORIES[ev.category]?.color || '#3EC88A'
+                const anim = i % 2 === 0
+                  ? `phase-in-left 0.65s cubic-bezier(0.22,1,0.36,1) ${0.1 + i * 0.055}s both`
+                  : `phase-in-right 0.65s cubic-bezier(0.22,1,0.36,1) ${0.1 + i * 0.055}s both`
+                return (
+                <div key={ev.id} className="card" style={{ padding: 0, overflow: 'hidden', animation: anim }}>
+                  <div style={{ display: 'flex', alignItems: 'stretch' }}>
+                    <div style={{ width: 3, flexShrink: 0, background: col, boxShadow: `0 0 8px ${col}80` }} />
+                    <div style={{ flex: 1, padding: '10px 12px', display: 'flex', alignItems: 'center', gap: 10 }}>
                   <div className="shrink-0 w-10 text-center">
-                    <p className="text-text-tertiary text-[10px] font-mono uppercase">{format(parseISO(ev.date), 'MMM')}</p>
-                    <p className="text-text-primary font-mono font-semibold text-lg leading-none">{format(parseISO(ev.date), 'd')}</p>
+                    <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.5rem', color: `${col}90`, textTransform: 'uppercase', letterSpacing: '0.1em' }}>{format(parseISO(ev.date), 'MMM')}</p>
+                    <p style={{ fontFamily: '"Playfair Display", serif', fontWeight: 700, fontSize: '1.25rem', color: '#EDE8E0', lineHeight: 1, textShadow: `0 0 12px ${col}60` }}>{format(parseISO(ev.date), 'd')}</p>
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-text-primary text-sm truncate">{ev.title}</p>
-                    {ev.time && <p className="text-text-tertiary text-xs font-mono">{ev.time}</p>}
+                    {ev.time && <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.65rem', color: '#A09890' }}>{ev.time}</p>}
                   </div>
                   <CategoryBadge category={ev.category} size="xs" />
                   {ev.reminder && <Bell size={12} className="text-text-tertiary"/>}
+                    </div>
+                  </div>
                 </div>
-              ))}
+              )})}
             </div>
         }
       </div>

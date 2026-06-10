@@ -97,14 +97,22 @@ function TaskForm({ initial = {}, projects, missions, onSave, onClose }) {
   )
 }
 
-function TaskItem({ task, onToggle, onDelete, onEdit, projects, missions }) {
+function TaskItem({ task, onToggle, onDelete, onEdit, projects, missions, index = 0 }) {
   const [showDetail, setShowDetail] = useState(false)
   const proj    = projects.find(p => p.id === task.projectId)
   const mission = missions?.find(m => m.id === task.missionId)
   const priorityColor = task.priority === 'high' ? '#D85A30' : task.priority === 'low' ? '#A09890' : undefined
+  const catColor = CATEGORIES[task.category]?.color || '#F09030'
+  const anim = index % 2 === 0
+    ? `phase-in-left 0.7s cubic-bezier(0.22,1,0.36,1) ${0.15 + index * 0.06}s both`
+    : `phase-in-right 0.7s cubic-bezier(0.22,1,0.36,1) ${0.15 + index * 0.06}s both`
 
   return (
-    <div className="card">
+    <div className="card" style={{ padding: 0, overflow: 'hidden', animation: anim }}>
+      <div style={{ display: 'flex', alignItems: 'stretch' }}>
+        {/* Left accent stripe */}
+        <div style={{ width: 3, flexShrink: 0, background: catColor, boxShadow: `0 0 8px ${catColor}80` }} />
+        <div style={{ flex: 1, padding: '12px 14px' }}>
       <div className="flex items-start gap-3">
         <button onClick={() => onToggle(task.id, !task.done)}
           className="mt-0.5 w-4 h-4 rounded border shrink-0 flex items-center justify-center transition-colors"
@@ -148,6 +156,8 @@ function TaskItem({ task, onToggle, onDelete, onEdit, projects, missions }) {
           <button onClick={() => onDelete(task.id)} className="p-1 text-text-tertiary hover:text-red-400 transition-colors">
             <Trash2 size={14} />
           </button>
+        </div>
+      </div>
         </div>
       </div>
     </div>
@@ -226,8 +236,8 @@ export default function Tasks() {
       {filtered.length === 0
         ? <EmptyState icon={CheckSquare} title="No tasks" description="Add a task above or quick-add from the dashboard." />
         : <div className="space-y-2">
-            {filtered.map(t => (
-              <TaskItem key={t.id} task={t} projects={projects} missions={missions}
+            {filtered.map((t, i) => (
+              <TaskItem key={t.id} task={t} projects={projects} missions={missions} index={i}
                 onToggle={(id, done) => updateTask(id, { done })}
                 onDelete={(id) => setDeleteId(id)}
                 onEdit={(t) => setEditTask(t)} />

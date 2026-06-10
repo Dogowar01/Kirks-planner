@@ -271,6 +271,7 @@
   /* Cards — vivid glassmorphism with neon accent glow */
   .card {
     @apply rounded-card p-4;
+    clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%);
     background: linear-gradient(
       135deg,
       color-mix(in srgb, var(--section-accent, #C4522A) 22%, rgba(14,13,11,0.88)) 0%,

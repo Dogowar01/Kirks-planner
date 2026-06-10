@@ -298,16 +298,23 @@ function initials(name) {
 
 // ─── Contact card ─────────────────────────────────────────────────────────────
 
-function ContactCard({ contact, onEdit, onDelete }) {
+function ContactCard({ contact, onEdit, onDelete, index = 0 }) {
   const [open, setOpen] = useState(false)
   const cat = CATEGORIES[contact.category]
+  const color = cat?.color || '#E06840'
+  const anim = index % 2 === 0
+    ? `phase-in-left 0.7s cubic-bezier(0.22,1,0.36,1) ${0.1 + index * 0.055}s both`
+    : `phase-in-right 0.7s cubic-bezier(0.22,1,0.36,1) ${0.1 + index * 0.055}s both`
 
   return (
-    <div className="card">
+    <div className="card" style={{ padding: 0, overflow: 'hidden', animation: anim }}>
+      <div style={{ display: 'flex', alignItems: 'stretch' }}>
+        <div style={{ width: 3, flexShrink: 0, background: color, boxShadow: `0 0 8px ${color}80` }} />
+        <div style={{ flex: 1, padding: '12px 14px' }}>
       <div className="flex items-center gap-3">
         <button onClick={() => setOpen(s=>!s)}
           className="w-9 h-9 rounded-full flex items-center justify-center text-white text-xs font-semibold shrink-0"
-          style={{ backgroundColor: cat?.color }}>
+          style={{ backgroundColor: color, boxShadow: `0 0 12px ${color}60` }}>
           {initials(contact.name)}
         </button>
         <div className="flex-1 min-w-0" onClick={() => setOpen(s=>!s)}>
@@ -322,25 +329,27 @@ function ContactCard({ contact, onEdit, onDelete }) {
       </div>
 
       {open && (
-        <div className="mt-3 pt-3 border-t space-y-2" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
+        <div className="mt-3 pt-3 border-t space-y-2" style={{ borderColor: `${color}25` }}>
           {contact.email && (
-            <a href={`mailto:${contact.email}`} className="flex items-center gap-2 text-xs text-app hover:underline">
+            <a href={`mailto:${contact.email}`} className="flex items-center gap-2 text-xs hover:underline" style={{ color }}>
               <Mail size={12}/> {contact.email}
             </a>
           )}
           {contact.phone && (
-            <a href={`tel:${contact.phone}`} className="flex items-center gap-2 text-xs text-writing hover:underline">
+            <a href={`tel:${contact.phone}`} className="flex items-center gap-2 text-xs hover:underline" style={{ color: '#00C8FF' }}>
               <Phone size={12}/> {contact.phone}
             </a>
           )}
           {contact.website && (
-            <a href={contact.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-xs text-personal hover:underline">
+            <a href={contact.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-xs hover:underline" style={{ color: '#00FF9D' }}>
               <Globe size={12}/> {contact.website}
             </a>
           )}
           {contact.note && <p className="text-text-secondary text-xs whitespace-pre-wrap">{contact.note}</p>}
         </div>
       )}
+        </div>
+      </div>
     </div>
   )
 }
@@ -393,8 +402,8 @@ export default function Contacts() {
       {filtered.length === 0
         ? <EmptyState icon={Users} title="No contacts" description="Add contacts to keep track of people across your work." />
         : <div className="space-y-2">
-            {filtered.map(c => (
-              <ContactCard key={c.id} contact={c}
+            {filtered.map((c, i) => (
+              <ContactCard key={c.id} contact={c} index={i}
                 onEdit={(c) => setEditContact(c)}
                 onDelete={(id) => setDeleteId(id)} />
             ))}

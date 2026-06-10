@@ -198,15 +198,21 @@ export default function Notes() {
           {/* Note list */}
           {filtered.length > 0 && (
             <div className="space-y-2">
-              {filtered.map(n => {
+              {filtered.map((n, i) => {
                 const accent = CATEGORIES[n.category]?.color || '#C9B49A'
+                const anim = i % 2 === 0
+                  ? `phase-in-left 0.7s cubic-bezier(0.22,1,0.36,1) ${0.1 + i * 0.06}s both`
+                  : `phase-in-right 0.7s cubic-bezier(0.22,1,0.36,1) ${0.1 + i * 0.06}s both`
                 return (
                   <button key={n.id}
                     onClick={() => setActiveNote(n)}
                     className="card w-full text-left"
-                    style={{ padding: 0, overflow: 'hidden' }}>
-                    {/* Category accent bar */}
-                    <div style={{ height: 1.5, background: `linear-gradient(to right, ${accent}CC, ${accent}30, transparent)` }} />
+                    style={{ padding: 0, overflow: 'hidden', animation: anim }}>
+                    {/* Left accent stripe + top bar */}
+                    <div style={{ display: 'flex', alignItems: 'stretch' }}>
+                      <div style={{ width: 3, flexShrink: 0, background: accent, boxShadow: `0 0 8px ${accent}80` }} />
+                      <div style={{ flex: 1 }}>
+                      <div style={{ height: 1.5, background: `linear-gradient(to right, ${accent}CC, ${accent}30, transparent)` }} />
                     <div style={{ padding: '12px 14px', display: 'flex', alignItems: 'flex-start', gap: 8 }}>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
@@ -248,6 +254,8 @@ export default function Notes() {
                           className="hover:text-red-400 transition-colors">
                           <Trash2 size={13} />
                         </button>
+                      </div>
+                    </div>
                       </div>
                     </div>
                   </button>
