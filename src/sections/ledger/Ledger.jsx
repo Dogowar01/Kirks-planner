@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ARTWORK_IMG from '../../assets/ledger-artwork.jpg';
-import BottomNav from '../../components/BottomNav';
+import { LayoutGrid } from 'lucide-react';
 import HoloRings from '../../components/HoloRings';
 
 // ─── DATA HELPERS ─────────────────────────────────────────────────────────────
@@ -71,12 +71,11 @@ function LedgerBg({ accent = '#C4522A' }) {
         background: `radial-gradient(ellipse 120% 60% at 50% -8%, ${accent}55 0%, ${accent}22 40%, transparent 68%)`,
         animation: ph(0.3, 1.8),
       }} />
-      {/* Architectural grid */}
+      {/* Architectural grid — static, no animation so opacity holds */}
       <div style={{
         position: 'absolute', inset: 0,
-        backgroundImage: `linear-gradient(${accent} 1px, transparent 1px), linear-gradient(90deg, ${accent} 1px, transparent 1px)`,
-        backgroundSize: '40px 40px', opacity: 0.022,
-        animation: ph(0.5, 1.6),
+        backgroundImage: `linear-gradient(${accent}12 1px, transparent 1px), linear-gradient(90deg, ${accent}12 1px, transparent 1px)`,
+        backgroundSize: '40px 40px',
       }} />
       {/* Orbs */}
       <div style={{
@@ -100,6 +99,7 @@ function LedgerBg({ accent = '#C4522A' }) {
 // ─── LANDING PAGE ─────────────────────────────────────────────────────────────
 
 function LandingView({ transactions, onOpen, onBack }) {
+  const navigate = useNavigate();
   const fyTotals = (biz) => {
     const fy = currentFY(), txns = transactions[biz].filter(tx => getFY(tx.date) === fy);
     const inn = txns.filter(tx => tx.type==="in").reduce((s,tx) => s+tx.amount, 0);
@@ -136,10 +136,13 @@ function LandingView({ transactions, onOpen, onBack }) {
         <div style={{ position: 'absolute', left: 0, right: 0, height: 2, background: 'linear-gradient(90deg, transparent 0%, rgba(160,60,220,0.5) 20%, rgba(0,200,255,0.9) 50%, rgba(160,60,220,0.5) 80%, transparent 100%)', boxShadow: '0 0 12px rgba(0,200,255,0.5)', filter: 'blur(0.5px)', animation: 'prismatic-scan 3s cubic-bezier(0.4,0,0.6,1) 0.5s 1 forwards' }} />
       </div>
 
-      {/* Back button */}
-      <div style={{ position: 'fixed', top: 'calc(env(safe-area-inset-top) + 0.75rem)', left: '1rem', zIndex: 10, animation: ph(0.4, 0.8, 'left') }}>
+      {/* Back + Hub buttons */}
+      <div style={{ position: 'fixed', top: 'calc(env(safe-area-inset-top) + 0.75rem)', left: '1rem', zIndex: 10, display: 'flex', gap: 6, animation: ph(0.4, 0.8, 'left') }}>
         <button onClick={onBack} style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', background: 'rgba(13,12,11,0.7)', backdropFilter: 'blur(12px)', border: '0.5px solid rgba(255,255,255,0.1)', borderRadius: 8, padding: '0.4rem 0.75rem', cursor: 'pointer', color: 'rgba(220,200,180,0.8)', fontSize: '0.7rem', letterSpacing: '0.1em', textTransform: 'uppercase', fontFamily: '"DM Mono", monospace' }}>
           ← Back
+        </button>
+        <button onClick={() => navigate('/hub')} style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'rgba(13,12,11,0.7)', backdropFilter: 'blur(12px)', border: '0.5px solid rgba(196,82,42,0.35)', borderRadius: 8, padding: '0.4rem 0.75rem', cursor: 'pointer', color: 'rgba(196,82,42,0.7)', fontSize: '0.44rem', letterSpacing: '0.14em', textTransform: 'uppercase', fontFamily: '"DM Mono", monospace' }}>
+          <LayoutGrid size={11} strokeWidth={1.5} />HUB
         </button>
       </div>
 
@@ -218,8 +221,6 @@ function LandingView({ transactions, onOpen, onBack }) {
           Kirk's Business Tracker · Signal9 Studio
         </div>
       </div>
-
-      <BottomNav />
     </div>
   );
 }
@@ -307,6 +308,7 @@ function MonthlyChart({ bizTxns, accent, secondary }) {
 // ─── LIST VIEW ────────────────────────────────────────────────────────────────
 
 function ListView({ activeBiz, transactions, categories, onBack, onAdd, onEdit, onDelete, onExport, onToggleCat, catView }) {
+  const navigate = useNavigate();
   const accent = BIZ_ACCENT[activeBiz];
   const secondary = BIZ_SECONDARY[activeBiz];
   const bizTxns = transactions[activeBiz];
@@ -373,7 +375,7 @@ function ListView({ activeBiz, transactions, categories, onBack, onAdd, onEdit, 
         <div style={{ position: 'absolute', left: 0, right: 0, height: 2, background: `linear-gradient(90deg, transparent 0%, ${accent}44 10%, ${accent}cc 30%, ${accent} 50%, ${accent}cc 70%, ${accent}44 90%, transparent 100%)`, boxShadow: `0 0 12px ${accent}66`, filter: 'blur(0.5px)', animation: 'prismatic-scan 3s cubic-bezier(0.4,0,0.6,1) 0.2s 1 forwards' }} />
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100dvh', position: 'relative', zIndex: 3, paddingBottom: 'calc(env(safe-area-inset-bottom) + 88px)' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100dvh', position: 'relative', zIndex: 3, paddingBottom: 'calc(env(safe-area-inset-bottom) + 2rem)' }}>
 
         {/* Header */}
         <div style={{
@@ -387,7 +389,12 @@ function ListView({ activeBiz, transactions, categories, onBack, onAdd, onEdit, 
         }}>
           {/* Holo bottom border */}
           <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 1.5, background: `linear-gradient(90deg, transparent 0%, ${accent}cc 30%, ${accent} 50%, ${accent}cc 70%, transparent 100%)`, backgroundSize: '300% 100%', animation: 'holo-border 4s linear infinite' }} />
-          <button onClick={onBack} style={{ background: 'none', border: `1px solid ${accent}40`, borderRadius: 8, color: accent, cursor: 'pointer', fontFamily: '"DM Mono", monospace', fontSize: '0.65rem', padding: '0.3rem 0.7rem', letterSpacing: '0.1em' }}>← BACK</button>
+          <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+            <button onClick={onBack} style={{ background: 'none', border: `1px solid ${accent}40`, borderRadius: 8, color: accent, cursor: 'pointer', fontFamily: '"DM Mono", monospace', fontSize: '0.65rem', padding: '0.3rem 0.7rem', letterSpacing: '0.1em' }}>← BACK</button>
+            <button onClick={() => navigate('/hub')} style={{ display: 'flex', alignItems: 'center', gap: 4, fontFamily: '"DM Mono", monospace', fontSize: '0.44rem', letterSpacing: '0.14em', color: `${accent}80`, background: `${accent}10`, border: `0.5px solid ${accent}35`, borderRadius: 6, padding: '5px 9px', cursor: 'pointer', textTransform: 'uppercase', flexShrink: 0 }}>
+              <LayoutGrid size={11} strokeWidth={1.5} />HUB
+            </button>
+          </div>
           <div style={{ textAlign: 'center' }}>
             <div style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.42rem', color: `${accent}70`, letterSpacing: '0.22em', textTransform: 'uppercase', marginBottom: 2 }}>■ Ledger</div>
             <h1 style={{ fontFamily: '"Playfair Display", serif', fontStyle: 'italic', fontWeight: 600, fontSize: '1.05rem', color: accent, margin: 0, textShadow: `0 0 20px ${accent}50` }}>{activeBiz}</h1>
@@ -503,8 +510,6 @@ function ListView({ activeBiz, transactions, categories, onBack, onAdd, onEdit, 
           </div>
         </div>
       )}
-
-      <BottomNav />
     </div>
   );
 }
@@ -535,6 +540,7 @@ function CatEditor({ activeBiz, categories, accent, onExternalAdd, onExternalRem
 // ─── FORM VIEW ────────────────────────────────────────────────────────────────
 
 function FormView({ activeBiz, categories, editingId, onBack, onSubmit, onDeleteEdit, initialForm }) {
+  const navigate = useNavigate();
   const accent = BIZ_ACCENT[activeBiz];
   const secondary = BIZ_SECONDARY[activeBiz];
   const [form, setForm] = useState(initialForm);
@@ -561,12 +567,17 @@ function FormView({ activeBiz, categories, editingId, onBack, onSubmit, onDelete
       <style>{globalCSS}</style>
       <LedgerBg accent={accent} />
 
-      <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100dvh', position: 'relative', zIndex: 3, paddingBottom: 'calc(env(safe-area-inset-bottom) + 88px)' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100dvh', position: 'relative', zIndex: 3, paddingBottom: 'calc(env(safe-area-inset-bottom) + 2rem)' }}>
 
         {/* Header */}
         <div style={{ position: 'sticky', top: 0, zIndex: 20, padding: 'calc(env(safe-area-inset-top) + 10px) 16px 12px', background: 'linear-gradient(to bottom, rgba(8,7,6,0.98) 0%, rgba(13,12,11,0.94) 100%)', backdropFilter: 'blur(24px)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', boxShadow: '0 4px 32px rgba(0,0,0,0.55)', overflow: 'hidden', animation: ph(0, 0.9) }}>
           <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 1.5, background: `linear-gradient(90deg, transparent 0%, ${accent}cc 30%, ${accent} 50%, ${accent}cc 70%, transparent 100%)`, animation: 'holo-border 4s linear infinite' }} />
-          <button onClick={onBack} style={{ background: 'none', border: `1px solid ${accent}40`, borderRadius: 8, color: accent, cursor: 'pointer', fontFamily: '"DM Mono", monospace', fontSize: '0.65rem', padding: '0.3rem 0.7rem', letterSpacing: '0.1em' }}>← BACK</button>
+          <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+            <button onClick={onBack} style={{ background: 'none', border: `1px solid ${accent}40`, borderRadius: 8, color: accent, cursor: 'pointer', fontFamily: '"DM Mono", monospace', fontSize: '0.65rem', padding: '0.3rem 0.7rem', letterSpacing: '0.1em' }}>← BACK</button>
+            <button onClick={() => navigate('/hub')} style={{ display: 'flex', alignItems: 'center', gap: 4, fontFamily: '"DM Mono", monospace', fontSize: '0.44rem', letterSpacing: '0.14em', color: `${accent}80`, background: `${accent}10`, border: `0.5px solid ${accent}35`, borderRadius: 6, padding: '5px 9px', cursor: 'pointer', textTransform: 'uppercase', flexShrink: 0 }}>
+              <LayoutGrid size={11} strokeWidth={1.5} />HUB
+            </button>
+          </div>
           <div style={{ textAlign: 'center' }}>
             <div style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.42rem', color: `${accent}70`, letterSpacing: '0.22em', textTransform: 'uppercase', marginBottom: 2 }}>■ {activeBiz}</div>
             <h1 style={{ fontFamily: '"Playfair Display", serif', fontStyle: 'italic', fontWeight: 600, fontSize: '1.05rem', color: accent, margin: 0, textShadow: `0 0 20px ${accent}50` }}>{editingId ? 'Edit Entry' : 'New Entry'}</h1>
@@ -615,7 +626,6 @@ function FormView({ activeBiz, categories, editingId, onBack, onSubmit, onDelete
         </div>
       </div>
 
-      <BottomNav />
     </div>
   );
 }
