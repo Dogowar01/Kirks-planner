@@ -1065,9 +1065,12 @@ function SectionLabel({ children, color, seq = '—' }) {
   )
 }
 
-function SectionShell({ color, children, style }) {
+function SectionShell({ color, children, style, from = 'left', delay = 0 }) {
+  const anim = from === 'right'
+    ? `slide-from-right 0.65s cubic-bezier(0.22,1,0.36,1) ${delay}s both`
+    : `slide-from-left  0.65s cubic-bezier(0.22,1,0.36,1) ${delay}s both`
   return (
-    <div style={{ position: 'relative', animation: 'section-appear 0.4s ease both' }}>
+    <div style={{ position: 'relative', animation: anim }}>
       {/* Corner markers — outside clip-path, staggered blink */}
       {[
         { top: 0, left: 0 },
@@ -1688,7 +1691,7 @@ export default function Dashboard() {
       <div className="p-5 md:p-6 max-w-3xl space-y-7">
 
         {/* Stats */}
-        <SectionShell color="#E05828">
+        <SectionShell color="#E05828" from="left" delay={0.05}>
           <SectionLabel color="#FF7040" seq="01">Overview</SectionLabel>
           <div className="grid grid-cols-3 gap-3">
             <StatCard icon={CheckSquare} label="Open Tasks"      value={openTasks.length}       color="#D4724A" onClick={() => navigate('/tasks')} />
@@ -1698,7 +1701,7 @@ export default function Dashboard() {
         </SectionShell>
 
         {/* Quick Add + Focus Moment */}
-        <SectionShell color="#B040D8">
+        <SectionShell color="#B040D8" from="right" delay={0.15}>
           <SectionLabel color="#CC60F0" seq="02">Actions</SectionLabel>
           <div className="space-y-3">
             <QuickAdd onAdd={(data) => addTask(data)} />
@@ -1707,7 +1710,7 @@ export default function Dashboard() {
         </SectionShell>
 
         {/* Missions */}
-        <SectionShell color="#D89820">
+        <SectionShell color="#D89820" from="left" delay={0.25}>
           <MissionsWidget onNavigateToTasks={(missionId) => {
             setMissionFilter(missionId)
             navigate('/tasks')
@@ -1716,7 +1719,7 @@ export default function Dashboard() {
 
         {/* Today */}
         {todayEvents.length > 0 && (
-          <SectionShell color="#20C880">
+          <SectionShell color="#20C880" from="right" delay={0.35}>
             <section>
               <SectionLabel color="#20E890" seq="04">Today</SectionLabel>
               <div className="space-y-2">
@@ -1738,7 +1741,7 @@ export default function Dashboard() {
         )}
 
         {/* Top tasks */}
-        <SectionShell color="#E04820">
+        <SectionShell color="#E04820" from="left" delay={0.42}>
         <section>
           <div className="flex items-center justify-between mb-2.5">
             <SectionLabel color="#FF6040" seq="05">Active Tasks</SectionLabel>
@@ -1764,7 +1767,7 @@ export default function Dashboard() {
         </SectionShell>
 
         {/* Upcoming */}
-        <SectionShell color="#8840CC">
+        <SectionShell color="#8840CC" from="right" delay={0.50}>
           <section>
             <div className="flex items-center justify-between mb-2.5">
               <SectionLabel color="#AA60EE" seq="06">Upcoming</SectionLabel>
