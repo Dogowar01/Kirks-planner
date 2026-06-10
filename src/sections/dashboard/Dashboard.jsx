@@ -309,30 +309,24 @@ function LiveClock({ taskCount = 0, eventCount = 0 }) {
       }} />
 
       {/* ── HOLO RING CLUSTERS — hero layer ── */}
-      <HoloRings size={280} color="#C4522A" style={{
-        position: 'absolute', bottom: -90, left: -90, opacity: 0.22, zIndex: 2,
+      <HoloRings size={300} color="#C4522A" style={{
+        position: 'absolute', bottom: -90, left: -90, opacity: 0.52, zIndex: 2,
       }} />
-      <HoloRings size={180} color="#00C8FF" style={{
-        position: 'absolute', top: -50, right: -50, opacity: 0.28, zIndex: 2,
+      <HoloRings size={200} color="#00C8FF" style={{
+        position: 'absolute', top: -50, right: -50, opacity: 0.44, zIndex: 2,
       }} />
-      <HoloRings size={130} color="#A040E0" style={{
-        position: 'absolute', top: '30%', left: '30%', opacity: 0.16, zIndex: 2,
+      <HoloRings size={145} color="#A040E0" style={{
+        position: 'absolute', top: '30%', left: '30%', opacity: 0.36, zIndex: 2,
       }} />
 
-      {/* ── HOLOGRAPHIC PRISMATIC SCAN — full hero width ── */}
+      {/* ── ACCENT SCAN LINE — runs once on mount ── */}
       <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', overflow: 'hidden', zIndex: 3 }}>
         <div style={{
           position: 'absolute', left: 0, right: 0, height: 2,
-          background: 'linear-gradient(90deg, transparent 0%, rgba(255,30,160,0.6) 15%, rgba(100,60,255,0.85) 30%, rgba(0,180,255,1) 45%, rgba(0,255,160,0.85) 60%, rgba(255,200,0,0.6) 75%, transparent 100%)',
-          filter: 'blur(1px)',
-          boxShadow: '0 0 12px rgba(100,160,255,0.5)',
-          animation: 'prismatic-scan 5s ease-in-out infinite',
-        }} />
-        <div style={{
-          position: 'absolute', left: 0, right: 0, height: 1,
-          background: 'linear-gradient(90deg, transparent 0%, rgba(0,255,160,0.4) 25%, rgba(255,30,160,0.6) 50%, rgba(0,180,255,0.5) 75%, transparent 100%)',
-          animation: 'prismatic-scan 5s ease-in-out infinite 2.5s',
-          opacity: 0.7,
+          background: 'linear-gradient(90deg, transparent 0%, rgba(196,82,42,0.44) 10%, rgba(196,82,42,0.8) 30%, #C4522A 50%, rgba(196,82,42,0.8) 70%, rgba(196,82,42,0.44) 90%, transparent 100%)',
+          boxShadow: '0 0 12px rgba(196,82,42,0.55), 0 0 24px rgba(196,82,42,0.28)',
+          filter: 'blur(0.5px)',
+          animation: 'prismatic-scan 2.4s cubic-bezier(0.4,0,0.6,1) 1 forwards',
         }} />
       </div>
 

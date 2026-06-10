@@ -115,33 +115,27 @@ export default function SectionShell({ accent, bgImage, children, className = ''
       {/* Holographic ring clusters — fixed viewport, partially cropped */}
       <div style={{ position: 'fixed', inset: 0, zIndex: 2, pointerEvents: 'none', overflow: 'hidden' }}>
         {/* Ring cluster 1 — bottom-left, large, accent colour */}
-        <HoloRings size={320} color={accent} style={{
-          position: 'absolute', bottom: -110, left: -110, opacity: 0.28,
+        <HoloRings size={340} color={accent} style={{
+          position: 'absolute', bottom: -100, left: -100, opacity: 0.52,
         }} />
         {/* Ring cluster 2 — top-right, medium, cyan */}
-        <HoloRings size={220} color="#00C8FF" style={{
-          position: 'absolute', top: -70, right: -70, opacity: 0.22,
+        <HoloRings size={240} color="#00C8FF" style={{
+          position: 'absolute', top: -65, right: -65, opacity: 0.42,
         }} />
         {/* Ring cluster 3 — mid-left, small, purple */}
-        <HoloRings size={150} color="#A040E0" style={{
-          position: 'absolute', top: '38%', left: -55, opacity: 0.18,
+        <HoloRings size={170} color="#A040E0" style={{
+          position: 'absolute', top: '38%', left: -60, opacity: 0.36,
         }} />
       </div>
 
-      {/* Holographic prismatic scan line — drifts full page height */}
+      {/* Accent scan line — runs once on mount then gone */}
       <div style={{ position: 'fixed', inset: 0, zIndex: 3, pointerEvents: 'none', overflow: 'hidden' }}>
         <div style={{
           position: 'absolute', left: 0, right: 0, height: 2,
-          background: 'linear-gradient(90deg, transparent 0%, rgba(255,30,160,0.5) 15%, rgba(100,60,255,0.7) 30%, rgba(0,180,255,0.8) 45%, rgba(0,255,160,0.7) 60%, rgba(255,200,0,0.5) 75%, transparent 100%)',
-          filter: 'blur(1px)',
-          animation: 'prismatic-scan 7s ease-in-out infinite',
-        }} />
-        {/* Second offset scan line */}
-        <div style={{
-          position: 'absolute', left: 0, right: 0, height: 1,
-          background: 'linear-gradient(90deg, transparent 0%, rgba(0,255,160,0.4) 20%, rgba(0,180,255,0.6) 40%, rgba(255,30,160,0.5) 60%, rgba(140,60,255,0.4) 80%, transparent 100%)',
-          animation: 'prismatic-scan 7s ease-in-out infinite 3.5s',
-          opacity: 0.6,
+          background: `linear-gradient(90deg, transparent 0%, ${accent}44 10%, ${accent}cc 30%, ${accent} 50%, ${accent}cc 70%, ${accent}44 90%, transparent 100%)`,
+          boxShadow: `0 0 12px ${accent}88, 0 0 24px ${accent}44`,
+          filter: 'blur(0.5px)',
+          animation: 'prismatic-scan 2.4s cubic-bezier(0.4,0,0.6,1) 1 forwards',
         }} />
       </div>
 
