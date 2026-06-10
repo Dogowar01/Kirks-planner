@@ -4,6 +4,7 @@ import { useStore } from '../../hooks/useStore'
 import { CATEGORIES } from '../../lib/constants'
 import CategoryBadge from '../../components/CategoryBadge'
 import SectionShell from '../../components/SectionShell'
+import PageHeader from '../../components/PageHeader'
 import bgImg from '../../assets/art-portrait.jpg'
 import Modal from '../../components/Modal'
 import ConfirmDialog from '../../components/ConfirmDialog'
@@ -365,11 +366,15 @@ export default function Contacts() {
 
   return (
     <SectionShell accent="#C8BFB5" bgImage={bgImg}>
+      <PageHeader subtitle="CONTACTS" title="Contacts" accent="#C8BFB5">
+        <button onClick={() => setShowModal(true)} style={{
+          background: 'rgba(200,191,181,0.1)', border: '0.5px solid rgba(200,191,181,0.45)',
+          color: '#C8BFB5', borderRadius: 8, padding: '8px 14px', cursor: 'pointer',
+          display: 'flex', alignItems: 'center', gap: 6,
+          fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', letterSpacing: '0.12em',
+        }}><Plus size={14} strokeWidth={2} /> ADD</button>
+      </PageHeader>
     <div className="p-4 md:p-6 max-w-2xl">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="section-title">Contacts</h1>
-        <button onClick={() => setShowModal(true)} className="btn-primary"><Plus size={16}/> Add</button>
-      </div>
 
       <div className="relative mb-3">
         <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-tertiary" />

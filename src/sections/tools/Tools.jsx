@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { QRCodeSVG } from 'qrcode.react'
 import SectionShell from '../../components/SectionShell'
+import PageHeader from '../../components/PageHeader'
 import bgImg from '../../assets/art-architectural.jpg'
 import { useStore } from '../../hooks/useStore'
 
@@ -122,7 +123,7 @@ function WorldClocks() {
   const { times, temps } = useWorldData()
   return (
     <div className="card" style={{ background: '#0a0905', borderColor: '#1e1a0a' }}>
-      <p className="section-label mb-4">World Clocks</p>
+      <p className="section-label mb-4">[ World Clocks ]</p>
       <div style={{ display: 'flex', justifyContent: 'space-around', flexWrap: 'wrap', gap: 16 }}>
         {CITIES.map(c => {
           const { time = '', day = '' } = times[c.name] || {}
@@ -451,7 +452,7 @@ function Pomodoro() {
   return (
     <div className="card space-y-4">
       <div className="flex items-center justify-between">
-        <p className="section-label">Pomodoro</p>
+        <p className="section-label">[ Pomodoro ]</p>
         <span className="section-label">{sessions} sessions today</span>
       </div>
 
@@ -525,7 +526,7 @@ function UnitConverter() {
 
   return (
     <div className="card space-y-3">
-      <p className="section-label">Unit Converter</p>
+      <p className="section-label">[ Unit Converter ]</p>
 
       <div className="flex gap-1.5 flex-wrap">
         {CONVERTERS.map((c, i) => (
@@ -604,7 +605,7 @@ function MapsSearch() {
 
   return (
     <div className="card space-y-4">
-      <p className="section-label">Maps & Directions</p>
+      <p className="section-label">[ Maps & Directions ]</p>
 
       {/* Search box */}
       <div style={{ position: 'relative' }}>
@@ -681,7 +682,7 @@ function QRGenerator() {
   const [url, setUrl] = useState('')
   return (
     <div className="card space-y-3">
-      <p className="section-label">QR Code Generator</p>
+      <p className="section-label">[ QR Code Generator ]</p>
       <input className="input" placeholder="Paste a URL or text…" value={url} onChange={e => setUrl(e.target.value)} />
       {url.trim() && (
         <div style={{ display: 'flex', justifyContent: 'center', padding: 16 }}>
@@ -733,7 +734,7 @@ function ColourPicker() {
 
   return (
     <div className="card space-y-4">
-      <p className="section-label">Colour Palette</p>
+      <p className="section-label">[ Colour Palette ]</p>
       <div className="flex gap-3 items-center">
         <input type="color" value={hex} onChange={e=>{setHex(e.target.value);setInput(e.target.value)}}
           style={{width:48,height:48,borderRadius:8,border:'1px solid var(--section-card-border)',cursor:'pointer',padding:2,background:'none'}} />
@@ -773,7 +774,7 @@ function BillSplitter() {
   const perPerson = Math.round(total/Math.max(people,1)*100)/100
   return (
     <div className="card space-y-4">
-      <p className="section-label">Tip & Bill Splitter</p>
+      <p className="section-label">[ Tip & Bill Splitter ]</p>
       <div>
         <label className="section-label mb-1 block">Bill Amount ($)</label>
         <input className="input" type="number" min="0" step="0.01" placeholder="0.00" value={bill} onChange={e=>setBill(e.target.value)} />
@@ -852,7 +853,7 @@ function CountdownTimer() {
 
   return (
     <div className="card space-y-4">
-      <p className="section-label">Countdown Timers</p>
+      <p className="section-label">[ Countdown Timers ]</p>
       <div className="space-y-2">
         <input className="input" placeholder="Event name…" value={label} onChange={e=>setLabel(e.target.value)} />
         <div className="flex gap-2">
@@ -1108,12 +1109,21 @@ export default function Tools() {
 
   return (
     <SectionShell accent="#2A7A6F" bgImage={bgImg}>
+      <PageHeader subtitle="UTILITIES" title={active ? (tool?.label || 'Tools') : 'Tools'} accent="#2A7A6F">
+        {active && (
+          <button onClick={() => setActive(null)} style={{
+            background: 'rgba(42,122,111,0.1)', border: '0.5px solid rgba(42,122,111,0.4)',
+            color: '#5ABCB0', borderRadius: 8, padding: '8px 14px', cursor: 'pointer',
+            fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', letterSpacing: '0.12em',
+          }}>‹ BACK</button>
+        )}
+      </PageHeader>
       <div className="p-4 md:p-6 max-w-2xl">
 
         {/* Hub */}
         {!active && (
           <>
-            <h1 className="section-title mb-6">Tools</h1>
+            <div className="mb-2" />
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
               {TOOLS.map(t => (
                 <button key={t.id} onClick={() => setActive(t.id)}
@@ -1133,10 +1143,7 @@ export default function Tools() {
         {/* Active tool */}
         {active && (
           <>
-            <div className="flex items-center gap-3 mb-6">
-              <button onClick={() => setActive(null)} className="btn-ghost px-3 py-1.5 text-sm">‹ Back</button>
-              <h1 className="section-title" style={{ fontSize: '1.3rem' }}>{tool?.label}</h1>
-            </div>
+            <div className="mb-4" />
             {active === 'clocks'    && <WorldClocks />}
             {active === 'calc'      && <Calculator />}
             {active === 'pomodoro'  && <Pomodoro />}

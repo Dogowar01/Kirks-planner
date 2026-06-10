@@ -30,6 +30,17 @@ export default function SectionShell({ accent, bgImage, children, className = ''
         }} />
       )}
 
+      {/* Architectural grid */}
+      <div style={{
+        position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none',
+        backgroundImage: `
+          linear-gradient(${accent} 1px, transparent 1px),
+          linear-gradient(90deg, ${accent} 1px, transparent 1px)
+        `,
+        backgroundSize: '40px 40px',
+        opacity: 0.055,
+      }} />
+
       {/* Colour gradient overlay — boosted for visible colour wash */}
       <div style={{
         position: 'fixed',

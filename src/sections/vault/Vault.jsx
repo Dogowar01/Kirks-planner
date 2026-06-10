@@ -722,24 +722,28 @@ export default function Vault() {
   return (
     <SectionShell accent="#C084FC" bgImage={bgImg}>
       {/* Header */}
-      <div style={{ padding: '12px 16px 10px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '0.5px solid rgba(255,255,255,0.06)' }}>
+      <div style={{
+        position: 'sticky', top: 0, zIndex: 10,
+        padding: '12px 20px 14px',
+        background: 'linear-gradient(to bottom, rgba(8,7,6,0.99), rgba(13,12,11,0.95))',
+        backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)',
+        borderBottom: '0.5px solid rgba(192,132,252,0.18)',
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        boxShadow: '0 4px 32px rgba(0,0,0,0.55)',
+      }}>
         <div>
-          <h1 style={{ fontFamily: '"Playfair Display", serif', fontStyle: 'italic', fontSize: '1.5rem', color: '#EDE8E0', margin: 0, lineHeight: 1.2 }}>Vault</h1>
-          <p style={{ fontFamily: '"DM Mono", monospace', fontSize: 10, letterSpacing: '0.15em', color: '#7A7068', margin: '3px 0 0', textTransform: 'uppercase' }}>
-            {unlocked ? 'Unlocked — Locks in 5 min' : setup ? 'Locked' : 'First-time setup'}
-          </p>
+          <div style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.38rem', color: 'rgba(192,132,252,0.5)', letterSpacing: '0.22em', textTransform: 'uppercase', marginBottom: 2 }}>
+            ■ SECURE VAULT
+          </div>
+          <h1 style={{ fontFamily: '"Playfair Display", serif', fontStyle: 'italic', fontWeight: 600, fontSize: '1.1rem', color: '#C084FC', margin: 0, textShadow: '0 0 20px rgba(192,132,252,0.4)', letterSpacing: '-0.01em' }}>Vault</h1>
         </div>
-        {unlocked ? (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <Unlock size={14} color="#4ADE80" strokeWidth={1.5} />
-            <span style={{ fontSize: 10, fontFamily: '"DM Mono", monospace', color: '#4ADE80', letterSpacing: '0.1em' }}>OPEN</span>
-          </div>
-        ) : (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <Lock size={14} color={PLUM} strokeWidth={1.5} />
-            <span style={{ fontSize: 10, fontFamily: '"DM Mono", monospace', color: PLUM, letterSpacing: '0.1em' }}>{setup ? 'LOCKED' : 'NEW'}</span>
-          </div>
-        )}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.48rem', letterSpacing: '0.12em', textTransform: 'uppercase' }}>
+            {unlocked
+              ? <span style={{ color: '#4ADE80', textShadow: '0 0 8px rgba(74,222,128,0.5)' }}>⬛ UNLOCKED</span>
+              : <span style={{ color: PLUM, opacity: 0.7 }}>{setup ? '■ LOCKED' : '■ NEW'}</span>}
+          </span>
+        </div>
       </div>
 
       {confirmReset && (

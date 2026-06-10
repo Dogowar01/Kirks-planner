@@ -3,6 +3,7 @@ import { useStore } from '../../hooks/useStore'
 import { useNotifications } from '../../hooks/useNotifications'
 import ConfirmDialog from '../../components/ConfirmDialog'
 import SectionShell from '../../components/SectionShell'
+import PageHeader from '../../components/PageHeader'
 import bgImg from '../../assets/art-ethereal.jpg'
 
 export default function Settings() {
@@ -42,12 +43,12 @@ export default function Settings() {
 
   return (
     <SectionShell accent="#A09890" bgImage={bgImg}>
+      <PageHeader subtitle="CONFIGURATION" title="Settings" accent="#A09890" />
     <div className="p-4 md:p-6 max-w-xl">
-      <h1 className="section-title mb-6">Settings</h1>
 
       <div className="space-y-6">
         <section className="card space-y-4">
-          <h2 className="section-label">Display</h2>
+          <h2 className="section-label">[ Display ]</h2>
           <div>
             <label className="text-text-secondary text-xs mb-1 block">Display Name</label>
             <input className="input" value={s.displayName || 'Kirk'}
@@ -56,7 +57,7 @@ export default function Settings() {
         </section>
 
         <section className="card space-y-4">
-          <h2 className="section-label">Writing</h2>
+          <h2 className="section-label">[ Writing ]</h2>
           <div>
             <label className="text-text-secondary text-xs mb-1 block">Default Daily Word Goal</label>
             <input type="number" min="100" step="100" className="input"
@@ -66,7 +67,7 @@ export default function Settings() {
         </section>
 
         <section className="card space-y-4">
-          <h2 className="section-label">Notifications</h2>
+          <h2 className="section-label">[ Notifications ]</h2>
           <p style={{ fontSize: '0.8rem', color: '#B8B0A8' }}>
             Get reminded for tasks and events that have a reminder set. Notifications are local — no account needed.
           </p>
@@ -85,7 +86,7 @@ export default function Settings() {
         </section>
 
         <section className="card space-y-4">
-          <h2 className="section-label">Data</h2>
+          <h2 className="section-label">[ Data ]</h2>
           <div className="flex flex-col gap-3">
             <button onClick={exportData} className="btn-ghost w-full justify-center">Export all data as JSON</button>
             <button onClick={() => fileRef.current.click()} className="btn-ghost w-full justify-center">Import from JSON backup</button>

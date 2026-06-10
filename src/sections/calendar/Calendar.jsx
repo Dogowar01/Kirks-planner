@@ -4,6 +4,7 @@ import { ChevronLeft, ChevronRight, Plus, Bell, Trash2, Search, MapPin, External
 import { useStore } from '../../hooks/useStore'
 import { CATEGORIES } from '../../lib/constants'
 import SectionShell from '../../components/SectionShell'
+import PageHeader from '../../components/PageHeader'
 import bgImg from '../../assets/art-abstract.jpg'
 import CategoryBadge from '../../components/CategoryBadge'
 import Modal from '../../components/Modal'
@@ -271,27 +272,27 @@ export default function Calendar() {
 
   return (
     <SectionShell accent="#6A7A5A" bgImage={bgImg}>
+      <PageHeader subtitle="SCHEDULE" title="Calendar" accent="#6A7A5A">
+        <button onClick={hasBinNights ? removeBinNights : addBinNights} style={{
+          background: 'rgba(106,122,90,0.1)', border: '0.5px solid rgba(106,122,90,0.35)',
+          color: '#8A9A7A', borderRadius: 8, padding: '8px 12px', cursor: 'pointer',
+          fontFamily: '"DM Mono", monospace', fontSize: '0.55rem', letterSpacing: '0.1em',
+        }}>🗑️</button>
+        <button onClick={() => setShowSearch(true)} style={{
+          background: 'rgba(106,122,90,0.1)', border: '0.5px solid rgba(106,122,90,0.35)',
+          color: '#8A9A7A', borderRadius: 8, padding: '8px 12px', cursor: 'pointer',
+          fontFamily: '"DM Mono", monospace', fontSize: '0.55rem', letterSpacing: '0.1em',
+          display: 'flex', alignItems: 'center', gap: 5,
+        }}><Search size={13} /></button>
+        <button onClick={() => setShowAdd(true)} style={{
+          background: 'rgba(106,122,90,0.15)', border: '0.5px solid rgba(106,122,90,0.5)',
+          color: '#8ABA7A', borderRadius: 8, padding: '8px 14px', cursor: 'pointer',
+          display: 'flex', alignItems: 'center', gap: 6,
+          fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', letterSpacing: '0.12em',
+          boxShadow: '0 0 12px rgba(106,122,90,0.1)',
+        }}><Plus size={14} strokeWidth={2} /> ADD</button>
+      </PageHeader>
     <div className="p-4 md:p-6 max-w-3xl">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="section-title">Calendar</h1>
-        <div className="flex gap-2 flex-wrap justify-end">
-          {hasBinNights ? (
-            <button onClick={removeBinNights} className="btn-ghost text-xs" title="Remove bin night events">
-              <Trash size={13} /> Bin Nights
-            </button>
-          ) : (
-            <button onClick={addBinNights} className="btn-ghost text-xs" title="Add Legana fortnightly bin nights">
-              🗑️ Bin Nights
-            </button>
-          )}
-          <button onClick={() => setShowSearch(true)} className="btn-ghost text-xs">
-            <Search size={14} /> Find Events
-          </button>
-          <button onClick={() => setShowAdd(true)} className="btn-primary text-xs">
-            <Plus size={14} /> Add
-          </button>
-        </div>
-      </div>
 
       {/* Month nav */}
       <div className="flex items-center gap-3 mb-4">

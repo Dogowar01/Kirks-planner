@@ -4,6 +4,7 @@ import { Plus, Bell, Trash2, ChevronDown, ChevronUp, Target, Pencil } from 'luci
 import { useStore } from '../../hooks/useStore'
 import { CATEGORIES } from '../../lib/constants'
 import SectionShell from '../../components/SectionShell'
+import PageHeader from '../../components/PageHeader'
 import bgImg from '../../assets/art-ethereal.jpg'
 import CategoryBadge from '../../components/CategoryBadge'
 import Modal from '../../components/Modal'
@@ -181,13 +182,18 @@ export default function Tasks() {
 
   return (
     <SectionShell accent="#D4780A" bgImage={bgImg}>
-    <div className="p-4 md:p-6 max-w-2xl">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="section-title">Tasks</h1>
-        <button onClick={() => setShowModal(true)} className="btn-primary">
-          <Plus size={16} /> Add Task
+      <PageHeader subtitle="TASK MANAGER" title="Tasks" accent="#D4780A">
+        <button onClick={() => setShowModal(true)} style={{
+          background: 'rgba(212,120,10,0.12)', border: '0.5px solid rgba(212,120,10,0.5)',
+          color: '#D4780A', borderRadius: 8, padding: '8px 14px', cursor: 'pointer',
+          display: 'flex', alignItems: 'center', gap: 6,
+          fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', letterSpacing: '0.12em',
+          boxShadow: '0 0 12px rgba(212,120,10,0.1)',
+        }}>
+          <Plus size={14} strokeWidth={2} /> ADD
         </button>
-      </div>
+      </PageHeader>
+    <div className="p-4 md:p-6 max-w-2xl">
 
       {/* Category filter bar */}
       <div className="flex gap-1.5 flex-wrap mb-2">

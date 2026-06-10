@@ -4,6 +4,7 @@ import { Plus, Pin, Trash2, Search, ArrowLeft } from 'lucide-react'
 import { useStore } from '../../hooks/useStore'
 import { CATEGORIES } from '../../lib/constants'
 import SectionShell from '../../components/SectionShell'
+import PageHeader from '../../components/PageHeader'
 import bgImg from '../../assets/art-vintage-woman.jpg'
 import ConfirmDialog from '../../components/ConfirmDialog'
 import { BookOpen } from 'lucide-react'
@@ -129,6 +130,18 @@ export default function Notes() {
 
   return (
     <SectionShell accent="#C9B49A" bgImage={bgImg}>
+      {!activeNote && (
+        <PageHeader subtitle="NOTE SYSTEM" title="Notes" accent="#C9B49A">
+          <button onClick={createNote} style={{
+            background: 'rgba(201,180,154,0.12)', border: '0.5px solid rgba(201,180,154,0.5)',
+            color: '#C9B49A', borderRadius: 8, padding: '8px 14px', cursor: 'pointer',
+            display: 'flex', alignItems: 'center', gap: 6,
+            fontFamily: '"DM Mono", monospace', fontSize: '0.6rem', letterSpacing: '0.12em',
+          }}>
+            <Plus size={14} strokeWidth={2} /> NEW
+          </button>
+        </PageHeader>
+      )}
     <div className="p-4 md:p-6 max-w-2xl">
 
       {/* ── Editor view ─────────────────────────────────────── */}
@@ -146,10 +159,7 @@ export default function Notes() {
       ) : (
         /* ── List view ───────────────────────────────────────── */
         <>
-          <div className="flex items-center justify-between mb-6">
-            <h1 className="section-title">Notes</h1>
-            <button onClick={createNote} className="btn-primary"><Plus size={16}/> New</button>
-          </div>
+          <div className="mb-6" />
 
           {/* Search */}
           <div style={{ position: 'relative', marginBottom: 12 }}>
