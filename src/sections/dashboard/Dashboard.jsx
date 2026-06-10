@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { format, isToday, isPast, parseISO, startOfDay, addDays, addMonths, isWithinInterval, startOfMonth, endOfMonth, differenceInDays } from 'date-fns'
 import { Bell, Plus, Calendar, CheckSquare, Briefcase, TrendingUp, Target, Pencil, Trash2, X, ChevronRight, Zap, ArrowRight, RotateCcw } from 'lucide-react'
@@ -9,6 +9,70 @@ import Modal from '../../components/Modal'
 import ConfirmDialog from '../../components/ConfirmDialog'
 import heroBg from '../../assets/art-newyork.jpg'
 import HoloRings from '../../components/HoloRings'
+
+// ── Matrix character-scramble reveal ──────────────────────────────────────────
+const MATRIX_CHARS = 'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#@$%&'
+
+function MatrixReveal({ text, delay = 0, duration = 1400, color = '#EDE8E0', style = {}, className = '' }) {
+  const [display, setDisplay] = useState(() => text.split('').map(() => ' '))
+  const frameRef = useRef(null)
+
+  useEffect(() => {
+    const chars = text.split('')
+    const resolved = new Array(chars.length).fill(false)
+    let start = null
+
+    // Per-character resolve time: spread evenly across duration, left→right
+    const resolveTimes = chars.map((_, i) => (i / Math.max(chars.length - 1, 1)) * duration)
+    // Scramble interval: update random chars rapidly while unresolved
+    const scrambleInterval = 40 // ms
+
+    let scrambleId = null
+    let timeoutId = null
+
+    function scramble() {
+      setDisplay(chars.map((ch, i) => {
+        if (resolved[i]) return ch
+        // spaces / punctuation stay as-is for layout — only scramble alphanum
+        if (ch === ' ') return ' '
+        return MATRIX_CHARS[Math.floor(Math.random() * MATRIX_CHARS.length)]
+      }))
+    }
+
+    timeoutId = setTimeout(() => {
+      scrambleId = setInterval(scramble, scrambleInterval)
+
+      // Schedule each character's resolution
+      chars.forEach((ch, i) => {
+        setTimeout(() => {
+          resolved[i] = true
+          // If all resolved, stop scrambling
+          if (resolved.every(Boolean)) {
+            clearInterval(scrambleId)
+            setDisplay(chars)
+          }
+        }, resolveTimes[i])
+      })
+    }, delay * 1000)
+
+    return () => {
+      clearTimeout(timeoutId)
+      clearInterval(scrambleId)
+    }
+  }, [text])
+
+  return (
+    <span className={className} style={{ color, fontVariantNumeric: 'tabular-nums', ...style }}>
+      {display.map((ch, i) => (
+        <span key={i} style={{
+          color: ch !== text[i] && ch !== ' ' ? `rgba(0,255,100,0.85)` : 'inherit',
+          textShadow: ch !== text[i] && ch !== ' ' ? '0 0 8px rgba(0,255,100,0.9)' : 'none',
+          transition: 'color 0.05s',
+        }}>{ch}</span>
+      ))}
+    </span>
+  )
+}
 
 const CAT_COLORS = {
   signal9:  '#C4522A',
@@ -456,7 +520,7 @@ function LiveClock({ taskCount = 0, eventCount = 0 }) {
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
           <div style={{ width: 2, height: 10, background: '#C4522A', boxShadow: '0 0 6px #C4522A' }} />
           <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.62rem', color: '#7A7268', letterSpacing: '0.14em', textTransform: 'uppercase' }}>
-            {format(now, "EEE · dd MMM yyyy")}
+            <MatrixReveal text={format(now, "EEE · dd MMM yyyy")} delay={0.6} duration={1000} color="#7A7268" />
           </p>
           <div style={{ width: 1, height: 8, background: 'rgba(0,200,255,0.3)' }} />
           <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.62rem', color: 'rgba(0,200,255,0.55)', letterSpacing: '0.12em' }}>
@@ -471,7 +535,7 @@ function LiveClock({ taskCount = 0, eventCount = 0 }) {
           letterSpacing: '-0.02em', position: 'relative',
           animation: 'title-ghost 16s ease-in-out infinite, chromatic-pulse 12s ease-in-out infinite 4s',
         }}>
-          {greeting} Kirk.
+          <MatrixReveal text={`${greeting} Kirk.`} delay={0.1} duration={1800} color="#EDE8E0" />
           {/* Blinking cyan cursor */}
           <span style={{
             display: 'inline-block', width: 2.5, height: '0.75em',
@@ -486,7 +550,7 @@ function LiveClock({ taskCount = 0, eventCount = 0 }) {
           </p>
           <div style={{ width: 1, height: 12, background: 'rgba(0,200,255,0.35)' }} />
           <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.52rem', color: 'rgba(0,200,255,0.5)', margin: 0, letterSpacing: '0.12em', textTransform: 'uppercase' }}>
-            SIG9 · LIVE
+            <MatrixReveal text="SIG9 · LIVE" delay={1.0} duration={700} color="rgba(0,200,255,0.5)" />
           </p>
         </div>
 
@@ -1067,8 +1131,8 @@ function SectionLabel({ children, color, seq = '—' }) {
 
 function SectionShell({ color, children, style, from = 'left', delay = 0 }) {
   const anim = from === 'right'
-    ? `slide-from-right 0.9s cubic-bezier(0.22,1,0.36,1) ${delay}s both`
-    : `slide-from-left  0.9s cubic-bezier(0.22,1,0.36,1) ${delay}s both`
+    ? `slide-from-right 1.2s cubic-bezier(0.22,1,0.36,1) ${delay}s both`
+    : `slide-from-left  1.2s cubic-bezier(0.22,1,0.36,1) ${delay}s both`
   return (
     <div style={{ position: 'relative', animation: anim }}>
       {/* Corner markers — outside clip-path, staggered blink */}
@@ -1691,7 +1755,7 @@ export default function Dashboard() {
       <div className="p-5 md:p-6 max-w-3xl space-y-7">
 
         {/* Stats */}
-        <SectionShell color="#E05828" from="left" delay={0.1}>
+        <SectionShell color="#E05828" from="left" delay={0.3}>
           <SectionLabel color="#FF7040" seq="01">Overview</SectionLabel>
           <div className="grid grid-cols-3 gap-3">
             <StatCard icon={CheckSquare} label="Open Tasks"      value={openTasks.length}       color="#D4724A" onClick={() => navigate('/tasks')} />
@@ -1701,7 +1765,7 @@ export default function Dashboard() {
         </SectionShell>
 
         {/* Quick Add + Focus Moment */}
-        <SectionShell color="#B040D8" from="right" delay={0.4}>
+        <SectionShell color="#B040D8" from="right" delay={0.75}>
           <SectionLabel color="#CC60F0" seq="02">Actions</SectionLabel>
           <div className="space-y-3">
             <QuickAdd onAdd={(data) => addTask(data)} />
@@ -1710,7 +1774,7 @@ export default function Dashboard() {
         </SectionShell>
 
         {/* Missions */}
-        <SectionShell color="#D89820" from="left" delay={0.7}>
+        <SectionShell color="#D89820" from="left" delay={1.15}>
           <MissionsWidget onNavigateToTasks={(missionId) => {
             setMissionFilter(missionId)
             navigate('/tasks')
@@ -1719,7 +1783,7 @@ export default function Dashboard() {
 
         {/* Today */}
         {todayEvents.length > 0 && (
-          <SectionShell color="#20C880" from="right" delay={1.0}>
+          <SectionShell color="#20C880" from="right" delay={1.55}>
             <section>
               <SectionLabel color="#20E890" seq="04">Today</SectionLabel>
               <div className="space-y-2">
@@ -1741,7 +1805,7 @@ export default function Dashboard() {
         )}
 
         {/* Top tasks */}
-        <SectionShell color="#E04820" from="left" delay={1.25}>
+        <SectionShell color="#E04820" from="left" delay={1.95}>
         <section>
           <div className="flex items-center justify-between mb-2.5">
             <SectionLabel color="#FF6040" seq="05">Active Tasks</SectionLabel>
@@ -1767,7 +1831,7 @@ export default function Dashboard() {
         </SectionShell>
 
         {/* Upcoming */}
-        <SectionShell color="#8840CC" from="right" delay={1.5}>
+        <SectionShell color="#8840CC" from="right" delay={2.35}>
           <section>
             <div className="flex items-center justify-between mb-2.5">
               <SectionLabel color="#AA60EE" seq="06">Upcoming</SectionLabel>
