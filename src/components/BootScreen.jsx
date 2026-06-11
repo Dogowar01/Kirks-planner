@@ -29,26 +29,32 @@ function MatrixRain() {
 
     let raf
     const draw = () => {
-      // Aggressive clear so characters don't linger
-      ctx.fillStyle = 'rgba(10,9,8,0.55)'
+      // Moderate clear — characters persist long enough to be readable but don't smear
+      ctx.fillStyle = 'rgba(10,9,8,0.28)'
       ctx.fillRect(0, 0, canvas.width, canvas.height)
 
-      ctx.font = `${fontSize}px "DM Mono", monospace`
+      ctx.font = `bold ${fontSize}px "DM Mono", monospace`
       for (let i = 0; i < drops.length; i++) {
         const y = drops[i] * fontSize
-        // Vertical gradient: bright near top of drop, fades toward bottom of canvas
         const alpha = Math.max(0, 1 - (y / canvas.height) * 1.1)
 
-        // Lead character — full brightness
-        ctx.fillStyle = `rgba(${rgb},${(alpha * 1.0).toFixed(2)})`
-        ctx.fillText(MATRIX_CHARS[Math.floor(Math.random() * MATRIX_CHARS.length)], i * fontSize, y)
-
-        // One step behind — dimmer
-        if (drops[i] > 1) {
-          const ty = (drops[i] - 1) * fontSize
-          const ta = Math.max(0, 1 - (ty / canvas.height) * 1.1) * 0.4
+        // Draw a short tail of 4 characters behind the lead, fading back
+        const tailLen = 4
+        for (let t = tailLen; t >= 1; t--) {
+          if (drops[i] - t < 0) continue
+          const ty = (drops[i] - t) * fontSize
+          const ta = Math.max(0, 1 - (ty / canvas.height) * 1.1) * ((tailLen - t + 1) / tailLen) * 0.55
           ctx.fillStyle = `rgba(${rgb},${ta.toFixed(2)})`
           ctx.fillText(MATRIX_CHARS[Math.floor(Math.random() * MATRIX_CHARS.length)], i * fontSize, ty)
+        }
+
+        // Lead character — full brightness with glow effect
+        if (alpha > 0) {
+          ctx.shadowColor = `rgba(${rgb},0.9)`
+          ctx.shadowBlur = 8
+          ctx.fillStyle = `rgba(${rgb},${Math.min(alpha * 1.0, 1).toFixed(2)})`
+          ctx.fillText(MATRIX_CHARS[Math.floor(Math.random() * MATRIX_CHARS.length)], i * fontSize, y)
+          ctx.shadowBlur = 0
         }
 
         if (y > canvas.height && Math.random() > 0.97) drops[i] = 0
@@ -134,8 +140,8 @@ export default function BootScreen({ onComplete }) {
             width: 28, height: 28,
             animation: 'phase-in 0.8s ease both',
           }}>
-            <div style={{ position: 'absolute', [isTop ? 'top' : 'bottom']: 0, left: 0, right: 0, height: 1.5, background: 'rgba(196,82,42,0.5)' }} />
-            <div style={{ position: 'absolute', top: 0, bottom: 0, [isLeft ? 'left' : 'right']: 0, width: 1.5, background: 'rgba(196,82,42,0.5)' }} />
+            <div style={{ position: 'absolute', [isTop ? 'top' : 'bottom']: 0, left: 0, right: 0, height: 1.5, background: 'rgba(0,212,255,0.7)', boxShadow: '0 0 6px rgba(0,212,255,0.8)' }} />
+            <div style={{ position: 'absolute', top: 0, bottom: 0, [isLeft ? 'left' : 'right']: 0, width: 1.5, background: 'rgba(0,212,255,0.7)', boxShadow: '0 0 6px rgba(0,212,255,0.8)' }} />
           </div>
         )
       })}
@@ -143,9 +149,9 @@ export default function BootScreen({ onComplete }) {
       {/* HoloRings — layered */}
       {phase >= 1 && (
         <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
-          <HoloRings color="#C4522A" size={Math.min(window.innerWidth, 520)} style={{ opacity: 0.28, position: 'absolute', animation: 'phase-in 1.4s ease both' }} />
-          <HoloRings color="#00C8FF" size={Math.min(window.innerWidth * 0.65, 340)} style={{ opacity: 0.18, position: 'absolute', animation: 'phase-in 1.6s ease 0.2s both' }} />
-          <HoloRings color="#8B5CF6" size={Math.min(window.innerWidth * 0.4, 210)} style={{ opacity: 0.14, position: 'absolute', animation: 'phase-in 1.8s ease 0.4s both' }} />
+          <HoloRings color="#00D4FF" size={Math.min(window.innerWidth, 520)} style={{ opacity: 0.45, position: 'absolute', animation: 'phase-in 1.4s ease both' }} />
+          <HoloRings color="#00D4FF" size={Math.min(window.innerWidth * 0.65, 340)} style={{ opacity: 0.30, position: 'absolute', animation: 'phase-in 1.6s ease 0.2s both' }} />
+          <HoloRings color="#00D4FF" size={Math.min(window.innerWidth * 0.4, 210)} style={{ opacity: 0.20, position: 'absolute', animation: 'phase-in 1.8s ease 0.4s both' }} />
         </div>
       )}
 
