@@ -123,8 +123,13 @@ export default function BootScreen({ onComplete }) {
       document.removeEventListener('click', playAudio)
       audio.play().catch(() => {})
     }
-    document.addEventListener('touchstart', playAudio, { once: true, passive: true })
-    document.addEventListener('click', playAudio, { once: true })
+
+    // Try autoplay immediately — works on desktop and sometimes PWA standalone
+    audio.play().then(() => { played = true }).catch(() => {
+      // Autoplay blocked — wait for first gesture instead
+      document.addEventListener('touchstart', playAudio, { once: true, passive: true })
+      document.addEventListener('click', playAudio, { once: true })
+    })
 
     const t1 = setTimeout(() => setPhase(1), 150)
     const t2 = setTimeout(() => setPhase(2), 1600)
