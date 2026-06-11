@@ -112,7 +112,7 @@ export default function BootScreen({ onComplete }) {
   // 0: dark  1: rings + wordmark  2: status  3: done-text  4: fade out
 
   useEffect(() => {
-    // Speak on boot — uses device's built-in voice engine, no API key needed
+    // Speech requires a user gesture on Chrome/mobile — fire on first tap/click
     const speak = () => {
       if (!window.speechSynthesis) return
       window.speechSynthesis.cancel()
@@ -120,23 +120,33 @@ export default function BootScreen({ onComplete }) {
       utter.rate   = 0.88
       utter.pitch  = 0.85
       utter.volume = 1
-      // Pick the best available English voice
-      const voices = window.speechSynthesis.getVoices()
-      const preferred = voices.find(v => v.lang.startsWith('en') && v.name.toLowerCase().includes('daniel'))
-        || voices.find(v => v.lang.startsWith('en') && !v.localService === false)
-        || voices.find(v => v.lang.startsWith('en'))
-      if (preferred) utter.voice = preferred
-      window.speechSynthesis.speak(utter)
-    }
-
-    // Voices may not be loaded instantly — wait for them if needed
-    if (window.speechSynthesis) {
+      const tryWithVoices = () => {
+        const voices = window.speechSynthesis.getVoices()
+        const preferred = voices.find(v => v.lang.startsWith('en') && v.name.toLowerCase().includes('daniel'))
+          || voices.find(v => v.lang === 'en-GB')
+          || voices.find(v => v.lang.startsWith('en'))
+        if (preferred) utter.voice = preferred
+        window.speechSynthesis.speak(utter)
+      }
       if (window.speechSynthesis.getVoices().length > 0) {
-        speak()
+        tryWithVoices()
       } else {
-        window.speechSynthesis.onvoiceschanged = () => { speak(); window.speechSynthesis.onvoiceschanged = null }
+        window.speechSynthesis.onvoiceschanged = () => { tryWithVoices(); window.speechSynthesis.onvoiceschanged = null }
+        // Fallback: speak after short delay even if onvoiceschanged never fires
+        setTimeout(() => { if (!utter.speaking) window.speechSynthesis.speak(utter) }, 300)
       }
     }
+
+    let spoken = false
+    const onGesture = () => {
+      if (spoken) return
+      spoken = true
+      document.removeEventListener('touchstart', onGesture)
+      document.removeEventListener('click', onGesture)
+      speak()
+    }
+    document.addEventListener('touchstart', onGesture, { once: true, passive: true })
+    document.addEventListener('click', onGesture, { once: true })
 
     const t1 = setTimeout(() => setPhase(1), 150)
     const t2 = setTimeout(() => setPhase(2), 1600)
@@ -147,6 +157,8 @@ export default function BootScreen({ onComplete }) {
       onComplete()
     }, 4200)
     return () => {
+      document.removeEventListener('touchstart', onGesture)
+      document.removeEventListener('click', onGesture)
       window.speechSynthesis?.cancel()
       ;[t1, t2, t3, t4, t5].forEach(clearTimeout)
     }
