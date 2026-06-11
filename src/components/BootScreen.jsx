@@ -21,6 +21,8 @@ function MatrixRain() {
     const fontSize = 14
     const cols = Math.floor(canvas.width / fontSize)
     const drops = Array.from({ length: cols }, () => Math.random() * -50)
+    // Alternate columns between neon yellow and magenta
+    const colColors = Array.from({ length: cols }, (_, i) => i % 2 === 0 ? '230,255,0' : '255,0,200')
 
     let raf
     const draw = () => {
@@ -31,10 +33,11 @@ function MatrixRain() {
       for (let i = 0; i < drops.length; i++) {
         const ch = MATRIX_CHARS[Math.floor(Math.random() * MATRIX_CHARS.length)]
         const y  = drops[i] * fontSize
+        const rgb = colColors[i]
         // Vertical gradient: bright near top of drop, fades toward bottom of canvas
         const alpha = Math.max(0, 1 - (y / canvas.height) * 1.1)
         // Lead character is brighter
-        ctx.fillStyle = `rgba(196,82,42,${(alpha * 0.9).toFixed(2)})`
+        ctx.fillStyle = `rgba(${rgb},${(alpha * 0.9).toFixed(2)})`
         ctx.font = `${fontSize}px "DM Mono", monospace`
         ctx.fillText(ch, i * fontSize, y)
 
@@ -42,7 +45,7 @@ function MatrixRain() {
         if (drops[i] > 1) {
           const ty = (drops[i] - 1) * fontSize
           const ta = Math.max(0, 1 - (ty / canvas.height) * 1.1) * 0.3
-          ctx.fillStyle = `rgba(196,82,42,${ta.toFixed(2)})`
+          ctx.fillStyle = `rgba(${rgb},${ta.toFixed(2)})`
           ctx.fillText(MATRIX_CHARS[Math.floor(Math.random() * MATRIX_CHARS.length)], i * fontSize, ty)
         }
 
