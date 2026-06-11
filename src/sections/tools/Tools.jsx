@@ -190,38 +190,41 @@ function NixieClock({ time, day, temp, city, flag, bootDelay = 0 }) {
       {/* City label */}
       <p style={{ fontFamily: '"DM Mono",monospace', fontSize: '0.58rem', color: '#A09890', letterSpacing: '0.2em', textTransform: 'uppercase' }}>{city}</p>
 
-      {/* Tube row — flag watermark behind digits */}
-      <div style={{
-        position: 'relative', overflow: 'hidden',
-        background: 'linear-gradient(180deg,#111008 0%,#0a0805 100%)',
-        borderRadius: 8, padding: '8px 10px 10px',
-        border: '1px solid #2a1f00',
-        boxShadow: '0 4px 20px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,150,0,0.08)',
-        display: 'flex', alignItems: 'flex-end', gap: 3,
-      }}>
-        {/* Flag watermark */}
+      {/* Tube row — flag floats outside, digits clipped inside */}
+      <div style={{ position: 'relative' }}>
+        {/* Flag — lives on wrapper so it bleeds past the box edges */}
         {flag && (
           <div style={{
-            position: 'absolute', inset: 0,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            pointerEvents: 'none', zIndex: 0,
-            fontSize: '6.5rem',
-            opacity: 0.18,
-            transform: 'rotate(-30deg) translateX(10%)',
-            filter: 'blur(0.5px) saturate(0.6) contrast(0.85)',
+            position: 'absolute',
+            top: '50%', left: '50%',
+            transform: 'translate(-50%, -50%) rotate(-30deg)',
+            pointerEvents: 'none', zIndex: 2,
+            fontSize: '9rem',
+            opacity: 0.22,
+            filter: 'saturate(0.65) contrast(0.85)',
             userSelect: 'none',
+            whiteSpace: 'nowrap',
           }}>
             {flag}
           </div>
         )}
-        {displayChars.map((ch, i) => (
-          <NixieTube
-            key={i}
-            char={ch}
-            colon={ch === ':'}
-            bootColor={booting && !resolvedMask[i] && ch !== ':' ? 'cathode' : null}
-          />
-        ))}
+        <div style={{
+          position: 'relative', overflow: 'hidden', zIndex: 1,
+          background: 'linear-gradient(180deg,#111008 0%,#0a0805 100%)',
+          borderRadius: 8, padding: '8px 10px 10px',
+          border: '1px solid #2a1f00',
+          boxShadow: '0 4px 20px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,150,0,0.08)',
+          display: 'flex', alignItems: 'flex-end', gap: 3,
+        }}>
+          {displayChars.map((ch, i) => (
+            <NixieTube
+              key={i}
+              char={ch}
+              colon={ch === ':'}
+              bootColor={booting && !resolvedMask[i] && ch !== ':' ? 'cathode' : null}
+            />
+          ))}
+        </div>
       </div>
 
       {/* Day + temp */}
