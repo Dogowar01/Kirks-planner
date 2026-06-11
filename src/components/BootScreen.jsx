@@ -18,9 +18,10 @@ function MatrixRain() {
     }
     resize()
 
-    const fontSize = 14
+    const fontSize = 18
     const cols = Math.floor(canvas.width / fontSize)
-    const drops = Array.from({ length: cols }, () => Math.random() * -50)
+    // Stagger start times: some begin immediately, others are queued above the screen
+    const drops = Array.from({ length: cols }, () => -(Math.random() * cols * 0.6))
     const RAIN_COLORS = ['230,255,0', '255,0,200', '255,255,255']
     const colColors = Array.from({ length: cols }, () => RAIN_COLORS[Math.floor(Math.random() * RAIN_COLORS.length)])
 
@@ -50,7 +51,7 @@ function MatrixRain() {
         }
 
         if (y > canvas.height && Math.random() > 0.97) drops[i] = 0
-        else drops[i] += 0.4
+        else drops[i] += 0.22
       }
 
       raf = requestAnimationFrame(draw)
