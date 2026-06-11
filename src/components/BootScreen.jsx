@@ -26,39 +26,58 @@ function MatrixRain() {
     const colColors = Array.from({ length: cols }, () => RAIN_COLORS[Math.floor(Math.random() * RAIN_COLORS.length)])
 
     const rgb = '210,50,255'
+    // Each column tracks its own array of characters so they stay fixed as the drop falls
+    const colChars = Array.from({ length: cols }, () => [])
+    const colLen = Array.from({ length: cols }, () => Math.floor(8 + Math.random() * 12))
 
     let raf
     const draw = () => {
-      // Moderate clear — characters persist long enough to be readable but don't smear
-      ctx.fillStyle = 'rgba(10,9,8,0.28)'
-      ctx.fillRect(0, 0, canvas.width, canvas.height)
-
+      // Full clear each frame — we redraw every character explicitly so nothing ghosts
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
       ctx.font = `bold ${fontSize}px "DM Mono", monospace`
+
       for (let i = 0; i < drops.length; i++) {
-        const y = drops[i] * fontSize
-        const alpha = Math.max(0, 1 - (y / canvas.height) * 1.1)
+        const head = Math.floor(drops[i])
+        const len  = colLen[i]
 
-        // Draw a short tail of 4 characters behind the lead, fading back
-        const tailLen = 4
-        for (let t = tailLen; t >= 1; t--) {
-          if (drops[i] - t < 0) continue
-          const ty = (drops[i] - t) * fontSize
-          const ta = Math.max(0, 1 - (ty / canvas.height) * 1.1) * ((tailLen - t + 1) / tailLen) * 0.55
-          ctx.fillStyle = `rgba(${rgb},${ta.toFixed(2)})`
-          ctx.fillText(MATRIX_CHARS[Math.floor(Math.random() * MATRIX_CHARS.length)], i * fontSize, ty)
+        // Ensure column has enough characters
+        while (colChars[i].length <= head + 2) {
+          colChars[i].push(MATRIX_CHARS[Math.floor(Math.random() * MATRIX_CHARS.length)])
+        }
+        // Randomly mutate a character in the column for the scramble effect
+        if (Math.random() < 0.08 && colChars[i].length > 0) {
+          const idx = Math.floor(Math.random() * colChars[i].length)
+          colChars[i][idx] = MATRIX_CHARS[Math.floor(Math.random() * MATRIX_CHARS.length)]
         }
 
-        // Lead character — full brightness with glow effect
-        if (alpha > 0) {
-          ctx.shadowColor = `rgba(${rgb},0.9)`
-          ctx.shadowBlur = 8
-          ctx.fillStyle = `rgba(${rgb},${Math.min(alpha * 1.0, 1).toFixed(2)})`
-          ctx.fillText(MATRIX_CHARS[Math.floor(Math.random() * MATRIX_CHARS.length)], i * fontSize, y)
-          ctx.shadowBlur = 0
-        }
+        // Draw the solid column from (head - len) to head
+        for (let row = Math.max(0, head - len); row <= head; row++) {
+          const y = row * fontSize
+          if (y > canvas.height) break
+          const ch = colChars[i][row] || MATRIX_CHARS[0]
 
-        if (y > canvas.height && Math.random() > 0.97) drops[i] = 0
-        else drops[i] += 0.22
+          // Fade bottom of canvas out via alpha
+          const canvasFade = Math.max(0, 1 - (y / canvas.height) * 1.15)
+          // Lead char is white-hot; rest are full plum
+          if (row === head) {
+            ctx.shadowColor = `rgba(${rgb},1)`
+            ctx.shadowBlur = 10
+            ctx.fillStyle = `rgba(255,255,255,${canvasFade.toFixed(2)})`
+          } else {
+            ctx.shadowBlur = 0
+            ctx.fillStyle = `rgba(${rgb},${canvasFade.toFixed(2)})`
+          }
+          ctx.fillText(ch, i * fontSize, y)
+        }
+        ctx.shadowBlur = 0
+
+        if (drops[i] * fontSize > canvas.height && Math.random() > 0.97) {
+          drops[i] = 0
+          colChars[i] = []
+          colLen[i] = Math.floor(8 + Math.random() * 12)
+        } else {
+          drops[i] += 0.22
+        }
       }
 
       raf = requestAnimationFrame(draw)
