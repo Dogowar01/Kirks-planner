@@ -94,7 +94,7 @@ function MoodCard({ log, onDelete, index }) {
   )
 }
 
-const today = () => new Date().toISOString().slice(0,10)
+const today = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}` }
 const EMPTY = { date: today(), mood: 3, energy: 3, tags: [], notes: '' }
 
 export default function Mood() {

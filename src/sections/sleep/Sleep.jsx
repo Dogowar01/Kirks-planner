@@ -103,7 +103,8 @@ function SleepCard({ log, onDelete, index }) {
   )
 }
 
-const EMPTY_FORM = { date: new Date().toISOString().slice(0,10), bedtime: '22:30', waketime: '06:30', quality: 4, notes: '' }
+const localDateStr = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}` }
+const EMPTY_FORM = { date: localDateStr(), bedtime: '22:30', waketime: '06:30', quality: 4, notes: '' }
 
 export default function Sleep() {
   const { sleep, addSleepLog, deleteSleepLog } = useStore()
