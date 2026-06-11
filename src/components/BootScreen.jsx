@@ -58,13 +58,14 @@ function MatrixRain() {
 
           // Fade bottom of canvas out via alpha
           const canvasFade = Math.max(0, 1 - (y / canvas.height) * 1.15)
-          // Lead char is white-hot; rest are full plum
+          // Lead char is white-hot; rest are plum with faint glow
           if (row === head) {
             ctx.shadowColor = `rgba(${rgb},1)`
-            ctx.shadowBlur = 10
+            ctx.shadowBlur = 14
             ctx.fillStyle = `rgba(255,255,255,${canvasFade.toFixed(2)})`
           } else {
-            ctx.shadowBlur = 0
+            ctx.shadowColor = `rgba(${rgb},0.8)`
+            ctx.shadowBlur = 6
             ctx.fillStyle = `rgba(${rgb},${canvasFade.toFixed(2)})`
           }
           ctx.fillText(ch, i * fontSize, y)
@@ -168,9 +169,9 @@ export default function BootScreen({ onComplete }) {
       {/* HoloRings — layered */}
       {phase >= 1 && (
         <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
-          <HoloRings color="#00D4FF" size={Math.min(window.innerWidth, 520)} style={{ opacity: 0.45, position: 'absolute', animation: 'phase-in 1.4s ease both' }} />
-          <HoloRings color="#00D4FF" size={Math.min(window.innerWidth * 0.65, 340)} style={{ opacity: 0.30, position: 'absolute', animation: 'phase-in 1.6s ease 0.2s both' }} />
-          <HoloRings color="#00D4FF" size={Math.min(window.innerWidth * 0.4, 210)} style={{ opacity: 0.20, position: 'absolute', animation: 'phase-in 1.8s ease 0.4s both' }} />
+          <HoloRings color="#00D4FF" size={Math.min(window.innerWidth, 520)} style={{ opacity: 0.12, position: 'absolute', animation: 'phase-in 1.4s ease both' }} />
+          <HoloRings color="#00D4FF" size={Math.min(window.innerWidth * 0.65, 340)} style={{ opacity: 0.09, position: 'absolute', animation: 'phase-in 1.6s ease 0.2s both' }} />
+          <HoloRings color="#00D4FF" size={Math.min(window.innerWidth * 0.4, 210)} style={{ opacity: 0.07, position: 'absolute', animation: 'phase-in 1.8s ease 0.4s both' }} />
         </div>
       )}
 
@@ -183,7 +184,7 @@ export default function BootScreen({ onComplete }) {
             <div style={{
               fontFamily: '"DM Mono", monospace', fontSize: '0.5rem',
               letterSpacing: '0.5em', textTransform: 'uppercase',
-              color: 'rgba(196,82,42,0.5)', marginBottom: 10,
+              color: 'rgba(255,255,255,0.55)', marginBottom: 10,
               animation: 'phase-in 0.7s ease both',
             }}>
               ■ &nbsp; S I G N A L 9 &nbsp; ■
@@ -191,15 +192,15 @@ export default function BootScreen({ onComplete }) {
             <h1 style={{
               fontFamily: '"Playfair Display", serif', fontStyle: 'italic', fontWeight: 600,
               fontSize: 'clamp(2.8rem, 10vw, 5.5rem)',
-              color: '#C4522A', margin: 0, lineHeight: 1,
-              textShadow: '0 0 60px rgba(196,82,42,0.4), 0 0 120px rgba(196,82,42,0.15)',
+              color: '#FFFFFF', margin: 0, lineHeight: 1,
+              textShadow: '0 0 40px rgba(255,255,255,0.6), 0 0 80px rgba(196,82,42,0.3)',
             }}>
-              <MatrixReveal text="Signal9" delay={0.2} duration={1100} color="#C4522A" />
+              <MatrixReveal text="Signal9" delay={0.2} duration={1100} color="#FFFFFF" />
             </h1>
             <p style={{
               fontFamily: '"DM Mono", monospace', fontSize: '0.55rem',
               letterSpacing: '0.3em', textTransform: 'uppercase',
-              color: 'rgba(196,174,154,0.45)', marginTop: 10,
+              color: 'rgba(255,255,255,0.5)', marginTop: 10,
               animation: 'phase-in 0.9s ease 0.4s both',
             }}>Life Planner</p>
           </>
@@ -224,9 +225,9 @@ export default function BootScreen({ onComplete }) {
         {phase >= 3 && (
           <div style={{ marginTop: 20, display: 'flex', flexDirection: 'column', gap: 5, alignItems: 'center' }}>
             {[
-              { text: 'ALL MODULES LOADED', color: 'rgba(196,82,42,0.45)' },
-              { text: 'DATA SYNC COMPLETE', color: 'rgba(196,82,42,0.35)' },
-              { text: 'WELCOME BACK, KIRK', color: 'rgba(196,82,42,0.55)' },
+              { text: 'ALL MODULES LOADED', color: 'rgba(255,255,255,0.5)' },
+              { text: 'DATA SYNC COMPLETE', color: 'rgba(255,255,255,0.4)' },
+              { text: 'WELCOME BACK, KIRK', color: 'rgba(255,255,255,0.7)' },
             ].map(({ text, color }, i) => (
               <p key={text} style={{
                 fontFamily: '"DM Mono", monospace', fontSize: '0.4rem',
