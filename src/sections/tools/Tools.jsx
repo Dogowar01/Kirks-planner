@@ -205,9 +205,10 @@ function NixieClock({ time, day, temp, city, flag, bootDelay = 0 }) {
             position: 'absolute', inset: 0,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             pointerEvents: 'none', zIndex: 0,
-            fontSize: '3.8rem',
-            opacity: 0.13,
-            filter: 'blur(1px) saturate(0.55) contrast(0.9)',
+            fontSize: '6.5rem',
+            opacity: 0.18,
+            transform: 'rotate(-30deg) translateX(10%)',
+            filter: 'blur(0.5px) saturate(0.6) contrast(0.85)',
             userSelect: 'none',
           }}>
             {flag}
