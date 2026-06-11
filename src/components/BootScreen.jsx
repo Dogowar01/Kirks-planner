@@ -21,8 +21,8 @@ function MatrixRain() {
     const fontSize = 14
     const cols = Math.floor(canvas.width / fontSize)
     const drops = Array.from({ length: cols }, () => Math.random() * -50)
-    // Alternate columns between neon yellow and magenta
-    const colColors = Array.from({ length: cols }, (_, i) => i % 2 === 0 ? '230,255,0' : '255,0,200')
+    const RAIN_COLORS = ['230,255,0', '255,0,200', '255,255,255']
+    const colColors = Array.from({ length: cols }, () => RAIN_COLORS[Math.floor(Math.random() * RAIN_COLORS.length)])
 
     let raf
     const draw = () => {
