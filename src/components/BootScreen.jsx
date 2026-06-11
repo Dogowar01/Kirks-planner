@@ -182,25 +182,25 @@ export default function BootScreen({ onComplete }) {
         {phase >= 1 && (
           <>
             <div style={{
-              fontFamily: '"DM Mono", monospace', fontSize: '0.5rem',
-              letterSpacing: '0.5em', textTransform: 'uppercase',
-              color: 'rgba(255,255,255,0.55)', marginBottom: 10,
+              fontFamily: '"Share Tech Mono", monospace', fontSize: '0.75rem',
+              letterSpacing: '0.45em', textTransform: 'uppercase',
+              color: 'rgba(255,255,255,0.55)', marginBottom: 14,
               animation: 'phase-in 0.7s ease both',
             }}>
               ■ &nbsp; S I G N A L 9 &nbsp; ■
             </div>
             <h1 style={{
               fontFamily: '"Playfair Display", serif', fontStyle: 'italic', fontWeight: 600,
-              fontSize: 'clamp(2.8rem, 10vw, 5.5rem)',
+              fontSize: 'clamp(4rem, 14vw, 7.5rem)',
               color: '#FFFFFF', margin: 0, lineHeight: 1,
               textShadow: '0 0 40px rgba(255,255,255,0.6), 0 0 80px rgba(196,82,42,0.3)',
             }}>
               <MatrixReveal text="Signal9" delay={0.2} duration={1100} color="#FFFFFF" />
             </h1>
             <p style={{
-              fontFamily: '"DM Mono", monospace', fontSize: '0.55rem',
-              letterSpacing: '0.3em', textTransform: 'uppercase',
-              color: 'rgba(255,255,255,0.5)', marginTop: 10,
+              fontFamily: '"Share Tech Mono", monospace', fontSize: '0.9rem',
+              letterSpacing: '0.35em', textTransform: 'uppercase',
+              color: 'rgba(255,255,255,0.5)', marginTop: 14,
               animation: 'phase-in 0.9s ease 0.4s both',
             }}>Life Planner</p>
           </>
@@ -210,13 +210,13 @@ export default function BootScreen({ onComplete }) {
         {phase >= 2 && (
           <div style={{ marginTop: 32 }}>
             <p style={{
-              fontFamily: '"DM Mono", monospace', fontSize: '0.62rem',
+              fontFamily: '"Share Tech Mono", monospace', fontSize: '1rem',
               letterSpacing: '0.35em', textTransform: 'uppercase',
-              color: 'rgba(0,200,255,0.75)',
-              textShadow: '0 0 14px rgba(0,200,255,0.5)',
+              color: 'rgba(0,200,255,0.9)',
+              textShadow: '0 0 14px rgba(0,200,255,0.6)',
               animation: 'phase-in 0.5s ease both',
             }}>
-              <MatrixReveal text="SYSTEM ONLINE" delay={0} duration={700} color="rgba(0,200,255,0.8)" />
+              <MatrixReveal text="SYSTEM ONLINE" delay={0} duration={700} color="rgba(0,200,255,0.9)" />
             </p>
           </div>
         )}
@@ -227,11 +227,11 @@ export default function BootScreen({ onComplete }) {
             {[
               { text: 'ALL MODULES LOADED', color: 'rgba(255,255,255,0.5)' },
               { text: 'DATA SYNC COMPLETE', color: 'rgba(255,255,255,0.4)' },
-              { text: 'WELCOME BACK, KIRK', color: 'rgba(255,255,255,0.7)' },
+              { text: 'WELCOME BACK, KIRK', color: 'rgba(255,255,255,0.8)' },
             ].map(({ text, color }, i) => (
               <p key={text} style={{
-                fontFamily: '"DM Mono", monospace', fontSize: '0.4rem',
-                letterSpacing: '0.22em', color,
+                fontFamily: '"Share Tech Mono", monospace', fontSize: '0.75rem',
+                letterSpacing: '0.2em', color,
                 animation: `phase-in 0.4s ease ${i * 0.12}s both`,
               }}>{text}</p>
             ))}
