@@ -112,6 +112,32 @@ export default function BootScreen({ onComplete }) {
   // 0: dark  1: rings + wordmark  2: status  3: done-text  4: fade out
 
   useEffect(() => {
+    // Speak on boot — uses device's built-in voice engine, no API key needed
+    const speak = () => {
+      if (!window.speechSynthesis) return
+      window.speechSynthesis.cancel()
+      const utter = new SpeechSynthesisUtterance('Signal 9 online. Welcome back, Kirk.')
+      utter.rate   = 0.88
+      utter.pitch  = 0.85
+      utter.volume = 1
+      // Pick the best available English voice
+      const voices = window.speechSynthesis.getVoices()
+      const preferred = voices.find(v => v.lang.startsWith('en') && v.name.toLowerCase().includes('daniel'))
+        || voices.find(v => v.lang.startsWith('en') && !v.localService === false)
+        || voices.find(v => v.lang.startsWith('en'))
+      if (preferred) utter.voice = preferred
+      window.speechSynthesis.speak(utter)
+    }
+
+    // Voices may not be loaded instantly — wait for them if needed
+    if (window.speechSynthesis) {
+      if (window.speechSynthesis.getVoices().length > 0) {
+        speak()
+      } else {
+        window.speechSynthesis.onvoiceschanged = () => { speak(); window.speechSynthesis.onvoiceschanged = null }
+      }
+    }
+
     const t1 = setTimeout(() => setPhase(1), 150)
     const t2 = setTimeout(() => setPhase(2), 1600)
     const t3 = setTimeout(() => setPhase(3), 2500)
@@ -120,7 +146,10 @@ export default function BootScreen({ onComplete }) {
       sessionStorage.setItem(BOOT_SESSION_KEY, '1')
       onComplete()
     }, 4200)
-    return () => [t1, t2, t3, t4, t5].forEach(clearTimeout)
+    return () => {
+      window.speechSynthesis?.cancel()
+      ;[t1, t2, t3, t4, t5].forEach(clearTimeout)
+    }
   }, [])
 
   return (
