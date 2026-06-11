@@ -25,27 +25,28 @@ function MatrixRain() {
     const RAIN_COLORS = ['230,255,0', '255,0,200', '255,255,255']
     const colColors = Array.from({ length: cols }, () => RAIN_COLORS[Math.floor(Math.random() * RAIN_COLORS.length)])
 
+    const rgb = '210,50,255'
+
     let raf
     const draw = () => {
-      // Fade trail
-      ctx.fillStyle = 'rgba(10,9,8,0.18)'
+      // Aggressive clear so characters don't linger
+      ctx.fillStyle = 'rgba(10,9,8,0.55)'
       ctx.fillRect(0, 0, canvas.width, canvas.height)
 
+      ctx.font = `${fontSize}px "DM Mono", monospace`
       for (let i = 0; i < drops.length; i++) {
-        const ch = MATRIX_CHARS[Math.floor(Math.random() * MATRIX_CHARS.length)]
-        const y  = drops[i] * fontSize
-        const rgb = colColors[i]
+        const y = drops[i] * fontSize
         // Vertical gradient: bright near top of drop, fades toward bottom of canvas
         const alpha = Math.max(0, 1 - (y / canvas.height) * 1.1)
-        // Lead character is brighter
-        ctx.fillStyle = `rgba(${rgb},${(alpha * 0.9).toFixed(2)})`
-        ctx.font = `${fontSize}px "DM Mono", monospace`
-        ctx.fillText(ch, i * fontSize, y)
 
-        // Trail chars slightly dimmer
+        // Lead character — full brightness
+        ctx.fillStyle = `rgba(${rgb},${(alpha * 1.0).toFixed(2)})`
+        ctx.fillText(MATRIX_CHARS[Math.floor(Math.random() * MATRIX_CHARS.length)], i * fontSize, y)
+
+        // One step behind — dimmer
         if (drops[i] > 1) {
           const ty = (drops[i] - 1) * fontSize
-          const ta = Math.max(0, 1 - (ty / canvas.height) * 1.1) * 0.3
+          const ta = Math.max(0, 1 - (ty / canvas.height) * 1.1) * 0.4
           ctx.fillStyle = `rgba(${rgb},${ta.toFixed(2)})`
           ctx.fillText(MATRIX_CHARS[Math.floor(Math.random() * MATRIX_CHARS.length)], i * fontSize, ty)
         }
