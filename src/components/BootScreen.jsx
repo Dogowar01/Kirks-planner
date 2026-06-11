@@ -112,7 +112,7 @@ export default function BootScreen({ onComplete }) {
   // 0: dark  1: rings + wordmark  2: status  3: done-text  4: fade out
 
   useEffect(() => {
-    const audio = new Audio('/signal9-online.mp3')
+    const audio = new Audio(import.meta.env.BASE_URL + 'signal9-online.mp3')
     audio.volume = 1
 
     let played = false
