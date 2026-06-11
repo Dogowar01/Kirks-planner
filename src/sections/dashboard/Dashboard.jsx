@@ -1886,6 +1886,55 @@ function HabitStrip({ onNavigate }) {
   )
 }
 
+// ─── Quick Stats Bars ─────────────────────────────────────────────────────────
+function QuickStatsBars({ onNavigateLedger, onNavigateFuel }) {
+  const now = new Date()
+  const monthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
+  const monthLabel = now.toLocaleDateString('en-AU', { month: 'long', year: 'numeric' })
+
+  // Read ledger
+  const ledgerRaw = (() => { try { const r = localStorage.getItem('ledger_v4'); return r ? JSON.parse(r) : null } catch { return null } })()
+  const txns = ledgerRaw?.transactions || {}
+  const monthIncome = (biz) => (txns[biz] || []).filter(t => t.type === 'in' && t.date?.startsWith(monthKey)).reduce((s, t) => s + (t.amount || 0), 0)
+  const s9 = monthIncome('Signal9')
+  const app = monthIncome('App Sales')
+  const hasLedger = Object.keys(txns).length > 0
+
+  // Read fuel
+  const fuelEntries = (() => { try { const r = localStorage.getItem('agenda-fuel-v1'); return r ? JSON.parse(r) : [] } catch { return [] } })()
+  const fuelMonth = fuelEntries.filter(e => e.date?.startsWith(monthKey))
+  const fuelCost = fuelMonth.reduce((s, e) => s + (e.cost || 0), 0)
+  const fuelLitres = fuelMonth.reduce((s, e) => s + (e.litres || 0), 0)
+  const hasFuel = fuelEntries.length > 0
+
+  if (!hasLedger && !hasFuel) return null
+
+  const fmt = (n) => `$${n.toFixed(2)}`
+  const Row = ({ color, label, value, sub, onClick }) => (
+    <button onClick={onClick} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '9px 0', borderBottom: '0.5px solid rgba(255,255,255,0.04)', background: 'none', border_: 'none', cursor: 'pointer', width: '100%', textAlign: 'left' }}>
+      <div style={{ width: 3, height: 28, borderRadius: 2, background: color, boxShadow: `0 0 8px ${color}80`, flexShrink: 0 }} />
+      <span style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.58rem', color: 'rgba(160,140,120,0.6)', letterSpacing: '0.1em', flex: 1 }}>{label}</span>
+      <div style={{ textAlign: 'right' }}>
+        <div style={{ fontFamily: '"Share Tech Mono","DM Mono",monospace', fontSize: '0.95rem', color, fontWeight: 700, textShadow: `0 0 8px ${color}50` }}>{value}</div>
+        {sub && <div style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.42rem', color: 'rgba(160,140,120,0.35)', letterSpacing: '0.08em' }}>{sub}</div>}
+      </div>
+    </button>
+  )
+
+  return (
+    <section>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+        <SectionLabel color="#C4522A" seq="00">{monthLabel}</SectionLabel>
+      </div>
+      <div style={{ background: 'rgba(14,12,11,0.8)', border: '0.5px solid rgba(255,255,255,0.06)', borderRadius: 12, padding: '0 14px' }}>
+        {hasLedger && <Row color="#C4522A" label="Signal9 Income"  value={fmt(s9)}  onClick={onNavigateLedger} />}
+        {hasLedger && <Row color="#00C8FF" label="App Sales Income" value={fmt(app)} onClick={onNavigateLedger} />}
+        {hasFuel   && <Row color="#FFB700" label="Fuel This Month"  value={fmt(fuelCost)} sub={fuelLitres > 0 ? `${fuelLitres.toFixed(1)} L` : undefined} onClick={onNavigateFuel} />}
+      </div>
+    </section>
+  )
+}
+
 // ─── Shopping Strip ───────────────────────────────────────────────────────────
 function ShoppingStrip({ onNavigate }) {
   const { shopping, updateShoppingList } = useStore()
@@ -2055,44 +2104,24 @@ export default function Dashboard() {
 
       <div className="p-5 md:p-6 max-w-3xl space-y-7">
 
+        {/* Business + fuel thin bars */}
+        <SectionShell color="#C4522A" from="left" delay={2.2}>
+          <QuickStatsBars onNavigateLedger={() => navigate('/ledger')} onNavigateFuel={() => navigate('/fuel')} />
+        </SectionShell>
+
+        {/* Shopping lists */}
+        <SectionShell color="#F97316" from="right" delay={2.4}>
+          <ShoppingStrip onNavigate={() => navigate('/shopping')} />
+        </SectionShell>
+
         {/* Habit strip */}
-        <SectionShell color="#F09030" from="left" delay={2.4}>
+        <SectionShell color="#F09030" from="left" delay={2.6}>
           <HabitStrip onNavigate={() => navigate('/habits')} />
-        </SectionShell>
-
-        {/* Daily Pulse: Routine + Focus + Writing */}
-        <DailyPulseWidget navigate={navigate} />
-
-        {/* Stats */}
-        <SectionShell color="#E05828" from="right" delay={2.85}>
-          <SectionLabel color="#FF7040" seq="01">Overview</SectionLabel>
-          <div className="grid grid-cols-3 gap-3">
-            <StatCard icon={CheckSquare} label="Open Tasks"      value={openTasks.length}       color="#D4724A" onClick={() => navigate('/tasks')} />
-            <StatCard icon={Calendar}    label="Events (7d)"     value={upcomingEvents.length}   color="#D4724A" onClick={() => navigate('/calendar')} />
-            <StatCard icon={Briefcase}   label="Active Projects" value={activeProjects.length}   color="#D4724A" onClick={() => navigate('/tasks')} />
-          </div>
-        </SectionShell>
-
-        {/* Quick Add + Focus Moment */}
-        <SectionShell color="#B040D8" from="left" delay={3.3}>
-          <SectionLabel color="#CC60F0" seq="02">Actions</SectionLabel>
-          <div className="space-y-3">
-            <QuickAdd onAdd={(data) => addTask(data)} />
-            <FocusMomentButton />
-          </div>
-        </SectionShell>
-
-        {/* Missions */}
-        <SectionShell color="#D89820" from="right" delay={3.75}>
-          <MissionsWidget onNavigateToTasks={(missionId) => {
-            setMissionFilter(missionId)
-            navigate('/tasks')
-          }} />
         </SectionShell>
 
         {/* Today */}
         {todayEvents.length > 0 && (
-          <SectionShell color="#20C880" from="left" delay={4.2}>
+          <SectionShell color="#20C880" from="right" delay={2.8}>
             <section>
               <SectionLabel color="#20E890" seq="04">Today</SectionLabel>
               <div className="space-y-2">
@@ -2113,8 +2142,38 @@ export default function Dashboard() {
           </SectionShell>
         )}
 
+        {/* Daily Pulse: Routine + Focus + Writing */}
+        <DailyPulseWidget navigate={navigate} />
+
+        {/* Stats */}
+        <SectionShell color="#E05828" from="right" delay={3.2}>
+          <SectionLabel color="#FF7040" seq="01">Overview</SectionLabel>
+          <div className="grid grid-cols-3 gap-3">
+            <StatCard icon={CheckSquare} label="Open Tasks"      value={openTasks.length}       color="#D4724A" onClick={() => navigate('/tasks')} />
+            <StatCard icon={Calendar}    label="Events (7d)"     value={upcomingEvents.length}   color="#D4724A" onClick={() => navigate('/calendar')} />
+            <StatCard icon={Briefcase}   label="Active Projects" value={activeProjects.length}   color="#D4724A" onClick={() => navigate('/tasks')} />
+          </div>
+        </SectionShell>
+
+        {/* Quick Add + Focus Moment */}
+        <SectionShell color="#B040D8" from="left" delay={3.6}>
+          <SectionLabel color="#CC60F0" seq="02">Actions</SectionLabel>
+          <div className="space-y-3">
+            <QuickAdd onAdd={(data) => addTask(data)} />
+            <FocusMomentButton />
+          </div>
+        </SectionShell>
+
+        {/* Missions */}
+        <SectionShell color="#D89820" from="right" delay={4.0}>
+          <MissionsWidget onNavigateToTasks={(missionId) => {
+            setMissionFilter(missionId)
+            navigate('/tasks')
+          }} />
+        </SectionShell>
+
         {/* Top tasks */}
-        <SectionShell color="#E04820" from="right" delay={4.65}>
+        <SectionShell color="#E04820" from="left" delay={4.4}>
         <section>
           <div className="flex items-center justify-between mb-2.5">
             <SectionLabel color="#FF6040" seq="05">Active Tasks</SectionLabel>
@@ -2140,7 +2199,7 @@ export default function Dashboard() {
         </SectionShell>
 
         {/* Upcoming */}
-        <SectionShell color="#8840CC" from="left" delay={5.1}>
+        <SectionShell color="#8840CC" from="right" delay={4.8}>
           <section>
             <div className="flex items-center justify-between mb-2.5">
               <SectionLabel color="#AA60EE" seq="06">Upcoming</SectionLabel>
@@ -2175,13 +2234,8 @@ export default function Dashboard() {
         </SectionShell>
 
         {/* Quick Contacts */}
-        <SectionShell color="#00C8FF" from="right" delay={5.55}>
+        <SectionShell color="#00C8FF" from="left" delay={5.2}>
           <QuickContacts onNavigate={() => navigate('/contacts')} />
-        </SectionShell>
-
-        {/* Shopping lists */}
-        <SectionShell color="#F97316" from="left" delay={6.0}>
-          <ShoppingStrip onNavigate={() => navigate('/shopping')} />
         </SectionShell>
 
       </div>
