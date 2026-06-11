@@ -1,6 +1,73 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import MatrixReveal from './MatrixReveal'
 import HoloRings from './HoloRings'
+
+const MATRIX_CHARS = '0123456789ABCDEF$%#@&!アイウエオカキクケコサシスセソタチツテト'
+
+function MatrixRain() {
+  const canvasRef = useRef(null)
+
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')
+
+    const resize = () => {
+      canvas.width  = canvas.offsetWidth
+      canvas.height = canvas.offsetHeight
+    }
+    resize()
+
+    const fontSize = 14
+    const cols = Math.floor(canvas.width / fontSize)
+    const drops = Array.from({ length: cols }, () => Math.random() * -50)
+
+    let raf
+    const draw = () => {
+      // Fade trail
+      ctx.fillStyle = 'rgba(10,9,8,0.18)'
+      ctx.fillRect(0, 0, canvas.width, canvas.height)
+
+      for (let i = 0; i < drops.length; i++) {
+        const ch = MATRIX_CHARS[Math.floor(Math.random() * MATRIX_CHARS.length)]
+        const y  = drops[i] * fontSize
+        // Vertical gradient: bright near top of drop, fades toward bottom of canvas
+        const alpha = Math.max(0, 1 - (y / canvas.height) * 1.1)
+        // Lead character is brighter
+        ctx.fillStyle = `rgba(196,82,42,${(alpha * 0.9).toFixed(2)})`
+        ctx.font = `${fontSize}px "DM Mono", monospace`
+        ctx.fillText(ch, i * fontSize, y)
+
+        // Trail chars slightly dimmer
+        if (drops[i] > 1) {
+          const ty = (drops[i] - 1) * fontSize
+          const ta = Math.max(0, 1 - (ty / canvas.height) * 1.1) * 0.3
+          ctx.fillStyle = `rgba(196,82,42,${ta.toFixed(2)})`
+          ctx.fillText(MATRIX_CHARS[Math.floor(Math.random() * MATRIX_CHARS.length)], i * fontSize, ty)
+        }
+
+        if (y > canvas.height && Math.random() > 0.97) drops[i] = 0
+        else drops[i] += 0.4
+      }
+
+      raf = requestAnimationFrame(draw)
+    }
+    draw()
+    return () => cancelAnimationFrame(raf)
+  }, [])
+
+  return (
+    <canvas
+      ref={canvasRef}
+      style={{
+        position: 'absolute', inset: 0, width: '100%', height: '100%',
+        opacity: 0.55, pointerEvents: 'none',
+        maskImage: 'linear-gradient(to bottom, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.4) 60%, transparent 100%)',
+        WebkitMaskImage: 'linear-gradient(to bottom, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.4) 60%, transparent 100%)',
+      }}
+    />
+  )
+}
 
 const BOOT_SESSION_KEY = 's9_session_booted'
 
@@ -35,6 +102,9 @@ export default function BootScreen({ onComplete }) {
       transition: 'opacity 0.7s cubic-bezier(0.4,0,0.6,1)',
       pointerEvents: phase === 4 ? 'none' : 'all',
     }}>
+
+      {/* Matrix rain */}
+      {phase >= 1 && <MatrixRain />}
 
       {/* Architectural grid overlay */}
       <div style={{
