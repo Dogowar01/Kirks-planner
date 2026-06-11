@@ -169,9 +169,9 @@ export default function BootScreen({ onComplete }) {
       {/* HoloRings — layered */}
       {phase >= 1 && (
         <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
-          <HoloRings color="#00D4FF" size={Math.min(window.innerWidth, 520)} style={{ opacity: 0.12, position: 'absolute', animation: 'phase-in 1.4s ease both' }} />
-          <HoloRings color="#00D4FF" size={Math.min(window.innerWidth * 0.65, 340)} style={{ opacity: 0.09, position: 'absolute', animation: 'phase-in 1.6s ease 0.2s both' }} />
-          <HoloRings color="#00D4FF" size={Math.min(window.innerWidth * 0.4, 210)} style={{ opacity: 0.07, position: 'absolute', animation: 'phase-in 1.8s ease 0.4s both' }} />
+          <HoloRings color="#00D4FF" size={Math.min(window.innerWidth, 520)} style={{ opacity: 0.30, position: 'absolute', animation: 'phase-in 1.4s ease both' }} />
+          <HoloRings color="#00D4FF" size={Math.min(window.innerWidth * 0.65, 340)} style={{ opacity: 0.22, position: 'absolute', animation: 'phase-in 1.6s ease 0.2s both' }} />
+          <HoloRings color="#00D4FF" size={Math.min(window.innerWidth * 0.4, 210)} style={{ opacity: 0.16, position: 'absolute', animation: 'phase-in 1.8s ease 0.4s both' }} />
         </div>
       )}
 
@@ -184,7 +184,7 @@ export default function BootScreen({ onComplete }) {
             <div style={{
               fontFamily: '"Share Tech Mono", monospace', fontSize: '0.75rem',
               letterSpacing: '0.45em', textTransform: 'uppercase',
-              color: 'rgba(255,255,255,0.55)', marginBottom: 14,
+              color: 'rgba(255,255,255,0.85)', marginBottom: 14,
               animation: 'phase-in 0.7s ease both',
             }}>
               ■ &nbsp; S I G N A L 9 &nbsp; ■
@@ -200,7 +200,7 @@ export default function BootScreen({ onComplete }) {
             <p style={{
               fontFamily: '"Share Tech Mono", monospace', fontSize: '0.9rem',
               letterSpacing: '0.35em', textTransform: 'uppercase',
-              color: 'rgba(255,255,255,0.5)', marginTop: 14,
+              color: 'rgba(255,255,255,0.8)', marginTop: 14,
               animation: 'phase-in 0.9s ease 0.4s both',
             }}>Life Planner</p>
           </>
@@ -225,9 +225,9 @@ export default function BootScreen({ onComplete }) {
         {phase >= 3 && (
           <div style={{ marginTop: 20, display: 'flex', flexDirection: 'column', gap: 5, alignItems: 'center' }}>
             {[
-              { text: 'ALL MODULES LOADED', color: 'rgba(255,255,255,0.5)' },
-              { text: 'DATA SYNC COMPLETE', color: 'rgba(255,255,255,0.4)' },
-              { text: 'WELCOME BACK, KIRK', color: 'rgba(255,255,255,0.8)' },
+              { text: 'ALL MODULES LOADED', color: 'rgba(255,255,255,0.75)' },
+              { text: 'DATA SYNC COMPLETE', color: 'rgba(255,255,255,0.65)' },
+              { text: 'WELCOME BACK, KIRK', color: 'rgba(255,255,255,0.95)' },
             ].map(({ text, color }, i) => (
               <p key={text} style={{
                 fontFamily: '"Share Tech Mono", monospace', fontSize: '0.75rem',
