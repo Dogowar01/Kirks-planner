@@ -200,7 +200,7 @@ function NixieClock({ time, day, temp, city, flag, bootDelay = 0 }) {
             transform: 'translate(-50%, -50%) rotate(-30deg)',
             pointerEvents: 'none', zIndex: 2,
             fontSize: '9rem',
-            opacity: 0.22,
+            opacity: 0.13,
             filter: 'saturate(0.65) contrast(0.85)',
             userSelect: 'none',
             whiteSpace: 'nowrap',
