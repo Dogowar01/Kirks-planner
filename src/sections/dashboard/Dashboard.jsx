@@ -2056,7 +2056,7 @@ function QuickContacts({ onNavigate }) {
 
 export default function Dashboard() {
   const navigate = useNavigate()
-  const { tasks, events, projects, notes, addTask } = useStore()
+  const { tasks, events, projects, notes, addTask, shopping } = useStore()
   const [missionFilter, setMissionFilter] = useState(null)
 
   const today = startOfDay(new Date())
@@ -2109,10 +2109,12 @@ export default function Dashboard() {
           <QuickStatsBars onNavigateLedger={() => navigate('/ledger')} onNavigateFuel={() => navigate('/fuel')} />
         </SectionShell>
 
-        {/* Shopping lists */}
-        <SectionShell color="#F97316" from="right" delay={2.4}>
-          <ShoppingStrip onNavigate={() => navigate('/shopping')} />
-        </SectionShell>
+        {/* Shopping lists — only shown when there are pending items */}
+        {shopping.some(l => l.items.some(i => !i.done)) && (
+          <SectionShell color="#F97316" from="right" delay={2.4}>
+            <ShoppingStrip onNavigate={() => navigate('/shopping')} />
+          </SectionShell>
+        )}
 
         {/* Habit strip */}
         <SectionShell color="#F09030" from="left" delay={2.6}>
