@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom'
+import FloatCard3D from '../../components/FloatCard3D'
 import { useStore } from '../../hooks/useStore'
 import { format, startOfWeek, endOfWeek } from 'date-fns'
 import HoloRings from '../../components/HoloRings'
@@ -69,78 +70,45 @@ function HubTile({ item, onClick, index }) {
   const { Icon } = item
 
   return (
-    <button
-      onClick={onClick}
-      style={{
+    <FloatCard3D color={item.color} onClick={onClick} animDelay={delay}
+      style={{ display: 'block', width: '100%', textAlign: 'left' }}>
+      <div style={{
+        position: 'relative', overflow: 'hidden', borderRadius: 16,
         background: 'rgba(13,11,10,0.9)',
-        border: `0.5px solid rgba(255,255,255,0.07)`,
-        borderRadius: 14,
         padding: '18px 16px 16px',
-        cursor: 'pointer',
-        textAlign: 'left',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 12,
-        animation: `phase-in 0.75s cubic-bezier(0.22,1,0.36,1) ${delay}s both`,
-        transition: 'background 0.25s, border-color 0.25s, transform 0.18s',
-        clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%)',
-        position: 'relative',
-        overflow: 'hidden',
-      }}
-      onMouseEnter={e => {
-        e.currentTarget.style.background = `${item.color}0F`
-        e.currentTarget.style.borderColor = `${item.color}50`
-        e.currentTarget.style.transform = 'translateY(-2px)'
-      }}
-      onMouseLeave={e => {
-        e.currentTarget.style.background = 'rgba(13,11,10,0.9)'
-        e.currentTarget.style.borderColor = 'rgba(255,255,255,0.07)'
-        e.currentTarget.style.transform = 'translateY(0)'
-      }}
-    >
-      {/* Top accent line that appears on hover via CSS — done with position */}
-      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 1, background: `linear-gradient(90deg, ${item.color}80, transparent)` }} />
-
-      {/* Cut-corner accent dot */}
-      <div style={{ position: 'absolute', top: 0, right: 0, width: 12, height: 12, borderBottom: `0.5px solid ${item.color}50`, borderLeft: `0.5px solid ${item.color}50` }} />
-
-      {/* Icon in glowing circle */}
-      <div style={{
-        width: 42, height: 42, borderRadius: 12,
-        background: `${item.color}18`,
-        border: `0.5px solid ${item.color}35`,
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        boxShadow: `0 0 16px ${item.color}20`,
-        flexShrink: 0,
+        display: 'flex', flexDirection: 'column', gap: 12,
       }}>
-        <Icon size={20} color={item.color} strokeWidth={1.5} />
-      </div>
+        {/* Top accent line */}
+        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 1, background: `linear-gradient(90deg, ${item.color}80, transparent)` }} />
+        {/* Cut-corner accent */}
+        <div style={{ position: 'absolute', top: 0, right: 0, width: 12, height: 12, borderBottom: `0.5px solid ${item.color}50`, borderLeft: `0.5px solid ${item.color}50` }} />
 
-      {/* Text */}
-      <div>
-        <p style={{
-          fontFamily: '"Playfair Display", serif', fontStyle: 'italic', fontWeight: 600,
-          fontSize: '0.95rem', color: '#EDE8E0', marginBottom: 4, lineHeight: 1.2,
+        {/* Icon */}
+        <div style={{
+          width: 42, height: 42, borderRadius: 12,
+          background: `${item.color}18`, border: `0.5px solid ${item.color}35`,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          boxShadow: `0 0 16px ${item.color}20`, flexShrink: 0,
         }}>
-          {item.label}
-        </p>
-        <p style={{
-          fontFamily: '"DM Mono", monospace', fontSize: '0.44rem',
-          color: '#4A4540', letterSpacing: '0.06em', lineHeight: 1.6,
-        }}>
-          {item.desc}
-        </p>
-      </div>
+          <Icon size={20} color={item.color} strokeWidth={1.5} />
+        </div>
 
-      {/* Arrow indicator */}
-      <div style={{
-        position: 'absolute', bottom: 12, right: 14,
-        fontFamily: '"DM Mono", monospace', fontSize: '0.38rem',
-        color: `${item.color}50`, letterSpacing: '0.1em',
-      }}>
-        OPEN →
+        {/* Text */}
+        <div>
+          <p style={{ fontFamily: '"Playfair Display", serif', fontStyle: 'italic', fontWeight: 600, fontSize: '0.95rem', color: '#EDE8E0', marginBottom: 4, lineHeight: 1.2 }}>
+            {item.label}
+          </p>
+          <p style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.44rem', color: '#4A4540', letterSpacing: '0.06em', lineHeight: 1.6 }}>
+            {item.desc}
+          </p>
+        </div>
+
+        {/* Arrow */}
+        <div style={{ position: 'absolute', bottom: 12, right: 14, fontFamily: '"DM Mono", monospace', fontSize: '0.38rem', color: `${item.color}50`, letterSpacing: '0.1em' }}>
+          OPEN →
+        </div>
       </div>
-    </button>
+    </FloatCard3D>
   )
 }
 
