@@ -1893,12 +1893,12 @@ function QuickStatsBars({ onNavigateLedger, onNavigateFuel }) {
   const monthLabel = now.toLocaleDateString('en-AU', { month: 'long', year: 'numeric' })
 
   // Read ledger
-  const ledgerRaw = (() => { try { const r = localStorage.getItem('ledger_v4'); return r ? JSON.parse(r) : null } catch { return null } })()
-  const txns = ledgerRaw?.transactions || {}
-  const monthIncome = (biz) => (txns[biz] || []).filter(t => t.type === 'in' && t.date?.startsWith(monthKey)).reduce((s, t) => s + (t.amount || 0), 0)
-  const s9 = monthIncome('Signal9')
-  const app = monthIncome('App Sales')
-  const hasLedger = Object.keys(txns).length > 0
+  const ledgerRaw = (() => { try { const r = localStorage.getItem('ledger_v5'); return r ? JSON.parse(r) : null } catch { return null } })()
+  const txns = ledgerRaw?.transactions || []
+  const monthIncome = (entity) => txns.filter(t => t.entity === entity && t.type === 'income' && t.date?.startsWith(monthKey)).reduce((s, t) => s + (t.amount || 0), 0)
+  const s9 = monthIncome('s9')
+  const app = monthIncome('apps')
+  const hasLedger = txns.length > 0
 
   // Read fuel
   const fuelEntries = (() => { try { const r = localStorage.getItem('agenda-fuel-v1'); return r ? JSON.parse(r) : [] } catch { return [] } })()
