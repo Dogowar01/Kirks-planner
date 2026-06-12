@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { format } from 'date-fns'
 import { useNavigate } from 'react-router-dom'
 import HoloRings from '../../components/HoloRings'
+import RainCanvas from '../../components/RainCanvas'
 
 const WMO_ICONS = {
   0:'☀️',1:'🌤️',2:'⛅',3:'☁️',45:'🌫️',48:'🌫️',51:'🌦️',53:'🌦️',55:'🌧️',
@@ -76,6 +77,9 @@ export default function Ambient() {
         cursor: 'pointer', overflow: 'hidden',
         opacity: show ? 1 : 0, transition: 'opacity 1s ease',
       }}>
+
+      {/* Rain */}
+      <RainCanvas color="#C4522A" opacity={0.5} intensity={2} windAngle={10} zIndex={1} />
 
       {/* Architectural grid */}
       <div style={{
