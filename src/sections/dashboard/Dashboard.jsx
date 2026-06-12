@@ -1052,6 +1052,119 @@ function FocusMomentModal({ onClose }) {
   )
 }
 
+const QUICK_ADD_DESTINATIONS = [
+  { label: 'Task',        sub: 'Add to task list',     path: '/tasks',         icon: CheckSquare, color: '#D4724A' },
+  { label: 'Event',       sub: 'Add to calendar',      path: '/calendar',      icon: Calendar,    color: '#20C880' },
+  { label: 'Journal',     sub: 'Write an entry',       path: '/journal',       icon: Pencil,      color: '#C084FC' },
+  { label: 'Note',        sub: 'Capture a thought',    path: '/notes',         icon: Plus,        color: '#00C8FF' },
+  { label: 'Habit',       sub: 'Track a habit',        path: '/habits',        icon: Flame,       color: '#F09030' },
+  { label: 'Transaction', sub: 'Log income/expense',   path: '/ledger',        icon: TrendingUp,  color: '#3B82F6' },
+  { label: 'Contact',     sub: 'Add a person',         path: '/contacts',      icon: Phone,       color: '#34D399' },
+  { label: 'Shopping',    sub: 'Add to shopping list', path: '/shopping',      icon: ArrowRight,  color: '#F97316' },
+]
+
+function QuickAddFAB() {
+  const [open, setOpen] = useState(false)
+  const navigate = useNavigate()
+  const PLUM = '#C084FC'
+
+  function go(path) {
+    setOpen(false)
+    navigate(path)
+  }
+
+  return (
+    <>
+      {/* Floating button */}
+      <button
+        onClick={() => setOpen(true)}
+        aria-label="Quick add"
+        style={{
+          position: 'fixed',
+          bottom: 'calc(env(safe-area-inset-bottom) + 88px)',
+          right: 22,
+          zIndex: 80,
+          width: 56, height: 56,
+          borderRadius: '50%',
+          background: `radial-gradient(circle at 35% 35%, rgba(216,170,255,0.18), rgba(192,132,252,0.92) 60%, rgba(140,60,220,0.95))`,
+          border: `1.5px solid rgba(216,170,255,0.55)`,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          cursor: 'pointer',
+          animation: 'fab-pulse 2.4s ease-in-out infinite',
+          touchAction: 'manipulation',
+          WebkitTapHighlightColor: 'transparent',
+        }}
+      >
+        <Plus size={26} color="#fff" strokeWidth={2.5} style={{ filter: 'drop-shadow(0 0 6px rgba(255,255,255,0.8))' }} />
+      </button>
+
+      {/* Bottom sheet */}
+      {open && (
+        <div
+          style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(6px)', WebkitBackdropFilter: 'blur(6px)', display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}
+          onClick={() => setOpen(false)}
+        >
+          <div
+            style={{
+              background: '#0F0D0C',
+              borderRadius: '24px 24px 0 0',
+              width: '100%', maxWidth: 520,
+              padding: '20px 20px calc(env(safe-area-inset-bottom) + 28px)',
+              borderTop: `1.5px solid ${PLUM}55`,
+              boxShadow: `0 -8px 60px rgba(192,132,252,0.18)`,
+              animation: 'fab-sheet-up 0.32s cubic-bezier(0.22,1,0.36,1) both',
+            }}
+            onClick={e => e.stopPropagation()}
+          >
+            {/* Handle */}
+            <div style={{ width: 36, height: 3, borderRadius: 2, background: 'rgba(255,255,255,0.12)', margin: '0 auto 20px' }} />
+
+            {/* Title */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 18 }}>
+              <div style={{ width: 5, height: 5, borderRadius: '50%', background: PLUM, boxShadow: `0 0 8px ${PLUM}` }} />
+              <span style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.55rem', letterSpacing: '0.22em', color: `${PLUM}99`, textTransform: 'uppercase' }}>
+                Quick Add — Where to?
+              </span>
+            </div>
+
+            {/* Destination grid */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+              {QUICK_ADD_DESTINATIONS.map(({ label, sub, path, icon: Icon, color }) => (
+                <button
+                  key={path}
+                  onClick={() => go(path)}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 12,
+                    background: `${color}0D`,
+                    border: `0.5px solid ${color}30`,
+                    borderRadius: 14,
+                    padding: '13px 14px',
+                    cursor: 'pointer',
+                    touchAction: 'manipulation',
+                    WebkitTapHighlightColor: 'transparent',
+                    textAlign: 'left',
+                    transition: 'border-color 0.15s, background 0.15s',
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor = `${color}70`; e.currentTarget.style.background = `${color}1A` }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = `${color}30`; e.currentTarget.style.background = `${color}0D` }}
+                >
+                  <div style={{ width: 32, height: 32, borderRadius: 10, background: `${color}18`, border: `0.5px solid ${color}40`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <Icon size={15} color={color} strokeWidth={1.8} />
+                  </div>
+                  <div>
+                    <div style={{ fontFamily: '"Playfair Display", serif', fontStyle: 'italic', fontSize: '0.85rem', color: '#EDE8E0', lineHeight: 1.2 }}>{label}</div>
+                    <div style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.42rem', color: '#7A7068', letterSpacing: '0.06em', marginTop: 2 }}>{sub}</div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  )
+}
+
 function FocusMomentButton() {
   const [open, setOpen] = useState(false)
   const PLUM = '#C084FC'
@@ -2100,6 +2213,7 @@ export default function Dashboard() {
 
   return (
     <div>
+      <QuickAddFAB />
       <LiveClock taskCount={openTasks.length} eventCount={upcomingEvents.length} />
 
       <div className="p-5 md:p-6 max-w-3xl space-y-7">
