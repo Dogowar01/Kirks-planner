@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react'
 import { format } from 'date-fns'
 import { useNavigate } from 'react-router-dom'
 import HoloRings from '../../components/HoloRings'
-import RainCanvas from '../../components/RainCanvas'
 
 const WMO_ICONS = {
   0:'☀️',1:'🌤️',2:'⛅',3:'☁️',45:'🌫️',48:'🌫️',51:'🌦️',53:'🌦️',55:'🌧️',
@@ -73,11 +72,7 @@ export default function Ambient() {
   const wIcon   = weather ? (WMO_ICONS[weather.code] || '—') : null
 
   return (
-    <>
-      {/* Rain — sibling of the clock div so it isn't trapped by the opacity stacking context */}
-      <RainCanvas color="#C4522A" opacity={0.7} intensity={3} windAngle={10} zIndex={9999} />
-
-      <div
+    <div
         onClick={() => navigate(-1)}
         style={{
           position: 'fixed', inset: 0, zIndex: 9998,
@@ -179,6 +174,5 @@ export default function Ambient() {
         background: 'linear-gradient(90deg, transparent, rgba(196,82,42,0.6), transparent)',
       }} />
     </div>
-    </>
   )
 }

@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
+import RainCanvas from '../../components/RainCanvas'
 import { QRCodeSVG } from 'qrcode.react'
 import SectionShell from '../../components/SectionShell'
 import PageHeader from '../../components/PageHeader'
@@ -241,11 +242,16 @@ function NixieClock({ time, day, temp, city, flag, bootDelay = 0 }) {
 function WorldClocks() {
   const { selected, add, remove } = useWorldCities()
   const [showPicker, setShowPicker] = useState(false)
-  const activeCities = CITY_OPTIONS.filter(c => selected.includes(c.name))
+  // Memoised so identity is stable — prevents useWorldData's effect from looping
+  const activeCities = useMemo(
+    () => CITY_OPTIONS.filter(c => selected.includes(c.name)),
+    [selected]
+  )
   const { times, temps } = useWorldData(activeCities)
 
   return (
-    <div className="card" style={{ background: '#0a0905', borderColor: '#1e1a0a' }}>
+    <div className="card" style={{ background: '#0a0905', borderColor: '#1e1a0a', position: 'relative', overflow: 'hidden' }}>
+      <RainCanvas color="#FF8C35" opacity={0.45} intensity={2} windAngle={8} zIndex={0} />
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
         <p className="section-label">[ World Clocks ]</p>
         <button onClick={() => setShowPicker(p => !p)}
