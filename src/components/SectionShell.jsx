@@ -20,16 +20,19 @@ export default function SectionShell({ accent, bgImage, children, className = ''
     >
       {/* Artwork background image */}
       {bgImage && (
-        <div style={{
-          position: 'fixed',
-          inset: 0,
-          zIndex: 0,
-          backgroundImage: `url(${bgImage})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center top',
-          opacity: 0.07,
-          pointerEvents: 'none',
-        }} />
+        <>
+          <div style={{
+            position: 'fixed', inset: 0, zIndex: 0,
+            backgroundImage: `url(${bgImage})`,
+            backgroundSize: 'cover', backgroundPosition: 'center top',
+            opacity: 0.18, pointerEvents: 'none',
+          }} />
+          {/* Gradient overlay so text stays readable over the image */}
+          <div style={{
+            position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none',
+            background: 'linear-gradient(to bottom, rgba(13,12,11,0.55) 0%, rgba(13,12,11,0.72) 35%, rgba(13,12,11,0.93) 75%, rgba(13,12,11,0.99) 100%)',
+          }} />
+        </>
       )}
 
       {/* Architectural grid */}

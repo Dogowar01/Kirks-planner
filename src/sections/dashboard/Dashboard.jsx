@@ -7,7 +7,7 @@ import { BUSINESSES } from '../../lib/constants'
 import CategoryBadge from '../../components/CategoryBadge'
 import Modal from '../../components/Modal'
 import ConfirmDialog from '../../components/ConfirmDialog'
-import heroBg from '../../assets/art-newyork.jpg'
+import heroBg from '../../assets/art-newyork.png'
 import HoloRings from '../../components/HoloRings'
 
 // ── Matrix character-scramble reveal ──────────────────────────────────────────

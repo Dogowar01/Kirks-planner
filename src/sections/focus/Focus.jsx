@@ -3,7 +3,7 @@ import { Play, Square, RotateCcw } from 'lucide-react'
 import SectionShell from '../../components/SectionShell'
 import PageHeader from '../../components/PageHeader'
 import HoloRings from '../../components/HoloRings'
-import bgImg from '../../assets/art-abstract.jpg'
+import bgImg from '../../assets/art-abstract.png'
 
 const FOCUS_KEY = 's9_focus_mode'
 

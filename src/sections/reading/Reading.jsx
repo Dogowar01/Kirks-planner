@@ -5,7 +5,7 @@ import SectionShell from '../../components/SectionShell'
 import PageHeader from '../../components/PageHeader'
 import Modal from '../../components/Modal'
 import ConfirmDialog from '../../components/ConfirmDialog'
-import bgImg from '../../assets/art-vintage-woman.jpg'
+import bgImg from '../../assets/art-vintage-woman.png'
 
 const ACCENT = '#3B82F6'
 

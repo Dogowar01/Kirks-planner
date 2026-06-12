@@ -5,7 +5,7 @@ import { useStore } from '../../hooks/useStore'
 import { CATEGORIES } from '../../lib/constants'
 import SectionShell from '../../components/SectionShell'
 import PageHeader from '../../components/PageHeader'
-import bgImg from '../../assets/art-vintage-woman.jpg'
+import bgImg from '../../assets/art-vintage-woman.png'
 import ConfirmDialog from '../../components/ConfirmDialog'
 import { BookOpen } from 'lucide-react'
 

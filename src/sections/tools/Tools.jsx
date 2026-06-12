@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { QRCodeSVG } from 'qrcode.react'
 import SectionShell from '../../components/SectionShell'
 import PageHeader from '../../components/PageHeader'
-import bgImg from '../../assets/art-architectural.jpg'
+import bgImg from '../../assets/art-architectural.png'
 import { useStore } from '../../hooks/useStore'
 
 // ─── World Clocks ────────────────────────────────────────────────────────────

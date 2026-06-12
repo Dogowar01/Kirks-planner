@@ -4,7 +4,7 @@ import { useNotifications } from '../../hooks/useNotifications'
 import ConfirmDialog from '../../components/ConfirmDialog'
 import SectionShell from '../../components/SectionShell'
 import PageHeader from '../../components/PageHeader'
-import bgImg from '../../assets/art-ethereal.jpg'
+import bgImg from '../../assets/art-ethereal.png'
 
 export default function Settings() {
   const { settings, updateSettings, exportData, importData, clearAllData } = useStore()

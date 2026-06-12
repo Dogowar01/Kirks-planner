@@ -17,6 +17,7 @@ export default function PageHeader({ subtitle, title, accent = '#C4522A', showBa
   return (
     <div style={{
       position: 'sticky', top: 0, zIndex: 10,
+      paddingTop: 'max(env(safe-area-inset-top), 10px)',
       padding: '10px 16px 12px',
       animation: 'phase-in 1.1s cubic-bezier(0.22,1,0.36,1) both',
       background: 'linear-gradient(to bottom, rgba(8,7,6,0.99) 0%, rgba(13,12,11,0.95) 100%)',
