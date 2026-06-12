@@ -1075,57 +1075,64 @@ function QuickAddFAB() {
 
   return (
     <>
-      {/* Floating button — orbital comet design */}
+      {/* Floating button — holo targeting reticle */}
       <div style={{
         position: 'fixed',
         bottom: 'calc(env(safe-area-inset-bottom) + 30px)',
         right: 20,
         zIndex: 80,
-        width: 68, height: 68,
+        width: 72, height: 72,
         pointerEvents: 'none',
       }}>
-        {/* Rotating conic energy ring */}
-        <div style={{
-          position: 'absolute', inset: 0, borderRadius: '50%',
-          background: `conic-gradient(from 0deg, transparent 0%, ${PLUM}10 55%, ${PLUM}66 80%, rgba(232,200,255,0.95) 98%, transparent 100%)`,
-          animation: 'fab-ring-spin 3.2s linear infinite',
-          WebkitMask: 'radial-gradient(circle, transparent 58%, black 62%, black 78%, transparent 82%)',
-          mask: 'radial-gradient(circle, transparent 58%, black 62%, black 78%, transparent 82%)',
-        }} />
-
-        {/* Orbiting comet — head + glow, carried around by rotating arm */}
-        <div style={{
-          position: 'absolute', inset: 0,
-          animation: 'fab-orbit 3.2s linear infinite',
-        }}>
-          <div style={{
-            position: 'absolute', top: -1, left: '50%', marginLeft: -3,
-            width: 6, height: 6, borderRadius: '50%',
-            background: '#F0E2FF',
-            boxShadow: `0 0 6px #fff, 0 0 12px ${PLUM}, 0 0 22px ${PLUM}, 0 0 34px ${PLUM}88`,
-            animation: 'fab-comet-twinkle 0.9s ease-in-out infinite',
+        {/* Sonar pings — staggered expanding rings */}
+        {[0, 1.5].map((d, i) => (
+          <div key={i} style={{
+            position: 'absolute', inset: 10, borderRadius: '50%',
+            border: `1px solid ${PLUM}`,
+            animation: `fab-sonar 3s cubic-bezier(0.25,0.6,0.4,1) ${d}s infinite`,
           }} />
-        </div>
+        ))}
+
+        {/* Outer reticle — segmented arcs, slow clockwise */}
+        <svg viewBox="0 0 72 72" style={{ position: 'absolute', inset: 0, animation: 'fab-reticle-cw 9s linear infinite' }}>
+          {[0, 120, 240].map(a => (
+            <path key={a}
+              d="M 36 3 A 33 33 0 0 1 64.6 19.5"
+              fill="none" stroke={PLUM} strokeWidth="1.5" strokeLinecap="round"
+              opacity="0.6" transform={`rotate(${a} 36 36)`}
+            />
+          ))}
+        </svg>
+
+        {/* Inner reticle — short ticks, counter-rotating */}
+        <svg viewBox="0 0 72 72" style={{ position: 'absolute', inset: 0, animation: 'fab-reticle-ccw 6s linear infinite' }}>
+          {[45, 135, 225, 315].map(a => (
+            <line key={a}
+              x1="36" y1="7.5" x2="36" y2="12.5"
+              stroke="#E8D5FF" strokeWidth="1.5" strokeLinecap="round"
+              opacity="0.8" transform={`rotate(${a} 36 36)`}
+            />
+          ))}
+        </svg>
 
         {/* Core button */}
         <button
           onClick={() => setOpen(true)}
           aria-label="Quick add"
           style={{
-            position: 'absolute', inset: 7,
+            position: 'absolute', inset: 11,
             borderRadius: '50%',
             background: `radial-gradient(circle at 35% 35%, rgba(216,170,255,0.22), rgba(192,132,252,0.92) 60%, rgba(140,60,220,0.95))`,
             border: `1.5px solid rgba(216,170,255,0.55)`,
-            boxShadow: `0 0 22px ${PLUM}66, 0 4px 20px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.3)`,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             cursor: 'pointer',
             pointerEvents: 'auto',
-            animation: 'fab-core-breathe 3.2s ease-in-out infinite',
+            animation: 'fab-core-hum 3s ease-in-out infinite',
             touchAction: 'manipulation',
             WebkitTapHighlightColor: 'transparent',
           }}
         >
-          <Plus size={24} color="#fff" strokeWidth={2.5} style={{ filter: 'drop-shadow(0 0 6px rgba(255,255,255,0.8))' }} />
+          <Plus size={22} color="#fff" strokeWidth={2.5} style={{ filter: 'drop-shadow(0 0 6px rgba(255,255,255,0.8))' }} />
         </button>
       </div>
 

@@ -44,28 +44,27 @@
   }
 }
 
-/* FAB orbit — comet circles the button */
-@keyframes fab-orbit {
+/* FAB reticle — segmented arc rings, lock-on style */
+@keyframes fab-reticle-cw {
   from { transform: rotate(0deg); }
   to   { transform: rotate(360deg); }
 }
-
-/* FAB energy ring — conic sweep rotating behind the button */
-@keyframes fab-ring-spin {
+@keyframes fab-reticle-ccw {
   from { transform: rotate(0deg); }
   to   { transform: rotate(-360deg); }
 }
 
-/* FAB core breathing — subtle scale + brightness swell */
-@keyframes fab-core-breathe {
-  0%, 100% { transform: scale(1);    filter: brightness(1); }
-  50%      { transform: scale(1.06); filter: brightness(1.25); }
+/* FAB sonar — expanding ping ring */
+@keyframes fab-sonar {
+  0%   { transform: scale(0.7); opacity: 0.7; }
+  70%  { opacity: 0.18; }
+  100% { transform: scale(1.65); opacity: 0; }
 }
 
-/* Comet head twinkle */
-@keyframes fab-comet-twinkle {
-  0%, 100% { opacity: 0.85; }
-  50%      { opacity: 1; }
+/* FAB core — neon sign flicker-on then steady hum */
+@keyframes fab-core-hum {
+  0%, 100% { box-shadow: 0 0 18px rgba(192,132,252,0.45), 0 4px 20px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.3); }
+  50%      { box-shadow: 0 0 30px rgba(192,132,252,0.75), 0 4px 20px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.3); }
 }
 
 @keyframes fab-sheet-up {
