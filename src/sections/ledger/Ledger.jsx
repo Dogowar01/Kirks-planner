@@ -5,17 +5,22 @@ import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
   LineChart, Line, PieChart, Pie, Cell, CartesianGrid,
 } from 'recharts'
-import bgImg from '../../assets/art-architectural.jpg'
+import bgHub      from '../../assets/art-architectural.png'
+import bgBP       from '../../assets/Brighterpathways.png'
+import bgS9       from '../../assets/Signal9.png'
+import bgApps     from '../../assets/Apps.png'
+import bgHome     from '../../assets/Household.png'
+import bgTravel   from '../../assets/Travel.png'
 
 // ─── CONSTANTS ───────────────────────────────────────────────────────────────
 
 export const LEDGER_KEY = 'ledger_v5'
 
 export const ENTITIES = {
-  bp:   { label: 'Brighter Pathways', short: 'BP',   color: '#8B5CF6', desc: 'Psychology practice & consulting' },
-  s9:   { label: 'Signal9 Studio',    short: 'S9',   color: '#3B82F6', desc: 'Fine art, prints & commissions' },
-  apps: { label: 'Signal9 Apps',      short: 'Apps', color: '#10B981', desc: 'Software, apps & digital products' },
-  home: { label: 'Household',         short: 'Home', color: '#94A3B8', desc: 'Personal & household expenses' },
+  bp:   { label: 'Brighter Pathways', short: 'BP',   color: '#8B5CF6', desc: 'Psychology practice & consulting', bg: bgBP },
+  s9:   { label: 'Signal9 Studio',    short: 'S9',   color: '#3B82F6', desc: 'Fine art, prints & commissions',   bg: bgS9 },
+  apps: { label: 'Signal9 Apps',      short: 'Apps', color: '#10B981', desc: 'Software, apps & digital products', bg: bgApps },
+  home: { label: 'Household',         short: 'Home', color: '#94A3B8', desc: 'Personal & household expenses',    bg: bgHome },
 }
 
 const DEFAULT_CATEGORIES = {
@@ -380,21 +385,28 @@ function HubView({ data, onNavigate }) {
           const count = data.transactions.filter(t => t.entity === key).length
           return (
             <button key={key} onClick={() => onNavigate(key)}
-              style={{ ...S.card(e.color), padding: '18px 16px', cursor: 'pointer', textAlign: 'left', animation: `phase-in 0.55s cubic-bezier(0.22,1,0.36,1) ${i * 0.06}s both`, display: 'block', width: '100%' }}>
-              <div style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.44rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: `${e.color}aa`, marginBottom: 6 }}>{e.short}</div>
-              <div style={{ fontFamily: '"Playfair Display", serif', fontStyle: 'italic', fontSize: '0.98rem', color: '#EDE8E0', marginBottom: 4, lineHeight: 1.2 }}>{e.label}</div>
-              <div style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.48rem', color: 'rgba(160,140,120,0.4)', marginBottom: 14 }}>{e.desc}</div>
-              <div style={{ borderTop: `0.5px solid ${e.color}20`, paddingTop: 10 }}>
-                {count > 0 ? (
-                  <>
-                    <div style={{ fontFamily: '"DM Mono", monospace', fontSize: '1rem', fontWeight: 700, color: net >= 0 ? '#10B981' : '#EF4444', fontVariantNumeric: 'tabular-nums' }}>{fmtAUD(Math.abs(net))}</div>
-                    <div style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.44rem', color: 'rgba(160,140,120,0.38)', marginTop: 2 }}>{net >= 0 ? 'net positive' : 'net negative'} · {count} records</div>
-                  </>
-                ) : (
-                  <div style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.48rem', color: `${e.color}60` }}>No records yet</div>
-                )}
+              style={{ position: 'relative', overflow: 'hidden', border: `0.5px solid ${e.color}35`, borderRadius: 16, clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%)', padding: '18px 16px', cursor: 'pointer', textAlign: 'left', animation: `phase-in 0.55s cubic-bezier(0.22,1,0.36,1) ${i * 0.06}s both`, display: 'block', width: '100%', background: '#0e0c0a', minHeight: 160 }}>
+              {/* Card background image */}
+              <div style={{ position: 'absolute', inset: 0, backgroundImage: `url(${e.bg})`, backgroundSize: 'cover', backgroundPosition: 'center', opacity: 0.22 }} />
+              {/* Card colour overlay */}
+              <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(135deg, ${e.color}22 0%, transparent 60%, rgba(8,7,6,0.6) 100%)` }} />
+              {/* Content */}
+              <div style={{ position: 'relative', zIndex: 1 }}>
+                <div style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.44rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: `${e.color}cc`, marginBottom: 6 }}>{e.short}</div>
+                <div style={{ fontFamily: '"Playfair Display", serif', fontStyle: 'italic', fontSize: '0.95rem', color: '#EDE8E0', marginBottom: 4, lineHeight: 1.2 }}>{e.label}</div>
+                <div style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.46rem', color: 'rgba(160,140,120,0.5)', marginBottom: 14, lineHeight: 1.4 }}>{e.desc}</div>
+                <div style={{ borderTop: `0.5px solid ${e.color}25`, paddingTop: 10 }}>
+                  {count > 0 ? (
+                    <>
+                      <div style={{ fontFamily: '"DM Mono", monospace', fontSize: '1rem', fontWeight: 700, color: net >= 0 ? '#10B981' : '#EF4444', fontVariantNumeric: 'tabular-nums' }}>{fmtAUD(Math.abs(net))}</div>
+                      <div style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.42rem', color: 'rgba(160,140,120,0.4)', marginTop: 2 }}>{net >= 0 ? 'net positive' : 'net negative'} · {count} records</div>
+                    </>
+                  ) : (
+                    <div style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.46rem', color: `${e.color}70` }}>No records yet</div>
+                  )}
+                </div>
               </div>
-              <div style={{ position: 'absolute', bottom: 14, right: 14, color: `${e.color}50` }}><ChevronRight size={16} /></div>
+              <ChevronRight size={15} style={{ position: 'absolute', bottom: 14, right: 14, color: `${e.color}60` }} />
             </button>
           )
         })}
@@ -402,16 +414,18 @@ function HubView({ data, onNavigate }) {
 
       {/* Travel card — full width */}
       <button onClick={() => onNavigate('travel')}
-        style={{ ...S.card('#F59E0B'), padding: '16px 18px', cursor: 'pointer', textAlign: 'left', display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', marginBottom: 20, animation: 'phase-in 0.55s cubic-bezier(0.22,1,0.36,1) 0.24s both' }}>
-        <div>
-          <div style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.44rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#F59E0Baa', marginBottom: 5 }}>Travel</div>
+        style={{ position: 'relative', overflow: 'hidden', border: '0.5px solid #F59E0B35', borderRadius: 16, clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%)', padding: '18px 20px', cursor: 'pointer', textAlign: 'left', display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', marginBottom: 20, animation: 'phase-in 0.55s cubic-bezier(0.22,1,0.36,1) 0.24s both', background: '#0e0c0a', minHeight: 80 }}>
+        <div style={{ position: 'absolute', inset: 0, backgroundImage: `url(${bgTravel})`, backgroundSize: 'cover', backgroundPosition: 'center', opacity: 0.2 }} />
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(90deg, rgba(8,7,6,0.3) 0%, rgba(8,7,6,0.7) 100%)' }} />
+        <div style={{ position: 'relative', zIndex: 1 }}>
+          <div style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.44rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#F59E0Bbb', marginBottom: 5 }}>Travel</div>
           <div style={{ fontFamily: '"Playfair Display", serif', fontStyle: 'italic', fontSize: '1rem', color: '#EDE8E0', marginBottom: 2 }}>Trips & Travel Expenses</div>
-          <div style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.48rem', color: 'rgba(160,140,120,0.4)' }}>Receipts, forex & tax claimables</div>
+          <div style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.46rem', color: 'rgba(160,140,120,0.5)' }}>Receipts, forex & tax claimables</div>
         </div>
-        <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4 }}>
-          <div style={{ fontFamily: '"DM Mono", monospace', fontSize: '1rem', fontWeight: 700, color: '#F59E0B' }}>{data.trips.length}</div>
-          <div style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.44rem', color: 'rgba(160,140,120,0.4)' }}>{data.trips.length === 1 ? 'trip' : 'trips'}</div>
-          <ChevronRight size={16} color="#F59E0B66" />
+        <div style={{ position: 'relative', zIndex: 1, textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 3 }}>
+          <div style={{ fontFamily: '"DM Mono", monospace', fontSize: '1.1rem', fontWeight: 700, color: '#F59E0B' }}>{data.trips.length}</div>
+          <div style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.44rem', color: 'rgba(160,140,120,0.45)' }}>{data.trips.length === 1 ? 'trip' : 'trips'}</div>
+          <ChevronRight size={15} color="#F59E0B70" />
         </div>
       </button>
 
@@ -951,38 +965,41 @@ export default function Ledger() {
   const meta = VIEW_META[view] || VIEW_META.hub
   const isHub = view === 'hub'
 
+  // Background image: hub uses architectural, entity views use their own
+  const viewBg = isHub ? bgHub : (ENTITIES[view]?.bg || bgHub)
+
   return (
     <div style={{ position: 'fixed', inset: 0, background: '#080706', overflowY: 'auto', fontFamily: '"DM Mono", monospace', color: '#EDE8E0' }}>
 
-      {/* Background art — very subtle */}
-      <div style={{ position: 'fixed', inset: 0, backgroundImage: `url(${bgImg})`, backgroundSize: 'cover', backgroundPosition: 'center top', opacity: 0.05, pointerEvents: 'none', zIndex: 0 }} />
-      {/* Gradient vignette */}
-      <div style={{ position: 'fixed', inset: 0, background: 'radial-gradient(ellipse at 30% 0%, rgba(196,82,42,0.06) 0%, transparent 60%)', pointerEvents: 'none', zIndex: 0 }} />
+      {/* Background art */}
+      <div style={{ position: 'fixed', inset: 0, backgroundImage: `url(${viewBg})`, backgroundSize: 'cover', backgroundPosition: 'center top', opacity: isHub ? 0.12 : 0.18, pointerEvents: 'none', zIndex: 0, transition: 'opacity 0.4s' }} />
+      {/* Dark overlay so text remains readable */}
+      <div style={{ position: 'fixed', inset: 0, background: 'linear-gradient(to bottom, rgba(8,7,6,0.55) 0%, rgba(8,7,6,0.82) 40%, rgba(8,7,6,0.97) 100%)', pointerEvents: 'none', zIndex: 0 }} />
 
-      {/* ── HEADER ── */}
-      <div style={{ position: 'sticky', top: 0, zIndex: 100, background: 'rgba(8,7,6,0.96)', backdropFilter: 'blur(16px)', borderBottom: `0.5px solid ${isHub ? 'rgba(196,82,42,0.18)' : meta.accent + '28'}` }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px' }}>
+      {/* ── HEADER — padded for iPhone notch / status bar ── */}
+      <div style={{ position: 'sticky', top: 0, zIndex: 100, background: 'rgba(8,7,6,0.94)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', borderBottom: `0.5px solid ${isHub ? 'rgba(196,82,42,0.2)' : meta.accent + '30'}` }}>
+        {/* Safe-area top spacer for iPhone notch */}
+        <div style={{ height: 'env(safe-area-inset-top, 0px)' }} />
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 16px' }}>
           <button
             onClick={() => isHub ? navigate('/dashboard') : setView('hub')}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(160,140,120,0.5)', padding: 4, display: 'flex', alignItems: 'center' }}>
-            <ArrowLeft size={20} />
+            style={{ background: 'rgba(255,255,255,0.06)', border: '0.5px solid rgba(255,255,255,0.1)', borderRadius: 10, cursor: 'pointer', color: 'rgba(200,180,160,0.8)', padding: '8px 10px', display: 'flex', alignItems: 'center', flexShrink: 0, minWidth: 44, minHeight: 44, justifyContent: 'center' }}>
+            <ArrowLeft size={18} />
           </button>
-          <div>
-            {!isHub && <div style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.4rem', letterSpacing: '0.22em', color: 'rgba(160,140,120,0.35)', textTransform: 'uppercase', marginBottom: 1 }}>Ledger</div>}
-            <div style={{ fontFamily: '"Playfair Display", serif', fontStyle: 'italic', fontWeight: 600, fontSize: '1.1rem', color: isHub ? '#EDE8E0' : meta.accent, textShadow: isHub ? 'none' : `0 0 20px ${meta.accent}40` }}>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            {!isHub && <div style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.4rem', letterSpacing: '0.22em', color: 'rgba(160,140,120,0.4)', textTransform: 'uppercase', marginBottom: 1 }}>Ledger</div>}
+            <div style={{ fontFamily: '"Playfair Display", serif', fontStyle: 'italic', fontWeight: 600, fontSize: '1.05rem', color: isHub ? '#EDE8E0' : meta.accent, textShadow: isHub ? 'none' : `0 0 20px ${meta.accent}50`, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               {meta.title}
             </div>
           </div>
-          <div style={{ flex: 1 }} />
-          <div style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.42rem', letterSpacing: '0.15em', color: 'rgba(160,140,120,0.3)', textTransform: 'uppercase' }}>{fyLabel(currentFY())}</div>
-          {/* Add transaction button on entity views */}
+          <div style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.4rem', letterSpacing: '0.12em', color: 'rgba(160,140,120,0.3)', textTransform: 'uppercase', flexShrink: 0 }}>{fyLabel(currentFY())}</div>
           {ENTITY_KEYS.includes(view) && (
-            <button onClick={() => setTxnModal({ entity: view })} style={{ ...S.chip(meta.accent), padding: '8px 14px' }}>
+            <button onClick={() => setTxnModal({ entity: view })} style={{ ...S.chip(meta.accent), padding: '8px 14px', flexShrink: 0, minHeight: 40 }}>
               <Plus size={13} />ADD
             </button>
           )}
           {view === 'travel' && (
-            <button onClick={() => setTxnModal(null) || setTripModal(true)} style={{ ...S.chip('#F59E0B'), padding: '8px 14px' }}>
+            <button onClick={() => setTripModal(true)} style={{ ...S.chip('#F59E0B'), padding: '8px 14px', flexShrink: 0, minHeight: 40 }}>
               <Plus size={13} />TRIP
             </button>
           )}
