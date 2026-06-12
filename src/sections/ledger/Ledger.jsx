@@ -1,6 +1,7 @@
 import { useState, useMemo, useCallback, useRef } from 'react'
 import HoloRings from '../../components/HoloRings'
 import FloatCard3D from '../../components/FloatCard3D'
+import LightningCanvas from '../../components/LightningCanvas'
 import { ArrowLeft, Plus, Trash2, Edit2, Download, Upload, X, RefreshCw, ChevronRight } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import {
@@ -1105,6 +1106,9 @@ export default function Ledger() {
 
       {/* Holographic foil overlay */}
       <div style={{ position: 'fixed', inset: 0, zIndex: 1, pointerEvents: 'none', background: 'linear-gradient(135deg, rgba(255,30,160,0.025) 0%, rgba(100,60,255,0.03) 25%, rgba(0,180,255,0.025) 50%, rgba(0,255,160,0.02) 75%, rgba(255,200,0,0.025) 100%)', backgroundSize: '400% 400%', animation: 'holo-border 12s ease infinite' }} />
+
+      {/* Lightning — accent colour shifts per entity view */}
+      <LightningCanvas color={accent} opacity={0.4} minDelay={2500} maxDelay={6000} zIndex={2} />
 
       {/* ── HEADER — padded for iPhone notch / status bar ── */}
       <div style={{ position: 'sticky', top: 0, zIndex: 100, background: 'rgba(8,7,6,0.94)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', borderBottom: `0.5px solid ${isHub ? 'rgba(196,82,42,0.2)' : meta.accent + '30'}` }}>

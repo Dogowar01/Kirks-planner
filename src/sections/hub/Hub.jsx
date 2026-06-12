@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import FloatCard3D from '../../components/FloatCard3D'
+import LightningCanvas from '../../components/LightningCanvas'
 import { useStore } from '../../hooks/useStore'
 import { format, startOfWeek, endOfWeek } from 'date-fns'
 import HoloRings from '../../components/HoloRings'
@@ -151,6 +152,10 @@ export default function Hub() {
 
   return (
     <div style={{ minHeight: '100vh', background: '#080706', position: 'relative', overflow: 'hidden' }}>
+
+      {/* Lightning */}
+      <LightningCanvas color="#C4522A" opacity={0.45} minDelay={2200} maxDelay={5500} zIndex={1} />
+      <LightningCanvas color="#00C8FF" opacity={0.28} minDelay={3500} maxDelay={7000} zIndex={1} />
 
       {/* Background rings — pulsating */}
       <div style={{ position: 'fixed', top: '35%', right: '-8%', pointerEvents: 'none', zIndex: 0 }}>
