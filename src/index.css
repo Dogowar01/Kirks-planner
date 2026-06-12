@@ -137,6 +137,34 @@
   85%            { transform: translateX(220%) skewX(-15deg); opacity: 0; }
 }
 
+/* Ledger convergence — four quadrants collapse to centre */
+@keyframes converge-top-left {
+  0%   { opacity: 0; transform: translate(-28px, -28px) scale(0.96); filter: blur(5px); }
+  55%  { filter: blur(0); }
+  100% { opacity: 1; transform: translate(0, 0) scale(1); filter: blur(0); }
+}
+@keyframes converge-top-right {
+  0%   { opacity: 0; transform: translate(28px, -28px) scale(0.96); filter: blur(5px); }
+  55%  { filter: blur(0); }
+  100% { opacity: 1; transform: translate(0, 0) scale(1); filter: blur(0); }
+}
+@keyframes converge-bottom-left {
+  0%   { opacity: 0; transform: translate(-28px, 28px) scale(0.96); filter: blur(5px); }
+  55%  { filter: blur(0); }
+  100% { opacity: 1; transform: translate(0, 0) scale(1); filter: blur(0); }
+}
+@keyframes converge-bottom-right {
+  0%   { opacity: 0; transform: translate(28px, 28px) scale(0.96); filter: blur(5px); }
+  55%  { filter: blur(0); }
+  100% { opacity: 1; transform: translate(0, 0) scale(1); filter: blur(0); }
+}
+/* Simple converge — edges inward, used as default */
+@keyframes converge-in {
+  0%   { opacity: 0; transform: scale(1.04); filter: blur(6px); }
+  50%  { filter: blur(0); }
+  100% { opacity: 1; transform: scale(1); filter: blur(0); }
+}
+
 @keyframes diagonal-march {
   0%   { background-position: 0 0; }
   100% { background-position: 60px 60px; }

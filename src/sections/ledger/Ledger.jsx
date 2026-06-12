@@ -1081,32 +1081,42 @@ export default function Ledger() {
       </div>
 
       {/* ── CONTENT ── */}
-      <div style={{ position: 'relative', zIndex: 1, padding: isHub ? 0 : 16, maxWidth: 860, margin: '0 auto' }}>
-        {isHub && <HubView data={data} onNavigate={setView} />}
-
-        {ENTITY_KEYS.includes(view) && (
-          <EntityView
-            entity={view}
-            data={data}
-            onAdd={(tx, entity) => setTxnModal({ edit: tx, entity: entity || view })}
-            onDelete={deleteTxn}
-          />
-        )}
-
-        {view === 'travel' && (
-          <TravelView
-            data={data}
-            onAddTrip={() => setTripModal(true)}
-            onDeleteTrip={deleteTrip}
-            onAddExpense={(tid) => setTravelModal({ tripId: tid })}
-            onDeleteExpense={deleteTravelExp}
-          />
-        )}
-
-        {view === 'reports'  && <ReportsView  data={data} />}
-        {view === 'tax'      && <TaxView      data={data} />}
-        {view === 'data'     && <DataView     data={data} onRestore={update} />}
-        {view === 'settings' && <SettingsView data={data} onUpdate={update} />}
+      {/* Convergence entrance: four quadrant layers slide inward from each corner */}
+      <div key={view} style={{ position: 'relative', zIndex: 1 }}>
+        {[
+          { anim: 'converge-top-left',     clip: 'polygon(0 0, 50% 0, 50% 50%, 0 50%)' },
+          { anim: 'converge-top-right',    clip: 'polygon(50% 0, 100% 0, 100% 50%, 50% 50%)' },
+          { anim: 'converge-bottom-left',  clip: 'polygon(0 50%, 50% 50%, 50% 100%, 0 100%)' },
+          { anim: 'converge-bottom-right', clip: 'polygon(50% 50%, 100% 50%, 100% 100%, 50% 100%)' },
+        ].map(({ anim, clip }, i) => (
+          <div key={anim} style={{
+            position: i === 0 ? 'relative' : 'absolute',
+            inset: 0,
+            animation: `${anim} 0.65s cubic-bezier(0.22,1,0.36,1) both`,
+            clipPath: clip,
+            WebkitClipPath: clip,
+          }}>
+            <div style={{ padding: isHub ? 0 : 16, maxWidth: 860, margin: '0 auto' }}>
+              {isHub && <HubView data={data} onNavigate={setView} />}
+              {ENTITY_KEYS.includes(view) && (
+                <EntityView entity={view} data={data}
+                  onAdd={(tx, entity) => setTxnModal({ edit: tx, entity: entity || view })}
+                  onDelete={deleteTxn} />
+              )}
+              {view === 'travel' && (
+                <TravelView data={data}
+                  onAddTrip={() => setTripModal(true)}
+                  onDeleteTrip={deleteTrip}
+                  onAddExpense={(tid) => setTravelModal({ tripId: tid })}
+                  onDeleteExpense={deleteTravelExp} />
+              )}
+              {view === 'reports'  && <ReportsView  data={data} />}
+              {view === 'tax'      && <TaxView      data={data} />}
+              {view === 'data'     && <DataView     data={data} onRestore={update} />}
+              {view === 'settings' && <SettingsView data={data} onUpdate={update} />}
+            </div>
+          </div>
+        ))}
       </div>
 
       {/* ── MODALS ── */}
