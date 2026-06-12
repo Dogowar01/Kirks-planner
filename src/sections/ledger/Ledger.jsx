@@ -360,6 +360,81 @@ function TxnTable({ txns, showEntity, onEdit, onDelete }) {
 
 // ─── HUB VIEW ────────────────────────────────────────────────────────────────
 
+// 3D floating card — tracks mouse position within the card for live perspective tilt
+function FloatCard3D({ color, children, onClick, style = {}, animDelay = 0 }) {
+  const ref = useRef(null)
+  const [tilt, setTilt] = useState({ x: 0, y: 0, hover: false })
+
+  const onMouseMove = (e) => {
+    const rect = ref.current.getBoundingClientRect()
+    const nx = (e.clientX - rect.left) / rect.width  * 2 - 1  // -1 → +1
+    const ny = (e.clientY - rect.top)  / rect.height * 2 - 1
+    setTilt({ x: ny * -10, y: nx * 12, hover: true })           // rotateX, rotateY degrees
+  }
+  const onMouseLeave = () => setTilt({ x: 0, y: 0, hover: false })
+
+  const depth = tilt.hover ? 24 : 10
+  const lift  = tilt.hover ? -14 : -5
+
+  return (
+    <button
+      ref={ref}
+      onClick={onClick}
+      onMouseMove={onMouseMove}
+      onMouseLeave={onMouseLeave}
+      onTouchStart={() => setTilt(t => ({ ...t, hover: true }))}
+      onTouchEnd={onMouseLeave}
+      style={{
+        ...style,
+        cursor: 'pointer',
+        border: 'none',
+        padding: 0,
+        background: 'none',
+        /* Perspective wrapper effect */
+        perspective: '700px',
+        /* Animated entrance */
+        animation: `phase-in 0.7s cubic-bezier(0.22,1,0.36,1) ${animDelay}s both`,
+        transition: 'filter 0.2s',
+        filter: tilt.hover ? `drop-shadow(0 0 18px ${color}55)` : 'none',
+      }}
+    >
+      <div style={{
+        position: 'relative',
+        width: '100%',
+        height: '100%',
+        transformStyle: 'preserve-3d',
+        transform: `perspective(700px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg) translateY(${lift}px)`,
+        transition: tilt.hover ? 'transform 0.08s ease-out' : 'transform 0.45s cubic-bezier(0.22,1,0.36,1)',
+        borderRadius: 16,
+        /* Multi-layer shadow creates physical depth illusion */
+        boxShadow: [
+          `0 ${depth}px ${depth * 2}px rgba(0,0,0,0.65)`,
+          `0 ${depth / 2}px ${depth}px rgba(0,0,0,0.45)`,
+          `0 2px 4px rgba(0,0,0,0.4)`,
+          `0 0 0 0.5px ${color}30`,
+          `inset 0 1px 0 ${color}25`,
+          `inset 0 -1px 0 rgba(0,0,0,0.4)`,
+        ].join(', '),
+      }}>
+        {/* Specular highlight — moves with tilt */}
+        <div style={{
+          position: 'absolute', inset: 0, borderRadius: 16, zIndex: 10, pointerEvents: 'none',
+          background: `radial-gradient(ellipse 60% 40% at ${50 + tilt.y * 2.5}% ${20 - tilt.x * 2}%, ${color}18 0%, transparent 70%)`,
+          transition: tilt.hover ? 'background 0.08s' : 'background 0.45s',
+        }} />
+        {/* Bottom edge thickness — simulates card depth */}
+        <div style={{
+          position: 'absolute', bottom: -4, left: 4, right: 4, height: 8,
+          borderRadius: '0 0 14px 14px', zIndex: -1,
+          background: `linear-gradient(to bottom, ${color}20, rgba(0,0,0,0.6))`,
+          filter: 'blur(3px)',
+        }} />
+        {children}
+      </div>
+    </button>
+  )
+}
+
 function HubView({ data, onNavigate }) {
   const fy = currentFY()
   const fyTxns = data.transactions.filter(t => getFY(t.date) === fy)
@@ -385,57 +460,61 @@ function HubView({ data, onNavigate }) {
       <div style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.44rem', letterSpacing: '0.22em', textTransform: 'uppercase', color: 'rgba(160,140,120,0.35)', marginBottom: 12 }}>Entities</div>
 
       {/* Entity cards grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
         {Object.entries(ENTITIES).map(([key, e], i) => {
           const inc = fyTxns.filter(t => t.entity === key && t.type === 'income').reduce((s, t) => s + t.amount, 0)
           const exp = fyTxns.filter(t => t.entity === key && t.type === 'expense').reduce((s, t) => s + t.amount, 0)
           const net = inc - exp
           const count = data.transactions.filter(t => t.entity === key).length
           return (
-            <button key={key} onClick={() => onNavigate(key)}
-              style={{ position: 'relative', overflow: 'hidden', border: `0.5px solid ${e.color}35`, borderRadius: 16, clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%)', padding: '18px 16px', cursor: 'pointer', textAlign: 'left', animation: `phase-in 0.55s cubic-bezier(0.22,1,0.36,1) ${i * 0.06}s both`, display: 'block', width: '100%', background: '#0e0c0a', minHeight: 160 }}>
-              {/* Card background image */}
-              <div style={{ position: 'absolute', inset: 0, backgroundImage: `url(${e.bg})`, backgroundSize: 'cover', backgroundPosition: 'center', opacity: 0.22 }} />
-              {/* Card colour overlay */}
-              <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(135deg, ${e.color}22 0%, transparent 60%, rgba(8,7,6,0.6) 100%)` }} />
-              {/* Content */}
-              <div style={{ position: 'relative', zIndex: 1 }}>
-                <div style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.44rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: `${e.color}cc`, marginBottom: 6 }}>{e.short}</div>
-                <div style={{ fontFamily: '"Playfair Display", serif', fontStyle: 'italic', fontSize: '0.95rem', color: '#EDE8E0', marginBottom: 4, lineHeight: 1.2 }}>{e.label}</div>
-                <div style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.46rem', color: 'rgba(160,140,120,0.5)', marginBottom: 14, lineHeight: 1.4 }}>{e.desc}</div>
-                <div style={{ borderTop: `0.5px solid ${e.color}25`, paddingTop: 10 }}>
-                  {count > 0 ? (
-                    <>
-                      <div style={{ fontFamily: '"DM Mono", monospace', fontSize: '1rem', fontWeight: 700, color: net >= 0 ? '#10B981' : '#EF4444', fontVariantNumeric: 'tabular-nums' }}>{fmtAUD(Math.abs(net))}</div>
-                      <div style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.42rem', color: 'rgba(160,140,120,0.4)', marginTop: 2 }}>{net >= 0 ? 'net positive' : 'net negative'} · {count} records</div>
-                    </>
-                  ) : (
-                    <div style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.46rem', color: `${e.color}70` }}>No records yet</div>
-                  )}
+            <FloatCard3D key={key} color={e.color} onClick={() => onNavigate(key)} animDelay={i * 0.07}
+              style={{ display: 'block', width: '100%', textAlign: 'left' }}>
+              <div style={{ position: 'relative', overflow: 'hidden', borderRadius: 16, background: '#0e0c0a', minHeight: 160, padding: '18px 16px' }}>
+                {/* Card background image */}
+                <div style={{ position: 'absolute', inset: 0, backgroundImage: `url(${e.bg})`, backgroundSize: 'cover', backgroundPosition: 'center', opacity: 0.25, borderRadius: 16 }} />
+                {/* Card colour overlay */}
+                <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(135deg, ${e.color}28 0%, transparent 60%, rgba(8,7,6,0.65) 100%)`, borderRadius: 16 }} />
+                {/* Content */}
+                <div style={{ position: 'relative', zIndex: 1 }}>
+                  <div style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.44rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: `${e.color}cc`, marginBottom: 6 }}>{e.short}</div>
+                  <div style={{ fontFamily: '"Playfair Display", serif', fontStyle: 'italic', fontSize: '0.95rem', color: '#EDE8E0', marginBottom: 4, lineHeight: 1.2 }}>{e.label}</div>
+                  <div style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.46rem', color: 'rgba(160,140,120,0.5)', marginBottom: 14, lineHeight: 1.4 }}>{e.desc}</div>
+                  <div style={{ borderTop: `0.5px solid ${e.color}25`, paddingTop: 10 }}>
+                    {count > 0 ? (
+                      <>
+                        <div style={{ fontFamily: '"DM Mono", monospace', fontSize: '1rem', fontWeight: 700, color: net >= 0 ? '#10B981' : '#EF4444', fontVariantNumeric: 'tabular-nums' }}>{fmtAUD(Math.abs(net))}</div>
+                        <div style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.42rem', color: 'rgba(160,140,120,0.4)', marginTop: 2 }}>{net >= 0 ? 'net positive' : 'net negative'} · {count} records</div>
+                      </>
+                    ) : (
+                      <div style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.46rem', color: `${e.color}70` }}>No records yet</div>
+                    )}
+                  </div>
                 </div>
+                <ChevronRight size={15} style={{ position: 'absolute', bottom: 14, right: 14, color: `${e.color}60` }} />
               </div>
-              <ChevronRight size={15} style={{ position: 'absolute', bottom: 14, right: 14, color: `${e.color}60` }} />
-            </button>
+            </FloatCard3D>
           )
         })}
       </div>
 
       {/* Travel card — full width */}
-      <button onClick={() => onNavigate('travel')}
-        style={{ position: 'relative', overflow: 'hidden', border: '0.5px solid #F59E0B35', borderRadius: 16, clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%)', padding: '18px 20px', cursor: 'pointer', textAlign: 'left', display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', marginBottom: 20, animation: 'phase-in 0.55s cubic-bezier(0.22,1,0.36,1) 0.24s both', background: '#0e0c0a', minHeight: 80 }}>
-        <div style={{ position: 'absolute', inset: 0, backgroundImage: `url(${bgTravel})`, backgroundSize: 'cover', backgroundPosition: 'center', opacity: 0.2 }} />
-        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(90deg, rgba(8,7,6,0.3) 0%, rgba(8,7,6,0.7) 100%)' }} />
-        <div style={{ position: 'relative', zIndex: 1 }}>
-          <div style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.44rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#F59E0Bbb', marginBottom: 5 }}>Travel</div>
-          <div style={{ fontFamily: '"Playfair Display", serif', fontStyle: 'italic', fontSize: '1rem', color: '#EDE8E0', marginBottom: 2 }}>Trips & Travel Expenses</div>
-          <div style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.46rem', color: 'rgba(160,140,120,0.5)' }}>Receipts, forex & tax claimables</div>
+      <FloatCard3D color="#F59E0B" onClick={() => onNavigate('travel')} animDelay={0.28}
+        style={{ display: 'block', width: '100%', textAlign: 'left', marginBottom: 20 }}>
+        <div style={{ position: 'relative', overflow: 'hidden', borderRadius: 16, background: '#0e0c0a', minHeight: 80, padding: '18px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ position: 'absolute', inset: 0, backgroundImage: `url(${bgTravel})`, backgroundSize: 'cover', backgroundPosition: 'center', opacity: 0.22, borderRadius: 16 }} />
+          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(90deg, rgba(8,7,6,0.3) 0%, rgba(8,7,6,0.7) 100%)', borderRadius: 16 }} />
+          <div style={{ position: 'relative', zIndex: 1 }}>
+            <div style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.44rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#F59E0Bbb', marginBottom: 5 }}>Travel</div>
+            <div style={{ fontFamily: '"Playfair Display", serif', fontStyle: 'italic', fontSize: '1rem', color: '#EDE8E0', marginBottom: 2 }}>Trips & Travel Expenses</div>
+            <div style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.46rem', color: 'rgba(160,140,120,0.5)' }}>Receipts, forex & tax claimables</div>
+          </div>
+          <div style={{ position: 'relative', zIndex: 1, textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 3 }}>
+            <div style={{ fontFamily: '"DM Mono", monospace', fontSize: '1.1rem', fontWeight: 700, color: '#F59E0B' }}>{data.trips.length}</div>
+            <div style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.44rem', color: 'rgba(160,140,120,0.45)' }}>{data.trips.length === 1 ? 'trip' : 'trips'}</div>
+            <ChevronRight size={15} color="#F59E0B70" />
+          </div>
         </div>
-        <div style={{ position: 'relative', zIndex: 1, textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 3 }}>
-          <div style={{ fontFamily: '"DM Mono", monospace', fontSize: '1.1rem', fontWeight: 700, color: '#F59E0B' }}>{data.trips.length}</div>
-          <div style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.44rem', color: 'rgba(160,140,120,0.45)' }}>{data.trips.length === 1 ? 'trip' : 'trips'}</div>
-          <ChevronRight size={15} color="#F59E0B70" />
-        </div>
-      </button>
+      </FloatCard3D>
 
       {/* Tools row */}
       <div style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.44rem', letterSpacing: '0.22em', textTransform: 'uppercase', color: 'rgba(160,140,120,0.35)', marginBottom: 12 }}>Tools</div>
