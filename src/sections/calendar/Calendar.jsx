@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, eachDayOfInterval, isSameMonth, isToday, parseISO, isSameDay, addMonths, subMonths, addDays } from 'date-fns'
+import { format, startOfMonth, startOfDay, endOfMonth, startOfWeek, endOfWeek, eachDayOfInterval, isSameMonth, isToday, parseISO, isSameDay, addMonths, subMonths, addDays } from 'date-fns'
 import { ChevronLeft, ChevronRight, Plus, Bell, Trash2, Search, MapPin, ExternalLink, Trash } from 'lucide-react'
 import { useStore } from '../../hooks/useStore'
 import { CATEGORIES } from '../../lib/constants'
@@ -363,7 +363,7 @@ export default function Calendar() {
   }
 
   const upcoming = [...events]
-    .filter(e => parseISO(e.date) >= startOfMonth(new Date()))
+    .filter(e => parseISO(e.date) >= startOfDay(new Date()))
     .sort((a,b) => a.date.localeCompare(b.date) || (a.time||'').localeCompare(b.time||''))
     .slice(0, 14)
 
