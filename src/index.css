@@ -44,6 +44,30 @@
   }
 }
 
+/* FAB orbit — comet circles the button */
+@keyframes fab-orbit {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* FAB energy ring — conic sweep rotating behind the button */
+@keyframes fab-ring-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(-360deg); }
+}
+
+/* FAB core breathing — subtle scale + brightness swell */
+@keyframes fab-core-breathe {
+  0%, 100% { transform: scale(1);    filter: brightness(1); }
+  50%      { transform: scale(1.06); filter: brightness(1.25); }
+}
+
+/* Comet head twinkle */
+@keyframes fab-comet-twinkle {
+  0%, 100% { opacity: 0.85; }
+  50%      { opacity: 1; }
+}
+
 @keyframes fab-sheet-up {
   from { transform: translateY(100%); opacity: 0; }
   to   { transform: translateY(0);    opacity: 1; }

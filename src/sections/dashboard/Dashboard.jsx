@@ -1075,28 +1075,59 @@ function QuickAddFAB() {
 
   return (
     <>
-      {/* Floating button */}
-      <button
-        onClick={() => setOpen(true)}
-        aria-label="Quick add"
-        style={{
-          position: 'fixed',
-          bottom: 'calc(env(safe-area-inset-bottom) + 88px)',
-          right: 22,
-          zIndex: 80,
-          width: 56, height: 56,
-          borderRadius: '50%',
-          background: `radial-gradient(circle at 35% 35%, rgba(216,170,255,0.18), rgba(192,132,252,0.92) 60%, rgba(140,60,220,0.95))`,
-          border: `1.5px solid rgba(216,170,255,0.55)`,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          cursor: 'pointer',
-          animation: 'fab-pulse 2.4s ease-in-out infinite',
-          touchAction: 'manipulation',
-          WebkitTapHighlightColor: 'transparent',
-        }}
-      >
-        <Plus size={26} color="#fff" strokeWidth={2.5} style={{ filter: 'drop-shadow(0 0 6px rgba(255,255,255,0.8))' }} />
-      </button>
+      {/* Floating button — orbital comet design */}
+      <div style={{
+        position: 'fixed',
+        bottom: 'calc(env(safe-area-inset-bottom) + 30px)',
+        right: 20,
+        zIndex: 80,
+        width: 68, height: 68,
+        pointerEvents: 'none',
+      }}>
+        {/* Rotating conic energy ring */}
+        <div style={{
+          position: 'absolute', inset: 0, borderRadius: '50%',
+          background: `conic-gradient(from 0deg, transparent 0%, ${PLUM}10 55%, ${PLUM}66 80%, rgba(232,200,255,0.95) 98%, transparent 100%)`,
+          animation: 'fab-ring-spin 3.2s linear infinite',
+          WebkitMask: 'radial-gradient(circle, transparent 58%, black 62%, black 78%, transparent 82%)',
+          mask: 'radial-gradient(circle, transparent 58%, black 62%, black 78%, transparent 82%)',
+        }} />
+
+        {/* Orbiting comet — head + glow, carried around by rotating arm */}
+        <div style={{
+          position: 'absolute', inset: 0,
+          animation: 'fab-orbit 3.2s linear infinite',
+        }}>
+          <div style={{
+            position: 'absolute', top: -1, left: '50%', marginLeft: -3,
+            width: 6, height: 6, borderRadius: '50%',
+            background: '#F0E2FF',
+            boxShadow: `0 0 6px #fff, 0 0 12px ${PLUM}, 0 0 22px ${PLUM}, 0 0 34px ${PLUM}88`,
+            animation: 'fab-comet-twinkle 0.9s ease-in-out infinite',
+          }} />
+        </div>
+
+        {/* Core button */}
+        <button
+          onClick={() => setOpen(true)}
+          aria-label="Quick add"
+          style={{
+            position: 'absolute', inset: 7,
+            borderRadius: '50%',
+            background: `radial-gradient(circle at 35% 35%, rgba(216,170,255,0.22), rgba(192,132,252,0.92) 60%, rgba(140,60,220,0.95))`,
+            border: `1.5px solid rgba(216,170,255,0.55)`,
+            boxShadow: `0 0 22px ${PLUM}66, 0 4px 20px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.3)`,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            cursor: 'pointer',
+            pointerEvents: 'auto',
+            animation: 'fab-core-breathe 3.2s ease-in-out infinite',
+            touchAction: 'manipulation',
+            WebkitTapHighlightColor: 'transparent',
+          }}
+        >
+          <Plus size={24} color="#fff" strokeWidth={2.5} style={{ filter: 'drop-shadow(0 0 6px rgba(255,255,255,0.8))' }} />
+        </button>
+      </div>
 
       {/* Bottom sheet */}
       {open && (
