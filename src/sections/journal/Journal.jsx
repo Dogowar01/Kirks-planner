@@ -5,7 +5,7 @@ import { useStore } from '../../hooks/useStore'
 import SectionShell from '../../components/SectionShell'
 import PageHeader from '../../components/PageHeader'
 import ConfirmDialog from '../../components/ConfirmDialog'
-import bgImg from '../../assets/art-vintage-woman.png'
+import bgImg from '../../assets/art-vintage-woman.webp'
 
 const MOODS = [
   { value: 1, emoji: '😔', label: 'Low',     color: '#6B7280' },

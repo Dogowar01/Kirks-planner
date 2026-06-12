@@ -4,7 +4,7 @@ import { Lock, Unlock, Plus, Eye, EyeOff, Copy, Check, Trash2, Pencil, X, Shield
 import { useVault, VAULT_TYPES } from '../../hooks/useVault'
 import SectionShell from '../../components/SectionShell'
 import ConfirmDialog from '../../components/ConfirmDialog'
-import bgImg from '../../assets/art-vintage-woman.png'
+import bgImg from '../../assets/art-vintage-woman.webp'
 
 // ─── Accent colours ─────────────────────────────────────────
 const PLUM = '#C084FC'

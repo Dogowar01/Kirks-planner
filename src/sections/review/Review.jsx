@@ -6,7 +6,7 @@ import SectionShell from '../../components/SectionShell'
 import PageHeader from '../../components/PageHeader'
 import Modal from '../../components/Modal'
 import ConfirmDialog from '../../components/ConfirmDialog'
-import bgImg from '../../assets/art-ethereal.png'
+import bgImg from '../../assets/art-ethereal.webp'
 
 const ACCENT = '#3EC88A'
 

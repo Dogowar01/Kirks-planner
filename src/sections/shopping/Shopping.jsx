@@ -4,7 +4,7 @@ import { useStore } from '../../hooks/useStore'
 import SectionShell from '../../components/SectionShell'
 import PageHeader from '../../components/PageHeader'
 import ConfirmDialog from '../../components/ConfirmDialog'
-import bgImg from '../../assets/art-abstract.png'
+import bgImg from '../../assets/art-abstract.webp'
 
 const ACCENT = '#F97316'
 

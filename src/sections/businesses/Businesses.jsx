@@ -5,7 +5,7 @@ import { useStore } from '../../hooks/useStore'
 import { BUSINESSES, STATUSES } from '../../lib/constants'
 import StatusBadge from '../../components/StatusBadge'
 import SectionShell from '../../components/SectionShell'
-import bgImg from '../../assets/art-architectural.png'
+import bgImg from '../../assets/art-architectural.webp'
 import Modal from '../../components/Modal'
 import ConfirmDialog from '../../components/ConfirmDialog'
 

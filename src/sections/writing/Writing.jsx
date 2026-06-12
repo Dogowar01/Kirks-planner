@@ -6,7 +6,7 @@ import SectionShell from '../../components/SectionShell'
 import PageHeader from '../../components/PageHeader'
 import Modal from '../../components/Modal'
 import ConfirmDialog from '../../components/ConfirmDialog'
-import bgImg from '../../assets/art-architectural.png'
+import bgImg from '../../assets/art-architectural.webp'
 
 const ACCENT = '#7C3AED'
 const today = () => format(new Date(), 'yyyy-MM-dd')

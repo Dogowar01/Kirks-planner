@@ -7,12 +7,12 @@ import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
   LineChart, Line, PieChart, Pie, Cell, CartesianGrid,
 } from 'recharts'
-import bgHub      from '../../assets/art-architectural.png'
-import bgBP       from '../../assets/Brighterpathways.png'
-import bgS9       from '../../assets/Signal9.png'
-import bgApps     from '../../assets/Apps.png'
-import bgHome     from '../../assets/Household.png'
-import bgTravel   from '../../assets/Travel.png'
+import bgHub      from '../../assets/art-architectural.webp'
+import bgBP       from '../../assets/Brighterpathways.webp'
+import bgS9       from '../../assets/Signal9.webp'
+import bgApps     from '../../assets/Apps.webp'
+import bgHome     from '../../assets/Household.webp'
+import bgTravel   from '../../assets/Travel.webp'
 
 // ─── CONSTANTS ───────────────────────────────────────────────────────────────
 

@@ -6,7 +6,7 @@ import SectionShell from '../../components/SectionShell'
 import PageHeader from '../../components/PageHeader'
 import Modal from '../../components/Modal'
 import ConfirmDialog from '../../components/ConfirmDialog'
-import bgImg from '../../assets/art-architectural.png'
+import bgImg from '../../assets/art-architectural.webp'
 
 const PALETTE = [
   '#C4522A', '#F09030', '#3EC88A', '#00C8FF', '#8B5CF6',

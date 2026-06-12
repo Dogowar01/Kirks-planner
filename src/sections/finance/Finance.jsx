@@ -6,7 +6,7 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 
 import { useStore } from '../../hooks/useStore'
 import Modal from '../../components/Modal'
 import SectionShell from '../../components/SectionShell'
-import bgImg from '../../assets/art-newyork.png'
+import bgImg from '../../assets/art-newyork.webp'
 import ConfirmDialog from '../../components/ConfirmDialog'
 
 const aud = (n) => Math.abs(n).toLocaleString('en-AU', { style: 'currency', currency: 'AUD', maximumFractionDigits: 0 })

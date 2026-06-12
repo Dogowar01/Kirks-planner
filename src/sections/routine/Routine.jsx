@@ -5,7 +5,7 @@ import { useStore } from '../../hooks/useStore'
 import SectionShell from '../../components/SectionShell'
 import PageHeader from '../../components/PageHeader'
 import Modal from '../../components/Modal'
-import bgImg from '../../assets/art-newyork.png'
+import bgImg from '../../assets/art-newyork.webp'
 
 const ACCENT = '#F5C842'
 const today = () => format(new Date(), 'yyyy-MM-dd')
