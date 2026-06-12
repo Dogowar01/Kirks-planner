@@ -40,12 +40,13 @@ export default function Ambient() {
   const navigate = useNavigate()
   const now = useAmbientClock()
   const weather = useAmbientWeather()
-  const [show, setShow] = useState(false)
-  const [ready, setReady] = useState(false)  // guards against iOS ghost-click on mount
+  const [show, setShow]       = useState(false)
+  const [clickable, setClickable] = useState(false)  // pointer-events off until ghost-click window closes
 
   useEffect(() => {
-    setTimeout(() => setShow(true), 100)
-    setTimeout(() => setReady(true), 420)   // activate tap-to-exit after ghost-click window
+    const t1 = setTimeout(() => setShow(true), 100)
+    const t2 = setTimeout(() => setClickable(true), 650)  // iOS ghost tap window is ~300ms, use 650 to be safe
+    return () => { clearTimeout(t1); clearTimeout(t2) }
   }, [])
 
   // Read pinned countdown
@@ -73,18 +74,20 @@ export default function Ambient() {
 
   return (
     <>
-      {/* Rain rendered as sibling — avoids opacity stacking-context trap */}
-      <RainCanvas color="#C4522A" opacity={0.5} intensity={2} windAngle={10} zIndex={9999} />
+      {/* Rain — sibling of the clock div so it isn't trapped by the opacity stacking context */}
+      <RainCanvas color="#C4522A" opacity={0.7} intensity={3} windAngle={10} zIndex={9999} />
 
-    <div
-      onClick={() => ready && navigate(-1)}
-      style={{
-        position: 'fixed', inset: 0, zIndex: 9998,
-        background: '#080706',
-        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-        cursor: ready ? 'pointer' : 'default', overflow: 'hidden',
-        opacity: show ? 1 : 0, transition: 'opacity 1s ease',
-      }}>
+      <div
+        onClick={() => navigate(-1)}
+        style={{
+          position: 'fixed', inset: 0, zIndex: 9998,
+          background: '#080706',
+          display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+          cursor: 'pointer', overflow: 'hidden',
+          opacity: show ? 1 : 0, transition: 'opacity 1s ease',
+          /* Block ALL pointer events until ghost-click window closes */
+          pointerEvents: clickable ? 'auto' : 'none',
+        }}>
 
       {/* Architectural grid */}
       <div style={{

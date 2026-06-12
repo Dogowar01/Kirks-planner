@@ -40,10 +40,10 @@ export default function FloatCard3D({ color, children, onClick, style = {}, anim
         border: 'none',
         padding: 0,
         background: 'none',
-        perspective: '700px',
+        /* No filter here — CSS filter blocks iOS click events on transformed children */
+        WebkitTapHighlightColor: 'transparent',
+        touchAction: 'manipulation',
         animation: `phase-in 0.7s cubic-bezier(0.22,1,0.36,1) ${animDelay}s both`,
-        transition: 'filter 0.2s',
-        filter: tilt.hover ? `drop-shadow(0 0 18px ${color}55)` : 'none',
       }}
     >
       <div style={{
@@ -54,6 +54,7 @@ export default function FloatCard3D({ color, children, onClick, style = {}, anim
         transform: `perspective(700px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg) translateY(${lift}px)`,
         transition: tilt.hover ? 'transform 0.08s ease-out' : 'transform 0.45s cubic-bezier(0.22,1,0.36,1)',
         borderRadius: 16,
+        /* Glow moved here — safe on the inner div, doesn't interfere with click target */
         boxShadow: [
           `0 ${depth}px ${depth * 2}px rgba(0,0,0,0.65)`,
           `0 ${depth / 2}px ${depth}px rgba(0,0,0,0.45)`,
@@ -61,7 +62,8 @@ export default function FloatCard3D({ color, children, onClick, style = {}, anim
           `0 0 0 0.5px ${color}30`,
           `inset 0 1px 0 ${color}25`,
           `inset 0 -1px 0 rgba(0,0,0,0.4)`,
-        ].join(', '),
+          tilt.hover ? `0 0 28px ${color}44` : '',
+        ].filter(Boolean).join(', '),
       }}>
         {/* Specular highlight — shifts with tilt */}
         <div style={{
