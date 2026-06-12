@@ -41,8 +41,12 @@ export default function Ambient() {
   const now = useAmbientClock()
   const weather = useAmbientWeather()
   const [show, setShow] = useState(false)
+  const [ready, setReady] = useState(false)  // guards against iOS ghost-click on mount
 
-  useEffect(() => { setTimeout(() => setShow(true), 100) }, [])
+  useEffect(() => {
+    setTimeout(() => setShow(true), 100)
+    setTimeout(() => setReady(true), 420)   // activate tap-to-exit after ghost-click window
+  }, [])
 
   // Read pinned countdown
   const pinned = (() => {
@@ -68,18 +72,19 @@ export default function Ambient() {
   const wIcon   = weather ? (WMO_ICONS[weather.code] || '—') : null
 
   return (
+    <>
+      {/* Rain rendered as sibling — avoids opacity stacking-context trap */}
+      <RainCanvas color="#C4522A" opacity={0.5} intensity={2} windAngle={10} zIndex={9999} />
+
     <div
-      onClick={() => navigate(-1)}
+      onClick={() => ready && navigate(-1)}
       style={{
         position: 'fixed', inset: 0, zIndex: 9998,
         background: '#080706',
         display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-        cursor: 'pointer', overflow: 'hidden',
+        cursor: ready ? 'pointer' : 'default', overflow: 'hidden',
         opacity: show ? 1 : 0, transition: 'opacity 1s ease',
       }}>
-
-      {/* Rain */}
-      <RainCanvas color="#C4522A" opacity={0.5} intensity={2} windAngle={10} zIndex={1} />
 
       {/* Architectural grid */}
       <div style={{
@@ -171,5 +176,6 @@ export default function Ambient() {
         background: 'linear-gradient(90deg, transparent, rgba(196,82,42,0.6), transparent)',
       }} />
     </div>
+    </>
   )
 }
