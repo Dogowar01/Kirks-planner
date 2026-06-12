@@ -1,4 +1,5 @@
 import { useState, useMemo, useCallback, useRef } from 'react'
+import HoloRings from '../../components/HoloRings'
 import { ArrowLeft, Plus, Trash2, Edit2, Download, Upload, X, RefreshCw, ChevronRight } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import {
@@ -1042,13 +1043,63 @@ export default function Ledger() {
   // Background image: hub uses architectural, entity views use their own
   const viewBg = isHub ? bgHub : (ENTITIES[view]?.bg || bgHub)
 
+  const accent = meta.accent
+
   return (
-    <div style={{ position: 'fixed', inset: 0, background: '#080706', overflowY: 'auto', fontFamily: '"DM Mono", monospace', color: '#EDE8E0' }}>
+    <div style={{ position: 'fixed', inset: 0, background: '#0D0C0B', overflowY: 'auto', fontFamily: '"DM Mono", monospace', color: '#EDE8E0', '--sa': accent, '--section-accent': accent }}>
 
       {/* Background art */}
-      <div style={{ position: 'fixed', inset: 0, backgroundImage: `url(${viewBg})`, backgroundSize: 'cover', backgroundPosition: 'center top', opacity: isHub ? 0.12 : 0.18, pointerEvents: 'none', zIndex: 0, transition: 'opacity 0.4s' }} />
-      {/* Dark overlay so text remains readable */}
-      <div style={{ position: 'fixed', inset: 0, background: 'linear-gradient(to bottom, rgba(8,7,6,0.55) 0%, rgba(8,7,6,0.82) 40%, rgba(8,7,6,0.97) 100%)', pointerEvents: 'none', zIndex: 0 }} />
+      <div style={{ position: 'fixed', inset: 0, backgroundImage: `url(${viewBg})`, backgroundSize: 'cover', backgroundPosition: 'center top', opacity: isHub ? 0.14 : 0.20, pointerEvents: 'none', zIndex: 0, transition: 'opacity 0.5s' }} />
+      {/* Dark gradient overlay */}
+      <div style={{ position: 'fixed', inset: 0, background: 'linear-gradient(to bottom, rgba(13,12,11,0.55) 0%, rgba(13,12,11,0.72) 35%, rgba(13,12,11,0.93) 75%, rgba(13,12,11,0.99) 100%)', pointerEvents: 'none', zIndex: 0 }} />
+
+      {/* Architectural grid */}
+      <div style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none', backgroundImage: `linear-gradient(${accent} 1px, transparent 1px), linear-gradient(90deg, ${accent} 1px, transparent 1px)`, backgroundSize: '40px 40px', opacity: 0.055 }} />
+
+      {/* Primary atmospheric colour wash — top bloom */}
+      <div style={{ position: 'fixed', inset: 0, zIndex: 1, pointerEvents: 'none', background: [
+        `radial-gradient(ellipse 120% 60% at 50% -8%, ${accent}65 0%, ${accent}28 40%, transparent 68%)`,
+        `radial-gradient(ellipse 70% 40% at -5% 30%, ${accent}35 0%, transparent 65%)`,
+        `radial-gradient(ellipse 70% 40% at 105% 25%, ${accent}30 0%, transparent 65%)`,
+      ].join(', ') }} />
+
+      {/* Atmospheric orbs */}
+      <div style={{ position: 'fixed', inset: 0, zIndex: 1, pointerEvents: 'none', overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', top: '-10%', right: '-8%', width: '55vw', height: '55vw', maxWidth: 480, maxHeight: 480, background: `radial-gradient(circle, ${accent}40 0%, ${accent}18 40%, transparent 70%)`, borderRadius: '50%', filter: 'blur(40px)', animation: 'orb-drift 18s ease-in-out infinite' }} />
+        <div style={{ position: 'absolute', bottom: '5%', left: '-12%', width: '50vw', height: '50vw', maxWidth: 420, maxHeight: 420, background: 'radial-gradient(circle, rgba(120,60,220,0.32) 0%, rgba(80,20,180,0.14) 45%, transparent 70%)', borderRadius: '50%', filter: 'blur(48px)', animation: 'orb-drift 24s ease-in-out infinite 4s' }} />
+        <div style={{ position: 'absolute', top: '45%', right: '-5%', width: '30vw', height: '30vw', maxWidth: 280, maxHeight: 280, background: 'radial-gradient(circle, rgba(0,200,255,0.18) 0%, transparent 70%)', borderRadius: '50%', filter: 'blur(32px)', animation: 'orb-drift 14s ease-in-out infinite 8s' }} />
+      </div>
+
+      {/* Power bar sweep */}
+      <div style={{ position: 'relative', zIndex: 2, height: 3, overflow: 'visible' }}>
+        <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', background: `linear-gradient(90deg, ${accent} 0%, ${accent}ee 25%, ${accent}88 60%, transparent 100%)`, boxShadow: `0 0 24px 2px ${accent}bb, 0 0 6px ${accent}, 0 2px 16px ${accent}55`, transformOrigin: 'left', animation: 'power-bar-sweep 1.0s cubic-bezier(0.22,1,0.36,1) both' }} />
+        {[12, 28, 52].map((pct, i) => (
+          <div key={i} style={{ position: 'absolute', left: `${pct}%`, top: -3, width: 1, height: 7, background: `linear-gradient(to bottom, ${accent}${['ff','aa','66'][i]}, transparent)` }} />
+        ))}
+      </div>
+
+      {/* Corner brackets */}
+      {[['top','left'],['top','right']].map(([v, h]) => (
+        <div key={v+h} style={{ position: 'fixed', [v]: 14, [h]: 14, width: 14, height: 14, zIndex: 2, pointerEvents: 'none', animation: 'corner-blink 4s ease-in-out infinite', animationDelay: h === 'right' ? '2s' : '0s' }}>
+          <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 1, background: `${accent}80` }} />
+          <div style={{ position: 'absolute', top: 0, bottom: 0, [h]: 0, width: 1, background: `${accent}80` }} />
+        </div>
+      ))}
+
+      {/* HoloRings */}
+      <div style={{ position: 'fixed', inset: 0, zIndex: 2, pointerEvents: 'none', overflow: 'hidden' }}>
+        <HoloRings size={340} color={accent} style={{ position: 'absolute', bottom: -100, left: -100, opacity: 0.52 }} />
+        <HoloRings size={240} color="#00C8FF" style={{ position: 'absolute', top: -65, right: -65, opacity: 0.42 }} />
+        <HoloRings size={170} color="#A040E0" style={{ position: 'absolute', top: '38%', left: -60, opacity: 0.36 }} />
+      </div>
+
+      {/* Prismatic scan line */}
+      <div style={{ position: 'fixed', inset: 0, zIndex: 3, pointerEvents: 'none', overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', left: 0, right: 0, height: 2, background: `linear-gradient(90deg, transparent 0%, ${accent}44 10%, ${accent}cc 30%, ${accent} 50%, ${accent}cc 70%, ${accent}44 90%, transparent 100%)`, boxShadow: `0 0 12px ${accent}88, 0 0 24px ${accent}44`, filter: 'blur(0.5px)', animation: 'prismatic-scan 2.4s cubic-bezier(0.4,0,0.6,1) 1 forwards' }} />
+      </div>
+
+      {/* Holographic foil overlay */}
+      <div style={{ position: 'fixed', inset: 0, zIndex: 1, pointerEvents: 'none', background: 'linear-gradient(135deg, rgba(255,30,160,0.025) 0%, rgba(100,60,255,0.03) 25%, rgba(0,180,255,0.025) 50%, rgba(0,255,160,0.02) 75%, rgba(255,200,0,0.025) 100%)', backgroundSize: '400% 400%', animation: 'holo-border 12s ease infinite' }} />
 
       {/* ── HEADER — padded for iPhone notch / status bar ── */}
       <div style={{ position: 'sticky', top: 0, zIndex: 100, background: 'rgba(8,7,6,0.94)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', borderBottom: `0.5px solid ${isHub ? 'rgba(196,82,42,0.2)' : meta.accent + '30'}` }}>
@@ -1092,7 +1143,7 @@ export default function Ledger() {
           <div key={anim} style={{
             position: i === 0 ? 'relative' : 'absolute',
             inset: 0,
-            animation: `${anim} 0.65s cubic-bezier(0.22,1,0.36,1) both`,
+            animation: `${anim} 1.1s cubic-bezier(0.22,1,0.36,1) both`,
             clipPath: clip,
             WebkitClipPath: clip,
           }}>

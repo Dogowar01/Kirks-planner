@@ -139,29 +139,33 @@
 
 /* Ledger convergence — four quadrants collapse to centre */
 @keyframes converge-top-left {
-  0%   { opacity: 0; transform: translate(-28px, -28px) scale(0.96); filter: blur(5px); }
-  55%  { filter: blur(0); }
+  0%   { opacity: 0; transform: translate(-36px, -36px) scale(0.95); filter: blur(8px); }
+  40%  { opacity: 0.6; }
+  70%  { filter: blur(0); }
   100% { opacity: 1; transform: translate(0, 0) scale(1); filter: blur(0); }
 }
 @keyframes converge-top-right {
-  0%   { opacity: 0; transform: translate(28px, -28px) scale(0.96); filter: blur(5px); }
-  55%  { filter: blur(0); }
+  0%   { opacity: 0; transform: translate(36px, -36px) scale(0.95); filter: blur(8px); }
+  40%  { opacity: 0.6; }
+  70%  { filter: blur(0); }
   100% { opacity: 1; transform: translate(0, 0) scale(1); filter: blur(0); }
 }
 @keyframes converge-bottom-left {
-  0%   { opacity: 0; transform: translate(-28px, 28px) scale(0.96); filter: blur(5px); }
-  55%  { filter: blur(0); }
+  0%   { opacity: 0; transform: translate(-36px, 36px) scale(0.95); filter: blur(8px); }
+  40%  { opacity: 0.6; }
+  70%  { filter: blur(0); }
   100% { opacity: 1; transform: translate(0, 0) scale(1); filter: blur(0); }
 }
 @keyframes converge-bottom-right {
-  0%   { opacity: 0; transform: translate(28px, 28px) scale(0.96); filter: blur(5px); }
-  55%  { filter: blur(0); }
+  0%   { opacity: 0; transform: translate(36px, 36px) scale(0.95); filter: blur(8px); }
+  40%  { opacity: 0.6; }
+  70%  { filter: blur(0); }
   100% { opacity: 1; transform: translate(0, 0) scale(1); filter: blur(0); }
 }
 /* Simple converge — edges inward, used as default */
 @keyframes converge-in {
   0%   { opacity: 0; transform: scale(1.04); filter: blur(6px); }
-  50%  { filter: blur(0); }
+  60%  { filter: blur(0); }
   100% { opacity: 1; transform: scale(1); filter: blur(0); }
 }
 
