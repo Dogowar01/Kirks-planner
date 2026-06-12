@@ -328,22 +328,29 @@ function TxnTable({ txns, showEntity, onEdit, onDelete }) {
           </tr>
         </thead>
         <tbody>
-          {txns.map(t => (
-            <tr key={t.id} style={{ borderBottom: '0.5px solid rgba(255,255,255,0.04)' }}>
-              <td style={{ padding: '9px 10px', color: 'rgba(160,140,120,0.5)', whiteSpace: 'nowrap', fontFamily: '"DM Mono", monospace' }}>{t.date}</td>
-              {showEntity && <td style={{ padding: '9px 10px' }}><EBadge entity={t.entity} /></td>}
-              <td style={{ padding: '9px 10px' }}><TBadge type={t.type} /></td>
-              <td style={{ padding: '9px 10px', color: 'rgba(200,185,165,0.6)', fontFamily: '"DM Mono", monospace' }}>{t.category}</td>
-              <td style={{ padding: '9px 10px', color: '#EDE8E0', fontFamily: '"DM Mono", monospace' }}>{t.description}</td>
-              <td style={{ padding: '9px 10px', fontWeight: 700, color: t.type === 'income' ? '#10B981' : '#EF4444', whiteSpace: 'nowrap', fontVariantNumeric: 'tabular-nums', textAlign: 'right', fontFamily: '"DM Mono", monospace' }}>
-                {t.type === 'income' ? '+' : '-'}{fmtAUDExact(t.amount)}
-              </td>
-              <td style={{ padding: '9px 4px', whiteSpace: 'nowrap' }}>
-                {onEdit && <button onClick={() => onEdit(t)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(160,140,120,0.3)', padding: '2px 5px' }}><Edit2 size={11} /></button>}
-                {onDelete && <button onClick={() => onDelete(t.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,77,106,0.3)', padding: '2px 5px' }}><Trash2 size={11} /></button>}
-              </td>
-            </tr>
-          ))}
+          {txns.map(t => {
+            const isFuel = t._source === 'fuel'
+            return (
+              <tr key={t.id} style={{ borderBottom: '0.5px solid rgba(255,255,255,0.04)', opacity: isFuel ? 0.8 : 1 }}>
+                <td style={{ padding: '9px 10px', color: 'rgba(160,140,120,0.5)', whiteSpace: 'nowrap', fontFamily: '"DM Mono", monospace' }}>{t.date}</td>
+                {showEntity && <td style={{ padding: '9px 10px' }}><EBadge entity={t.entity} /></td>}
+                <td style={{ padding: '9px 10px' }}><TBadge type={t.type} /></td>
+                <td style={{ padding: '9px 10px', fontFamily: '"DM Mono", monospace' }}>
+                  <span style={{ color: 'rgba(200,185,165,0.6)' }}>{t.category}</span>
+                  {isFuel && <span style={{ marginLeft: 5, fontSize: '0.9em' }}>⛽</span>}
+                </td>
+                <td style={{ padding: '9px 10px', color: '#EDE8E0', fontFamily: '"DM Mono", monospace' }}>{t.description}</td>
+                <td style={{ padding: '9px 10px', fontWeight: 700, color: t.type === 'income' ? '#10B981' : '#EF4444', whiteSpace: 'nowrap', fontVariantNumeric: 'tabular-nums', textAlign: 'right', fontFamily: '"DM Mono", monospace' }}>
+                  {t.type === 'income' ? '+' : '-'}{fmtAUDExact(t.amount)}
+                </td>
+                <td style={{ padding: '9px 4px', whiteSpace: 'nowrap' }}>
+                  {!isFuel && onEdit   && <button onClick={() => onEdit(t)}    style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(160,140,120,0.3)', padding: '2px 5px' }}><Edit2 size={11} /></button>}
+                  {!isFuel && onDelete && <button onClick={() => onDelete(t.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,77,106,0.3)', padding: '2px 5px' }}><Trash2 size={11} /></button>}
+                  {isFuel && <span style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.4rem', color: 'rgba(160,140,120,0.3)', padding: '2px 6px' }}>FUEL</span>}
+                </td>
+              </tr>
+            )
+          })}
         </tbody>
       </table>
     </div>
@@ -445,6 +452,41 @@ function HubView({ data, onNavigate }) {
   )
 }
 
+// ─── FUEL BRIDGE ─────────────────────────────────────────────────────────────
+// Read fuel entries and present them as virtual ledger transactions.
+// They are never copied into ledger_v5 — fuel store stays the source of truth.
+
+function loadFuelAsVirtual() {
+  try {
+    const raw = localStorage.getItem('agenda-fuel-v1')
+    if (!raw) return []
+    return JSON.parse(raw).map(f => ({
+      id: 'fuel_' + f.id,
+      date: f.date,
+      entity: 'home',
+      type: 'expense',
+      category: 'Fuel',
+      description: f.notes ? `Fuel — ${f.notes}` : `Fuel (${f.paymentMethod || ''})`,
+      amount: f.cost || 0,
+      gst: 'yes',
+      notes: f.litres ? `${f.litres}L` : '',
+      _source: 'fuel',
+      _fuelId: f.id,
+    }))
+  } catch { return [] }
+}
+
+// Write a new fuel entry from the ledger side (Household › Fuel category)
+function addFuelEntry({ date, cost, notes }) {
+  try {
+    const raw = localStorage.getItem('agenda-fuel-v1')
+    const entries = raw ? JSON.parse(raw) : []
+    const newEntry = { id: Date.now().toString(), date, cost, litres: 0, paymentMethod: 'living', notes: notes || '', createdAt: new Date().toISOString() }
+    const updated = [newEntry, ...entries].sort((a, b) => b.date.localeCompare(a.date))
+    localStorage.setItem('agenda-fuel-v1', JSON.stringify(updated))
+  } catch {}
+}
+
 // ─── ENTITY VIEW ─────────────────────────────────────────────────────────────
 
 function EntityView({ entity, data, onAdd, onDelete }) {
@@ -453,26 +495,37 @@ function EntityView({ entity, data, onAdd, onDelete }) {
   const [search, setSearch] = useState('')
   const e = ENTITIES[entity]
 
+  // For Household: merge virtual fuel entries
+  const fuelVirtual = useMemo(() => entity === 'home' ? loadFuelAsVirtual() : [], [entity])
+
+  const allTxns = useMemo(() => {
+    const ledger = data.transactions.filter(t => t.entity === entity)
+    if (entity !== 'home') return ledger
+    // Exclude any ledger transactions that shadow a fuel entry (category=Fuel, source=fuel)
+    const fuelIds = new Set(fuelVirtual.map(f => f._fuelId))
+    const nonFuel = ledger.filter(t => !(t.category === 'Fuel' && t._source === 'fuel'))
+    return [...nonFuel, ...fuelVirtual]
+  }, [data, entity, fuelVirtual])
+
   const allFYs = useMemo(() =>
-    [...new Set(data.transactions.filter(t => t.entity === entity).map(t => getFY(t.date)))].sort((a, b) => b - a)
-  , [data, entity])
+    [...new Set(allTxns.map(t => getFY(t.date)))].sort((a, b) => b - a)
+  , [allTxns])
 
   const txns = useMemo(() => {
-    let t = data.transactions.filter(t => t.entity === entity)
+    let t = allTxns
     if (typeF !== 'all') t = t.filter(x => x.type === typeF)
     if (fyF  !== 'all') t = t.filter(x => getFY(x.date) === parseInt(fyF))
     if (search) t = t.filter(x => (x.description + x.category + (x.notes || '')).toLowerCase().includes(search.toLowerCase()))
     return t.sort((a, b) => b.date.localeCompare(a.date))
-  }, [data, entity, typeF, fyF, search])
+  }, [allTxns, typeF, fyF, search])
 
   const income  = txns.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0)
   const expense = txns.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0)
   const net = income - expense
 
   const monthData = useMemo(() => {
-    const all = data.transactions.filter(t => t.entity === entity)
     const months = {}
-    all.forEach(t => {
+    allTxns.forEach(t => {
       const m = t.date.slice(0, 7)
       if (!months[m]) months[m] = { m, income: 0, expense: 0 }
       if (t.type === 'income')  months[m].income  += t.amount
@@ -480,7 +533,9 @@ function EntityView({ entity, data, onAdd, onDelete }) {
     })
     const MO = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
     return Object.values(months).sort((a, b) => a.m.localeCompare(b.m)).slice(-6).map(m => ({ ...m, label: MO[parseInt(m.m.slice(5))-1] }))
-  }, [data, entity])
+  }, [allTxns])
+
+  const fuelCount = fuelVirtual.length
 
   return (
     <div style={{ paddingBottom: 60 }}>
@@ -490,6 +545,16 @@ function EntityView({ entity, data, onAdd, onDelete }) {
         <MetricCard label="Expenses" value={fmtAUD(expense)} color="#EF4444" />
         <MetricCard label="Net"      value={fmtAUD(net)}     color={net >= 0 ? '#10B981' : '#EF4444'} />
       </div>
+
+      {/* Fuel sync notice for Household */}
+      {entity === 'home' && fuelCount > 0 && (
+        <div style={{ ...S.surface, padding: '10px 14px', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 10, border: '0.5px solid rgba(251,191,36,0.2)' }}>
+          <span style={{ fontSize: '1rem' }}>⛽</span>
+          <span style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.52rem', color: 'rgba(251,191,36,0.7)' }}>
+            {fuelCount} fuel fill-up{fuelCount !== 1 ? 's' : ''} synced from Fuel Tracker — shown read-only below
+          </span>
+        </div>
+      )}
 
       {/* Mini chart */}
       {monthData.length > 1 && (
@@ -509,19 +574,23 @@ function EntityView({ entity, data, onAdd, onDelete }) {
 
       {/* Filter bar */}
       <div style={{ ...S.surface, padding: '10px 12px', marginBottom: 12, display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-        <select style={{ ...S.input, width: 'auto', flex: 1, minWidth: 100 }} value={typeF} onChange={e => setTypeF(e.target.value)}>
+        <select style={{ ...S.input, width: 'auto', flex: 1, minWidth: 100 }} value={typeF} onChange={ev => setTypeF(ev.target.value)}>
           <option value="all">All types</option><option value="income">Income</option><option value="expense">Expense</option>
         </select>
-        <select style={{ ...S.input, width: 'auto', flex: 1, minWidth: 100 }} value={fyF} onChange={e => setFyF(e.target.value)}>
+        <select style={{ ...S.input, width: 'auto', flex: 1, minWidth: 100 }} value={fyF} onChange={ev => setFyF(ev.target.value)}>
           <option value="all">All years</option>
           {allFYs.map(fy => <option key={fy} value={fy}>{fyLabel(fy)}</option>)}
         </select>
-        <input style={{ ...S.input, flex: 2, minWidth: 110 }} value={search} onChange={e => setSearch(e.target.value)} placeholder="Search…" />
+        <input style={{ ...S.input, flex: 2, minWidth: 110 }} value={search} onChange={ev => setSearch(ev.target.value)} placeholder="Search…" />
       </div>
 
-      {/* Table */}
+      {/* Table — fuel rows are read-only (no edit/delete) */}
       <div style={{ ...S.surface, overflow: 'hidden' }}>
-        <TxnTable txns={txns} onEdit={t => onAdd(t, entity)} onDelete={onDelete} />
+        <TxnTable
+          txns={txns}
+          onEdit={t => !t._source && onAdd(t, entity)}
+          onDelete={id => onDelete(id)}
+        />
       </div>
     </div>
   )
@@ -951,7 +1020,12 @@ export default function Ledger() {
     const txns = data.transactions.find(t => t.id === tx.id)
       ? data.transactions.map(t => t.id === tx.id ? tx : t)
       : [...data.transactions, tx]
-    update({ ...data, transactions: txns }); setTxnModal(null)
+    update({ ...data, transactions: txns })
+    // Mirror to fuel tracker if this is a Household fuel expense
+    if (tx.entity === 'home' && tx.category === 'Fuel' && tx.type === 'expense' && !tx._source) {
+      addFuelEntry({ date: tx.date, cost: tx.amount, notes: tx.description || tx.notes || '' })
+    }
+    setTxnModal(null)
   }
   const deleteTxn = (id) => setConfirm({ message: 'Delete this transaction?', onConfirm: () => { update({ ...data, transactions: data.transactions.filter(t => t.id !== id) }); setConfirm(null) } })
   const saveTrip = (trip) => { update({ ...data, trips: [...data.trips, trip] }); setTripModal(false) }
