@@ -124,11 +124,11 @@ export default function LightningCanvas({
 
       // Flash frames: [mainAlpha, branchAlpha, lineWidth, glowBlur, whiteCoreAlpha, delay]
       const seq = [
-        [opacity,        opacity * 0.6,  2.2, 38, 0.9,  0  ],
-        [opacity * 0.85, opacity * 0.5,  1.6, 26, 0.65, 55 ],
-        [opacity * 0.55, opacity * 0.3,  1.1, 16, 0.35, 90 ],
-        [opacity * 0.25, opacity * 0.12, 0.7,  8, 0.1, 130 ],
-        [0,              0,              0,    0, 0,   180 ],
+        [opacity,        opacity * 0.65, 2.4, 42, 1.0,  0  ],
+        [opacity * 0.88, opacity * 0.52, 1.8, 28, 0.82, 55 ],
+        [opacity * 0.58, opacity * 0.32, 1.2, 18, 0.48, 90 ],
+        [opacity * 0.28, opacity * 0.14, 0.8,  9, 0.18, 130],
+        [0,              0,              0,    0, 0,    180],
       ]
 
       let frameIdx = 0
@@ -136,7 +136,6 @@ export default function LightningCanvas({
         if (frameIdx >= seq.length) {
           ctx.clearRect(0, 0, w, h)
           if (doubleStrike && Math.random() < 0.45) {
-            // Same bolt re-lights briefly ~200ms later
             timerB = setTimeout(() => strike(false), 180 + Math.random() * 120)
           } else {
             schedule()
@@ -148,12 +147,16 @@ export default function LightningCanvas({
 
         ctx.clearRect(0, 0, w, h)
         // Wide outer glow
-        drawSegments(all,    ma,  lw + 2.5, blur * 1.4)
-        // Tighter inner glow
-        drawSegments(main,   ma,  lw + 0.8, blur * 0.7)
-        drawSegments(branches, ba, lw * 0.6, blur * 0.5)
-        // Bright white hot core
-        drawWhiteCore(main, wc * opacity, lw * 0.45)
+        drawSegments(all,      ma,  lw + 3,   blur * 1.5)
+        // Mid glow — coloured, tighter
+        drawSegments(main,     ma,  lw + 1.2, blur * 0.75)
+        drawSegments(branches, ba,  lw * 0.7, blur * 0.5)
+        // Intense centre glow — second coloured pass with high blur right on the core
+        drawSegments(main,     ma * 0.9, lw * 0.9, blur * 0.4)
+        // White-hot core — brighter and thicker
+        drawWhiteCore(main, wc, lw * 0.7)
+        // Extra ultra-thin pure white filament down the very centre
+        drawWhiteCore(main, wc * 0.75, lw * 0.25)
 
         timerA = setTimeout(() => { rafId = requestAnimationFrame(nextFrame) }, delay)
       }
