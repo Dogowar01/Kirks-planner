@@ -502,14 +502,14 @@ function EntityView({ entity, data, onAdd, onDelete }) {
   const [search, setSearch] = useState('')
   const e = ENTITIES[entity]
 
-  // For Household: merge virtual fuel entries
-  const fuelVirtual = useMemo(() => entity === 'home' ? loadFuelAsVirtual() : [], [entity])
+  // For Household: merge virtual fuel entries (re-read whenever data changes
+  // so a freshly added fuel expense appears immediately)
+  const fuelVirtual = useMemo(() => entity === 'home' ? loadFuelAsVirtual() : [], [entity, data])
 
   const allTxns = useMemo(() => {
     const ledger = data.transactions.filter(t => t.entity === entity)
     if (entity !== 'home') return ledger
     // Exclude any ledger transactions that shadow a fuel entry (category=Fuel, source=fuel)
-    const fuelIds = new Set(fuelVirtual.map(f => f._fuelId))
     const nonFuel = ledger.filter(t => !(t.category === 'Fuel' && t._source === 'fuel'))
     return [...nonFuel, ...fuelVirtual]
   }, [data, entity, fuelVirtual])
@@ -1024,14 +1024,19 @@ export default function Ledger() {
   const update = useCallback((next) => { setData(next); saveLedger(next) }, [])
 
   const saveTxn = (tx) => {
-    const txns = data.transactions.find(t => t.id === tx.id)
+    const isEdit = data.transactions.some(t => t.id === tx.id)
+    // New Household fuel expenses live in the fuel store ONLY — they surface
+    // in the ledger as virtual rows. Writing to both would double-count.
+    if (!isEdit && tx.entity === 'home' && tx.category === 'Fuel' && tx.type === 'expense' && !tx._source) {
+      addFuelEntry({ date: tx.date, cost: tx.amount, notes: tx.description || tx.notes || '' })
+      update({ ...data }) // refresh so the new virtual fuel row appears
+      setTxnModal(null)
+      return
+    }
+    const txns = isEdit
       ? data.transactions.map(t => t.id === tx.id ? tx : t)
       : [...data.transactions, tx]
     update({ ...data, transactions: txns })
-    // Mirror to fuel tracker if this is a Household fuel expense
-    if (tx.entity === 'home' && tx.category === 'Fuel' && tx.type === 'expense' && !tx._source) {
-      addFuelEntry({ date: tx.date, cost: tx.amount, notes: tx.description || tx.notes || '' })
-    }
     setTxnModal(null)
   }
   const deleteTxn = (id) => setConfirm({ message: 'Delete this transaction?', onConfirm: () => { update({ ...data, transactions: data.transactions.filter(t => t.id !== id) }); setConfirm(null) } })

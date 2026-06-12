@@ -303,7 +303,33 @@
 
   ::-webkit-scrollbar { width: 3px; height: 3px; }
   ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 2px; }
+  ::-webkit-scrollbar-thumb { background: rgba(196,82,42,0.35); border-radius: 2px; }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(196,82,42,0.6); }
+
+  /* Text selection in the Signal9 rust */
+  ::selection { background: rgba(196,82,42,0.45); color: #F5F0E8; }
+
+  /* Kill the iOS grey tap flash app-wide — sections do their own press feedback */
+  * { -webkit-tap-highlight-color: transparent; }
+
+  /* Keyboard-focus ring in the accent colour (mouse/touch clicks stay clean) */
+  :focus-visible {
+    outline: 1.5px solid color-mix(in srgb, var(--section-accent, #C4522A) 80%, white);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  /* Stop the dark theme rubber-banding into a white void on overscroll */
+  html, body { overscroll-behavior-y: none; }
+
+  /* Respect reduced-motion: collapse decorative animation to its end state */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
 }
 
 @layer components {

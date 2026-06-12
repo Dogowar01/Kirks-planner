@@ -17,7 +17,14 @@ function initStore() {
     storage.set(KEYS.settings,  seed.settings)
     storage.set(KEYS.contacts,  seed.contacts)
     storage.set(KEYS.missions,  seed.missions)
-    return seed
+    // Seed only covers the original data types — pad the rest so the very
+    // first render doesn't crash on state.habits / state.sleep etc.
+    return {
+      habits: [], habitLogs: [], journal: [], writing: [], weeklyReviews: [],
+      routine: [], routineLog: [], reading: [], sleep: [], subscriptions: [],
+      mood: [], shopping: [],
+      ...seed,
+    }
   }
   return {
     projects:  storage.get(KEYS.projects)  || [],
@@ -359,14 +366,26 @@ export function StoreProvider({ children }) {
   const importData = useCallback((json) => {
     try {
       const data = JSON.parse(json)
-      if (data.projects)  persist(KEYS.projects,  data.projects)
-      if (data.events)    persist(KEYS.events,    data.events)
-      if (data.tasks)     persist(KEYS.tasks,     data.tasks)
-      if (data.contacts)  persist(KEYS.contacts,  data.contacts)
-      if (data.notes)     persist(KEYS.notes,     data.notes)
-      if (data.finance)   persist(KEYS.finance,   data.finance)
-      if (data.settings)  persist(KEYS.settings,  data.settings)
-      if (data.missions)  persist(KEYS.missions,  data.missions)
+      if (data.projects)      persist(KEYS.projects,      data.projects)
+      if (data.events)        persist(KEYS.events,        data.events)
+      if (data.tasks)         persist(KEYS.tasks,         data.tasks)
+      if (data.contacts)      persist(KEYS.contacts,      data.contacts)
+      if (data.notes)         persist(KEYS.notes,         data.notes)
+      if (data.finance)       persist(KEYS.finance,       data.finance)
+      if (data.settings)      persist(KEYS.settings,      data.settings)
+      if (data.missions)      persist(KEYS.missions,      data.missions)
+      if (data.habits)        persist(KEYS.habits,        data.habits)
+      if (data.habitLogs)     persist(KEYS.habitLogs,     data.habitLogs)
+      if (data.journal)       persist(KEYS.journal,       data.journal)
+      if (data.writing)       persist(KEYS.writing,       data.writing)
+      if (data.weeklyReviews) persist(KEYS.weeklyReviews, data.weeklyReviews)
+      if (data.routine)       persist(KEYS.routine,       data.routine)
+      if (data.routineLog)    persist(KEYS.routineLog,    data.routineLog)
+      if (data.reading)       persist(KEYS.reading,       data.reading)
+      if (data.sleep)         persist(KEYS.sleep,         data.sleep)
+      if (data.subscriptions) persist(KEYS.subscriptions, data.subscriptions)
+      if (data.mood)          persist(KEYS.mood,          data.mood)
+      if (data.shopping)      persist(KEYS.shopping,      data.shopping)
       return true
     } catch { return false }
   }, [persist])
@@ -374,7 +393,16 @@ export function StoreProvider({ children }) {
   const clearAllData = useCallback(() => {
     Object.values(KEYS).forEach(k => storage.remove(k))
     const seed = getSeedData()
-    setState(seed)
+    // Seed only covers the original data types — pad the rest with empty
+    // arrays so sections don't crash on undefined before the next reload
+    const fullState = {
+      contacts: [],
+      habits: [], habitLogs: [], journal: [], writing: [], weeklyReviews: [],
+      routine: [], routineLog: [], reading: [], sleep: [], subscriptions: [],
+      mood: [], shopping: [],
+      ...seed,
+    }
+    setState(fullState)
     Object.entries({
       [KEYS.projects]: seed.projects,
       [KEYS.events]:   seed.events,

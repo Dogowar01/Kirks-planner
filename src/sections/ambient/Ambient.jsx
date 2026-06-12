@@ -51,7 +51,7 @@ export default function Ambient() {
   // Read pinned countdown
   const pinned = (() => {
     try {
-      const id = JSON.parse(localStorage.getItem('s9_settings_v1') || 'null')?.pinnedCountdownId
+      const id = JSON.parse(localStorage.getItem('kirk_planner_v1_settings') || 'null')?.pinnedCountdownId
       if (!id) return null
       const events = JSON.parse(localStorage.getItem('s9_countdowns') || '[]')
       const ev = events.find(e => e.id === id)

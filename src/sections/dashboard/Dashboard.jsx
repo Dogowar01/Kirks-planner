@@ -1911,7 +1911,7 @@ function QuickStatsBars({ onNavigateLedger, onNavigateFuel }) {
 
   const fmt = (n) => `$${n.toFixed(2)}`
   const Row = ({ color, label, value, sub, onClick }) => (
-    <button onClick={onClick} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '9px 0', borderBottom: '0.5px solid rgba(255,255,255,0.04)', background: 'none', border_: 'none', cursor: 'pointer', width: '100%', textAlign: 'left' }}>
+    <button onClick={onClick} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '9px 0', border: 'none', borderBottom: '0.5px solid rgba(255,255,255,0.04)', background: 'none', cursor: 'pointer', width: '100%', textAlign: 'left' }}>
       <div style={{ width: 3, height: 28, borderRadius: 2, background: color, boxShadow: `0 0 8px ${color}80`, flexShrink: 0 }} />
       <span style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.58rem', color: 'rgba(160,140,120,0.6)', letterSpacing: '0.1em', flex: 1 }}>{label}</span>
       <div style={{ textAlign: 'right' }}>

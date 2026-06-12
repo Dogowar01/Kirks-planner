@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, lazy, Suspense } from 'react'
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom'
 import Layout from './sections/Layout'
 import Dashboard from './sections/dashboard/Dashboard'
@@ -9,7 +9,8 @@ import Notes from './sections/notes/Notes'
 import Settings from './sections/settings/Settings'
 import Tools from './sections/tools/Tools'
 import Vault from './sections/vault/Vault'
-import Ledger from './sections/ledger/Ledger'
+// Lazy — Ledger pulls in recharts (~600KB) which shouldn't block app startup
+const Ledger = lazy(() => import('./sections/ledger/Ledger'))
 import FuelTracker from './sections/fuel/FuelTracker'
 import Habits from './sections/habits/Habits'
 import Journal from './sections/journal/Journal'
@@ -43,7 +44,17 @@ export default function App() {
         <NotificationEngine />
         <Routes>
           {/* Full-screen standalone routes */}
-          <Route path="/ledger"  element={<Ledger />} />
+          <Route path="/ledger" element={
+            <Suspense fallback={
+              <div style={{ position: 'fixed', inset: 0, background: '#0D0C0B', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.5rem', letterSpacing: '0.3em', color: 'rgba(196,82,42,0.6)', textTransform: 'uppercase', animation: 'data-flicker 1.2s ease-in-out infinite' }}>
+                  ■ Loading Ledger
+                </span>
+              </div>
+            }>
+              <Ledger />
+            </Suspense>
+          } />
           <Route path="/fuel"    element={<FuelTracker />} />
           <Route path="/ambient" element={<Ambient />} />
 
