@@ -72,6 +72,7 @@ export function loadLedger() {
     const raw = localStorage.getItem(LEDGER_KEY)
     if (!raw) return initData()
     const d = JSON.parse(raw)
+    if (!Array.isArray(d.transactions)) d.transactions = []
     if (!d.categories) d.categories = JSON.parse(JSON.stringify(DEFAULT_CATEGORIES))
     if (!d.rates) d.rates = { USD: 1.52, JPY: 0.0098, updatedAt: null }
     if (!d.trips) d.trips = []
@@ -157,7 +158,8 @@ function Confirm({ message, onConfirm, onCancel }) {
 
 function TxnModal({ editData, categories, defaultEntity, onSave, onClose }) {
   const [f, setF] = useState({ date: localDate(), type: 'expense', entity: defaultEntity || 'bp', category: '', description: '', amount: '', gst: 'no', notes: '', ...(editData || {}) })
-  const set = (k, v) => setF(p => ({ ...p, [k]: v }))
+  const [errors, setErrors] = useState({})
+  const set = (k, v) => { setF(p => ({ ...p, [k]: v })); setErrors(e => ({ ...e, [k]: false })) }
   const accent = ENTITIES[f.entity]?.color || '#C4522A'
 
   const cats = useMemo(() => {
@@ -166,7 +168,10 @@ function TxnModal({ editData, categories, defaultEntity, onSave, onClose }) {
   }, [f.entity, f.type, categories])
 
   const save = () => {
-    if (!f.date || !f.description.trim() || !f.amount) return
+    const errs = {}
+    if (!f.description.trim()) errs.description = true
+    if (!f.amount) errs.amount = true
+    if (Object.keys(errs).length) { setErrors(errs); return }
     onSave({ ...f, id: editData?.id || uid(), amount: parseFloat(f.amount) || 0 })
   }
 
@@ -195,11 +200,13 @@ function TxnModal({ editData, categories, defaultEntity, onSave, onClose }) {
           </Field>
         </div>
         <Field label="Description">
-          <input style={S.input} value={f.description} onChange={e => set('description', e.target.value)} placeholder="What was this for?" />
+          <input style={{ ...S.input, borderColor: errors.description ? '#EF4444' : undefined }} value={f.description} onChange={e => set('description', e.target.value)} placeholder="What was this for?" />
+          {errors.description && <span style={{ fontFamily: '"DM Mono"', fontSize: '0.48rem', color: '#EF4444', marginTop: 3, display: 'block' }}>Required</span>}
         </Field>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
           <Field label="Amount (AUD)">
-            <input type="number" step="0.01" min="0" style={S.input} value={f.amount} onChange={e => set('amount', e.target.value)} placeholder="0.00" />
+            <input type="number" step="0.01" min="0" style={{ ...S.input, borderColor: errors.amount ? '#EF4444' : undefined }} value={f.amount} onChange={e => set('amount', e.target.value)} placeholder="0.00" />
+            {errors.amount && <span style={{ fontFamily: '"DM Mono"', fontSize: '0.48rem', color: '#EF4444', marginTop: 3, display: 'block' }}>Required</span>}
           </Field>
           <Field label="GST">
             <select style={S.input} value={f.gst} onChange={e => set('gst', e.target.value)}>
@@ -1146,42 +1153,26 @@ export default function Ledger() {
       </div>
 
       {/* ── CONTENT ── */}
-      {/* Convergence entrance: four quadrant layers slide inward from each corner */}
-      <div key={view} style={{ position: 'relative', zIndex: 1 }}>
-        {[
-          { anim: 'converge-top-left',     clip: 'polygon(0 0, 50% 0, 50% 50%, 0 50%)' },
-          { anim: 'converge-top-right',    clip: 'polygon(50% 0, 100% 0, 100% 50%, 50% 50%)' },
-          { anim: 'converge-bottom-left',  clip: 'polygon(0 50%, 50% 50%, 50% 100%, 0 100%)' },
-          { anim: 'converge-bottom-right', clip: 'polygon(50% 50%, 100% 50%, 100% 100%, 50% 100%)' },
-        ].map(({ anim, clip }, i) => (
-          <div key={anim} style={{
-            position: i === 0 ? 'relative' : 'absolute',
-            inset: 0,
-            animation: `${anim} 1.1s cubic-bezier(0.22,1,0.36,1) both`,
-            clipPath: clip,
-            WebkitClipPath: clip,
-          }}>
-            <div style={{ padding: isHub ? 0 : 16, maxWidth: 860, margin: '0 auto' }}>
-              {isHub && <HubView data={data} onNavigate={setView} />}
-              {ENTITY_KEYS.includes(view) && (
-                <EntityView entity={view} data={data}
-                  onAdd={(tx, entity) => setTxnModal({ edit: tx, entity: entity || view })}
-                  onDelete={deleteTxn} />
-              )}
-              {view === 'travel' && (
-                <TravelView data={data}
-                  onAddTrip={() => setTripModal(true)}
-                  onDeleteTrip={deleteTrip}
-                  onAddExpense={(tid) => setTravelModal({ tripId: tid })}
-                  onDeleteExpense={deleteTravelExp} />
-              )}
-              {view === 'reports'  && <ReportsView  data={data} />}
-              {view === 'tax'      && <TaxView      data={data} />}
-              {view === 'data'     && <DataView     data={data} onRestore={update} />}
-              {view === 'settings' && <SettingsView data={data} onUpdate={update} />}
-            </div>
-          </div>
-        ))}
+      <div key={view} style={{ position: 'relative', zIndex: 1, animation: 'phase-in 0.55s cubic-bezier(0.22,1,0.36,1) both' }}>
+        <div style={{ padding: isHub ? 0 : 16, maxWidth: 860, margin: '0 auto' }}>
+          {isHub && <HubView data={data} onNavigate={setView} />}
+          {ENTITY_KEYS.includes(view) && (
+            <EntityView entity={view} data={data}
+              onAdd={(tx, entity) => setTxnModal({ edit: tx, entity: entity || view })}
+              onDelete={deleteTxn} />
+          )}
+          {view === 'travel' && (
+            <TravelView data={data}
+              onAddTrip={() => setTripModal(true)}
+              onDeleteTrip={deleteTrip}
+              onAddExpense={(tid) => setTravelModal({ tripId: tid })}
+              onDeleteExpense={deleteTravelExp} />
+          )}
+          {view === 'reports'  && <ReportsView  data={data} />}
+          {view === 'tax'      && <TaxView      data={data} />}
+          {view === 'data'     && <DataView     data={data} onRestore={update} />}
+          {view === 'settings' && <SettingsView data={data} onUpdate={update} />}
+        </div>
       </div>
 
       {/* ── MODALS ── */}
